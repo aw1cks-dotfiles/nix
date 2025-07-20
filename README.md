@@ -17,6 +17,10 @@ $ sudo pacman -S nix
 $ sudo usermod -aG nix alex
 $ mkdir -pv ~/.config/nix
 $ echo 'experimental-features = nix-command flakes' > ~/.config/nix/nix.conf
+$ mkdir -pv ~/.config/nixpkgs
+$ echo '{
+  allowUnfree = true;
+}' > ~/.config/nixpkgs/config.nix
 $ sudo systemctl enable --now nix-daemon
 $ nix-channel --add https://nixos.org/channels/nixos-25.05 nixpkgs
 $ nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager

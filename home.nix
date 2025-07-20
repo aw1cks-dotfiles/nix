@@ -1,6 +1,9 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, nixgl, ... }:
 {
   # Allow unfree packages
+  # NOTE: this is only for home-manager's nixpkgs instance.
+  # nixGL will also need to pull in non-free packages (nvidia);
+  # see the ~/.config/nixpkgs/config.nix file in the README
   nixpkgs = {
     config = {
       allowUnfree = true;
@@ -10,6 +13,11 @@
 
   # Make sure home-manager manages itself so it doesn't get GC'd
   programs.home-manager.enable = true;
+
+  # Configure NixGL for running apps that require OpenGL/Vulkan
+  nixGL.packages = nixgl.packages;
+  nixGL.defaultWrapper = "nvidia";
+  nixGL.vulkan.enable = true;
 
   home.stateVersion = "25.05";
 
@@ -70,7 +78,7 @@
     jq
     lazyjournal
     maven
-    meld
+    (config.lib.nixGL.wrap meld)
     mitmproxy
     moreutils
     mtr
@@ -106,8 +114,8 @@
     uutils-coreutils-noprefix
     uv
     vault
-    wezterm
-    wireshark
+    (config.lib.nixGL.wrap wezterm)
+    (config.lib.nixGL.wrap wireshark)
     yamllint
     yarn-berry
     yq

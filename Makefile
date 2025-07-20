@@ -2,7 +2,8 @@ DEFAULT_GOAL: update
 
 .PHONY: update
 update:
-	home-manager switch --flake .
+# unfortunately, NixGL with nvidia drivers requires an impure build
+	home-manager switch --impure --flake .
 
 .PHONY: clean
 clean:
