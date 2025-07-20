@@ -41,7 +41,9 @@
     kubectl-neat
     kubectl-node-shell
     kubectl-tree
+    kubectl-view-allocations
     kubecolor
+    kubeconform
     kubectx
     kubelogin-oidc
     kubernetes-helm
@@ -54,6 +56,7 @@
     clickhouse-cli
     cmake
     coder
+    containerlab
     crane
     d2
     delta
@@ -76,6 +79,8 @@
     grpcurl
     inetutils
     jq
+    kafkactl
+    kcat
     lazyjournal
     maven
     (config.lib.nixGL.wrap meld)
@@ -118,7 +123,9 @@
     (config.lib.nixGL.wrap wireshark)
     yamllint
     yarn-berry
+    youki
     yq
+    (config.lib.nixGL.wrap zeal)
     zstd
   ];
 }
