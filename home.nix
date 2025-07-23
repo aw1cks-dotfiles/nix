@@ -71,7 +71,11 @@
     gdlv
     gh
     gh-f
-    gitFull
+    (gitFull.override {
+      withLibsecret = true;
+      withSsh = true;
+      openssh = openssh_gssapi;
+    })
     git-doc
     gitkraken
     go
