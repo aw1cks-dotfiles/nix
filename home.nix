@@ -14,6 +14,19 @@
   # Make sure home-manager manages itself so it doesn't get GC'd
   programs.home-manager.enable = true;
 
+  # Let's clean up old generations after a week. GC them from nix store as well.
+  services.home-manager.autoExpire = {
+    enable = true;
+    frequency = "weekly";
+    store = {
+      cleanup = true;
+      options = "--delete-older-than 7d";
+    };
+  };
+
+  # Disable the home-manager toast notification; the news can still be read with `home-manager news`.
+  news.display = "silent";
+
   # Configure NixGL for running apps that require OpenGL/Vulkan
   nixGL.packages = nixgl.packages;
   nixGL.defaultWrapper = "nvidia";
