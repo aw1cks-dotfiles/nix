@@ -11,6 +11,8 @@
     };
   };
 
+  targets.genericLinux.enable = true;
+
   # Make sure home-manager manages itself so it doesn't get GC'd
   programs.home-manager.enable = true;
 
@@ -36,6 +38,8 @@
 
   home.username = "alex";
   home.homeDirectory = "/home/alex";
+
+  programs.man.enable = true;
 
   home.packages = with pkgs; [
     argocd
