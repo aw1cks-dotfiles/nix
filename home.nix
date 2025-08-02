@@ -68,6 +68,11 @@
     stern
 
     bat
+    cargo-bloat
+    cargo-edit
+    cargo-semver-checks
+    cargo-sort
+    cargo-udeps
     cfssl
     claude-code
     clickhouse-cli
