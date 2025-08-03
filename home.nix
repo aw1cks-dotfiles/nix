@@ -93,6 +93,7 @@
     fswatch
     fzf
     gdlv
+    gg-jj
     gh
     gh-f
     (gitFull.override {
@@ -108,7 +109,9 @@
     inetutils
     inotify-info
     inotify-tools
+    jjui
     jq
+    jujutsu
     kafkactl
     kcat
     lazyjournal
