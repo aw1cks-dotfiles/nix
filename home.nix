@@ -75,7 +75,7 @@
     cargo-udeps
     cfssl
     cfspeedtest
-    claude-code
+    unstable.claude-code
     clickhouse-cli
     cmake
     coder
