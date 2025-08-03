@@ -2,6 +2,7 @@
   description = "aw1cks home-manager configuration";
   inputs = {
     nixpkgs.url = "nixpkgs/release-25.05";
+    nixpkgs-unstable.url = "nixpkgs/nixpkgs-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
@@ -16,11 +17,21 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, nixgl, ... }:
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, nixgl, ... }:
     let
       lib = nixpkgs.lib;
       system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
+      overlay-unstable = final: prev: {
+        unstable = import nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      };
+
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ overlay-unstable ];
+      };
     in {
       homeConfigurations = {
         alex = home-manager.lib.homeManagerConfiguration {
