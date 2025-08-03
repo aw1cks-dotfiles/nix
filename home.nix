@@ -90,6 +90,7 @@
     dotnet-sdk
     etcd
     fd
+    fswatch
     fzf
     gdlv
     gh
@@ -105,11 +106,14 @@
     graphviz
     grpcurl
     inetutils
+    inotify-info
+    inotify-tools
     jq
     kafkactl
     kcat
     lazyjournal
     maven
+    mermaid-cli
     (config.lib.nixGL.wrap meld)
     mitmproxy
     moreutils
@@ -133,6 +137,7 @@
     shellharden
     skopeo
     sqlcmd
+    sqlite
     sqlx-cli
     starship
     step-cli
