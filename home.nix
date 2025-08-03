@@ -86,7 +86,6 @@
     delve
     difftastic
     dive
-    dotnet-runtime
     dotnet-sdk
     etcd
     fd
