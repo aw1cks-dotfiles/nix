@@ -74,6 +74,7 @@
     cargo-sort
     cargo-udeps
     cfssl
+    cfspeedtest
     claude-code
     clickhouse-cli
     cmake
