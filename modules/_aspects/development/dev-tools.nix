@@ -1,8 +1,8 @@
 # Core development tools — from nix-upstream/modules/development/default.nix
 # Language-specific tools are in separate modules: ai.nix, containers.nix, java.nix, rust.nix
-{ ... }:
+{ dl, ... }:
 {
-  flake.modules.home.dev-tools =
+  dl.dev-tools.homeManager =
     { pkgs, ... }:
     {
       home.packages = with pkgs; [

@@ -1,8 +1,8 @@
 # Nixpkgs configuration and unstable overlay
 # Provides the `unstable` package set overlay for accessing bleeding-edge packages
-{ inputs, ... }:
+{ dl, inputs, ... }:
 {
-  flake.modules.home.nixpkgs =
+  dl.base-nixpkgs.homeManager =
     { pkgs, ... }:
     let
       system = pkgs.stdenv.hostPlatform.system;

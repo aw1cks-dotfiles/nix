@@ -1,9 +1,23 @@
-# Git configuration — converted from dotconfig/.gitconfig
-{ ... }:
+# Git configuration — combined git packages and configuration
+{ dl, ... }:
 {
-  flake.modules.home.git-config =
+  dl.base-git.homeManager =
     { pkgs, ... }:
     {
+      # Git companion packages (git itself, delta, and git-lfs are managed by git program config)
+      home.packages = with pkgs; [
+        difftastic
+        git-doc
+        gg-jj
+        gh
+        gh-f
+        jjui
+        jujutsu
+        onefetch
+        tig
+      ];
+
+      # Git program configuration
       programs.delta = {
         enable = true;
         enableGitIntegration = true;
@@ -67,7 +81,7 @@
             mt = "mergetool";
             p = "push";
             pb = "! git push -u $(git remote | head -1) $(git rev-parse --abbrev-ref HEAD)";
-            pf = "push --force-if-includes";
+            pf = "push --force-with-lease --force-if-includes";
             pl = "pull";
             po = "push -u origin";
             pu = "pull";

@@ -1,7 +1,7 @@
 # Kubernetes tools — migrated from nix-old/modules/kubernetes.nix
-{ ... }:
+{ dl, ... }:
 {
-  flake.modules.home.kubernetes =
+  dl.dev-kubernetes.homeManager =
     { pkgs, ... }:
     {
       home.packages = with pkgs; [

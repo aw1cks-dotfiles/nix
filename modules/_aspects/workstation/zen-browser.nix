@@ -1,9 +1,9 @@
-# Zen Browser — migrated from nix-old/modules/zen-browser.nix
+# Zen Browser — migrated from dendritic-lib/modules/editor/zen-browser.nix
 # Note: This module requires the zen-browser flake input.
 # The zen-browser home module is imported via inputs in the deferred module.
-{ inputs, ... }:
+{ dl, inputs, ... }:
 {
-  flake.modules.home.zen-browser =
+  dl.workstation-zen-browser.homeManager =
     {
       config,
       pkgs,
@@ -30,7 +30,8 @@
       '';
     in
     {
-      imports = [ inputs.zen-browser.homeModules.twilight-official ];
+      # TEMPORARILY REMOVED FOR DEBUGGING
+      # imports = [ inputs.zen-browser.homeModules.twilight-official ];
 
       options.modules.zen-browser = {
         enable = lib.mkOption {

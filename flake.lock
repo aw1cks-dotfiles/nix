@@ -64,6 +64,37 @@
         "type": "github"
       }
     },
+    "den": {
+      "locked": {
+        "lastModified": 1770894221,
+        "narHash": "sha256-ypeLNfVJnh5+NO0ZhFdW3Yqh+tFLrA+mjXeYIAo9bDA=",
+        "owner": "vic",
+        "repo": "den",
+        "rev": "53bc73d78da4f39c3ffa9e8ab38ecea14ef12fcd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "vic",
+        "ref": "v0.8.0",
+        "repo": "den",
+        "type": "github"
+      }
+    },
+    "flake-aspects": {
+      "locked": {
+        "lastModified": 1769723924,
+        "narHash": "sha256-U15OaMr9AcJiB1wW2uCFzFO+DnQ3jJSvln+ZR/+Q0vE=",
+        "owner": "vic",
+        "repo": "flake-aspects",
+        "rev": "61524836788ef6991a82e7d34ebb0ccc05d374ed",
+        "type": "github"
+      },
+      "original": {
+        "owner": "vic",
+        "repo": "flake-aspects",
+        "type": "github"
+      }
+    },
     "flake-file": {
       "locked": {
         "lastModified": 1770893152,
@@ -267,6 +298,8 @@
       "inputs": {
         "agenix": "agenix",
         "claude-code": "claude-code",
+        "den": "den",
+        "flake-aspects": "flake-aspects",
         "flake-file": "flake-file",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager_2",

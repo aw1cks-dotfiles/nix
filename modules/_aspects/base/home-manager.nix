@@ -1,7 +1,7 @@
 # Home-manager self-management — migrated from nix-old/modules/home-manager.nix
-{ ... }:
+{ dl, ... }:
 {
-  flake.modules.home.home-manager = {
+  dl.base-home-manager.homeManager = {
     programs.home-manager.enable = true;
     services.home-manager.autoExpire = {
       enable = true;

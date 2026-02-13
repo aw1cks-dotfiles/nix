@@ -1,7 +1,7 @@
 # Java — from nix-upstream/modules/development/java.nix
-{ ... }:
+{ dl, ... }:
 {
-  flake.modules.home.java =
+  dl.dev-java.homeManager =
     { pkgs, ... }:
     {
       programs.java = {

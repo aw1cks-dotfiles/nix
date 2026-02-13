@@ -1,7 +1,7 @@
-# GUI applications — migrated from nix-old/modules/gui-apps.nix
-{ ... }:
+# GUI applications — migrated from dendritic-lib/modules/packages/gui-apps.nix
+{ dl, ... }:
 {
-  flake.modules.home.gui-apps =
+  dl.workstation-gui-apps.homeManager =
     { pkgs, ... }:
     {
       home.packages = with pkgs; [

@@ -11,6 +11,8 @@
       url = "github:ryantm/agenix";
     };
     claude-code.url = "github:sadjow/claude-code-nix";
+    den.url = "github:vic/den/v0.8.0";
+    flake-aspects.url = "github:vic/flake-aspects";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
       inputs.nixpkgs-lib.follows = "nixpkgs";

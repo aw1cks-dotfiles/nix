@@ -1,7 +1,7 @@
 # Rust tooling — from nix-upstream/modules/development/rust.nix
-{ ... }:
+{ dl, ... }:
 {
-  flake.modules.home.rust =
+  dl.dev-rust.homeManager =
     { pkgs, ... }:
     {
       home.packages = with pkgs; [
