@@ -30,7 +30,7 @@
       '';
     in
     {
-      imports = [ inputs.zen-browser.homeModules.twilight-official ];
+      imports = [ inputs.zen-browser.homeModules.twilight ];
 
       options.modules.zen-browser = {
         enable = lib.mkOption {
