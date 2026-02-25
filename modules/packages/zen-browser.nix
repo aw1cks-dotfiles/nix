@@ -75,6 +75,8 @@
 
         programs.zen-browser = {
           enable = true;
+          # Disable warnings about migration from ~/.zen -> $XDG_CONFIG_HOME/zen
+          suppressXdgMigrationWarning = true;
           profiles.default = {
             id = 0;
             isDefault = true;
