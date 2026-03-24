@@ -4,11 +4,11 @@
   flake.modules.home.ai =
     { pkgs, ... }:
     {
-      home.packages = with pkgs; [
+      home.packages = with pkgs.llm-agents; [
         claude-code
-        unstable.codex
-        unstable.gemini-cli
-        unstable.opencode
+        codex
+        gemini-cli
+        opencode
       ];
     };
 }

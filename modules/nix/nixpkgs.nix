@@ -21,7 +21,7 @@
               config.allowUnfree = true;
             };
           })
-          inputs.claude-code.overlays.default
+          inputs.llm-agents.overlays.default
         ];
       };
     };
