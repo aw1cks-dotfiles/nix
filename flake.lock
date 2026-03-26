@@ -438,19 +438,37 @@
         "type": "github"
       }
     },
-    "nixpkgs": {
+    "nix-manipulator": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
       "locked": {
-        "lastModified": 1774358210,
-        "narHash": "sha256-cQpK5ElPEzoWp5UVexN+P7AYrHwa1IWbuuqhVbiakLo=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "e48985617670d5ef2ab89e5e200e8c753c66c198",
+        "lastModified": 1772204831,
+        "narHash": "sha256-sl+7CCR310uTVJJ+luf9Nr1C03QFp0RbuTuVeMJaQGA=",
+        "owner": "hoh",
+        "repo": "nix-manipulator",
+        "rev": "e09a23af708d05ec907e1c826092c1a7b50a4ef4",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "release-25.11",
+        "owner": "hoh",
+        "repo": "nix-manipulator",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1769584980,
+        "narHash": "sha256-5ZR+lN7X3EVCADFFPKsPPkqDj3+L7eLu5wxTIdk6c4Y=",
+        "owner": "hoh",
         "repo": "nixpkgs",
+        "rev": "e91e354e9e2dc9ca71f4e02db98af20bdd1e035e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hoh",
+        "repo": "nixpkgs",
+        "rev": "e91e354e9e2dc9ca71f4e02db98af20bdd1e035e",
         "type": "github"
       }
     },
@@ -466,6 +484,22 @@
       "original": {
         "owner": "NixOS",
         "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1774358210,
+        "narHash": "sha256-cQpK5ElPEzoWp5UVexN+P7AYrHwa1IWbuuqhVbiakLo=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e48985617670d5ef2ab89e5e200e8c753c66c198",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "release-25.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -504,7 +538,8 @@
         "import-tree": "import-tree",
         "llm-agents": "llm-agents",
         "nix-darwin": "nix-darwin",
-        "nixpkgs": "nixpkgs",
+        "nix-manipulator": "nix-manipulator",
+        "nixpkgs": "nixpkgs_2",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "stylix": "stylix",
         "zen-browser": "zen-browser"

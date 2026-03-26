@@ -1,6 +1,10 @@
 { config, ... }:
 let
   inherit (config.flake.modules) home;
+  # cat /sys/module/nvidia/version
+  nvidiaDriverVersion = "590.48.01";
+  # nix store prefetch-file "https://download.nvidia.com/XFree86/Linux-$(uname -m)/$(</sys/module/nvidia/version)/NVIDIA-Linux-$(uname -m)-$(</sys/module/nvidia/version).run"
+  nvidiaDriverHash = "sha256-ueL4BpN4FDHMh/TNKRCeEz3Oy1ClDWto1LO/LWlr1ok=";
 in
 {
   configurations.home."alex@desktop" = {
@@ -33,8 +37,8 @@ in
         enable = true;
         gpu.nvidia = {
           enable = true;
-          version = "590.48.01";
-          sha256 = "sha256-ueL4BpN4FDHMh/TNKRCeEz3Oy1ClDWto1LO/LWlr1ok=";
+          version = nvidiaDriverVersion;
+          sha256 = nvidiaDriverHash;
         };
       };
 
