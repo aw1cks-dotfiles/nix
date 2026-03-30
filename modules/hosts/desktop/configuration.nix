@@ -2,9 +2,9 @@
 let
   inherit (config.flake.modules) home;
   # cat /sys/module/nvidia/version
-  nvidiaDriverVersion = "590.48.01";
+  nvidiaDriverVersion = "595.58.03";
   # nix store prefetch-file "https://download.nvidia.com/XFree86/Linux-$(uname -m)/$(</sys/module/nvidia/version)/NVIDIA-Linux-$(uname -m)-$(</sys/module/nvidia/version).run"
-  nvidiaDriverHash = "sha256-ueL4BpN4FDHMh/TNKRCeEz3Oy1ClDWto1LO/LWlr1ok=";
+  nvidiaDriverHash = "sha256-jA1Plnt5MsSrVxQnKu6BAzkrCnAskq+lVRdtNiBYKfk=";
 in
 {
   configurations.home."alex@desktop" = {
