@@ -8,8 +8,6 @@
         difftastic
         git-doc
         gg-jj
-        gh
-        gh-f
         jjui
         jujutsu
         onefetch

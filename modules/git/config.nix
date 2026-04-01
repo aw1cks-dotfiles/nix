@@ -227,5 +227,25 @@
           };
         };
       };
+
+      programs.gh = {
+        enable = true;
+        extensions = with pkgs; [
+          gh-f
+          gh-poi
+          gh-s
+        ];
+
+        settings = {
+          aliases = {
+            co = "pr checkout";
+          };
+          color_labels = "enabled";
+          editor = "nvim";
+          git_protocol = "ssh";
+          prefer_editor_prompt = "enabled";
+          spinner = "enabled";
+        };
+      };
     };
 }
