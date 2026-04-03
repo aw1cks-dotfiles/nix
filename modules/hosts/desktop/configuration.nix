@@ -19,6 +19,7 @@ in
         home.dev-tools
         home.ai
         home.containers
+        home.kubernetes
         home.rust
         home.java
         home.zen-browser
