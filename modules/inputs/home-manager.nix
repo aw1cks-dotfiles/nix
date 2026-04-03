@@ -189,7 +189,7 @@ in
 
             log(f"Resolved: {hm_attr} (host: {hostname})")
 
-            mod_rel = Path("modules/hosts") / hostname / "configuration.nix"
+            mod_rel = Path("hosts") / hostname / "configuration.nix"
             mod_path = git_toplevel() / mod_rel
             log(f"Host module path: {mod_rel}")
 
