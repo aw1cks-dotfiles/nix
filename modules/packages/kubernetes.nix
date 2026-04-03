@@ -37,6 +37,7 @@
           ];
         })
         kustomize
+        minikube
         stern
       ];
     };
