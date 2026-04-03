@@ -5,3 +5,8 @@ hm-switch target=default_flake_target:
 
 update-flake:
   nix flake update
+
+clean:
+  nix profile wipe-history --older-than 7d
+  nix store gc
+  nix store optimise
