@@ -12,6 +12,17 @@
         "nix-command"
         "flakes"
       ];
+
+      # Shared inputs can publish their own binary caches. Add the ones we know
+      # about here so downstream home-manager / nixos / darwin consumers all get
+      # the same substitute coverage instead of rebuilding tool packages locally.
+      extra-substituters = [
+        "https://cache.numtide.com"
+      ];
+      extra-trusted-public-keys = [
+        "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+      ];
+
       keep-outputs = true;
     };
 
