@@ -21,12 +21,6 @@ in
         homeDirectory = "/home/alex";
         stateVersion = "25.05";
       };
-
-      programs.man.enable = true;
-      manual = {
-        html.enable = true;
-        manpages.enable = true;
-      };
     };
   };
 }

@@ -2,7 +2,12 @@
 { ... }:
 {
   flake.modules.home.home-manager = {
-    programs.home-manager.enable = true;
+    programs = {
+      home-manager.enable = true;
+      nh.enable = true;
+      nix-index.enable = true;
+      nix-init.enable = true;
+    };
     services.home-manager.autoExpire = {
       enable = true;
       frequency = "weekly";
@@ -12,5 +17,9 @@
       };
     };
     news.display = "silent";
+    manual = {
+      html.enable = true;
+      manpages.enable = true;
+    };
   };
 }

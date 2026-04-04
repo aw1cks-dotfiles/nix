@@ -9,6 +9,7 @@ in
       modules.home.nixpkgs
       modules.home.home-manager
       modules.home.cli-tools
+      modules.home.zsh
       modules.home.git
       modules.home.git-config
       modules.home.nix-settings

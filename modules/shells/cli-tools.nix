@@ -17,7 +17,6 @@
           opensshWithKerberos
           powershell
           pwgen
-          ripgrep
           tmux
           uutils-coreutils-noprefix
           uutils-diffutils
@@ -106,5 +105,8 @@
           theme = "Catppuccin Mocha";
         };
       };
+
+      # TODO: set this up for cleaning up apps not respecting XDG
+      # programs.boxxy.enable = true;
     };
 }

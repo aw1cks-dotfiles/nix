@@ -3,9 +3,10 @@
 { lib, ... }:
 {
   flake.modules.home.dev-tools =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     {
-      home.packages = with pkgs;
+      home.packages =
+        with pkgs;
         [
           # build tooling
           cmake
@@ -17,7 +18,6 @@
           # golang
           delve
           gdlv
-          go
           gore
 
           # js
@@ -36,13 +36,26 @@
           protoc-gen-rust
           protoc-gen-rust-grpc
           protoc-gen-tonic
-
-          # python
-          uv
         ]
-        # FIXME: this is pulling in a broken version of bazel
+        # FIXME: this is pulling in a broken version of bazel on macOS
         ++ lib.optionals pkgs.stdenv.isLinux [
           protoc-gen-js
         ];
+
+      programs = {
+        go = {
+          enable = true;
+          env = {
+            GOPATH = [ "${config.xdg.dataHome}/go" ];
+          };
+        };
+        # rizin.enable = true;
+        uv = {
+          enable = true;
+          settings = {
+            native-tls = true;
+          };
+        };
+      };
     };
 }

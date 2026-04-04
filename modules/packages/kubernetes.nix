@@ -4,14 +4,14 @@
   flake.modules.home.kubernetes =
     { pkgs, ... }:
     {
-      home.packages = with pkgs;
+      home.packages =
+        with pkgs;
         [
           argocd
           cilium-cli
           helm-docs
           helmfile
           hubble
-          k9s
           kube-capacity
           kubebuilder
           kubectl
@@ -24,7 +24,6 @@
           kubectl-node-shell
           kubectl-tree
           kubectl-view-allocations
-          kubecolor
           kubeconform
           kubectx
           kubelogin-oidc
@@ -43,5 +42,18 @@
           cloud-provider-kind
           minikube
         ];
+
+      programs = {
+        k9s.enable = true;
+        kubecolor = {
+          enable = true;
+          settings = {
+            objFreshThreshold = "1h";
+            preset = "dark";
+            paging = "auto";
+            pager = "less -RF";
+          };
+        };
+      };
     };
 }
