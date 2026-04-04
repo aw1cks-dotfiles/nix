@@ -29,7 +29,7 @@
           pkgs.python3
         ];
         text = ''
-          exec ${pkgs.python3}/bin/python3 ${updateScript} "$@"
+          exec -a update-nvidia-version ${pkgs.python3}/bin/python3 ${updateScript} "$@"
         '';
       };
     in

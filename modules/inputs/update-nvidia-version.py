@@ -3,6 +3,8 @@ import json
 import socket
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 
@@ -33,12 +35,42 @@ def detect_nvidia_version() -> str:
     return NV_VERSION_PATH.read_text().strip()
 
 
-def prefetch_nvidia_hash(version: str, arch: str) -> str:
-    url = (
+def nvidia_installer_url(version: str, arch: str) -> str:
+    return (
         f"https://download.nvidia.com/XFree86/Linux-{arch}"
         f"/{version}/NVIDIA-Linux-{arch}-{version}.run"
     )
-    log(f"Prefetching: {url}")
+
+
+def fetch_nvidia_hash_from_mirror(version: str, arch: str) -> str | None:
+    url = f"{nvidia_installer_url(version, arch)}.sha256sum"
+    log(f"Fetching hash from mirror: {url}")
+    contents = ""
+    try:
+        with urllib.request.urlopen(url) as response:
+            contents = response.read().decode("utf-8").strip()
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            return None
+        die(f"failed to fetch NVIDIA sha256sum file {url}: HTTP {err.code}")
+    except urllib.error.URLError as err:
+        die(f"failed to fetch NVIDIA sha256sum file {url}: {err.reason}")
+    except Exception as err:
+        die(f"failed to read NVIDIA sha256sum file {url}: {err}")
+
+    parts = contents.split()
+    if not parts:
+        die(f"empty NVIDIA sha256sum file returned by mirror: {url}")
+    return parts[0]
+
+
+def prefetch_nvidia_hash(version: str, arch: str) -> str:
+    url = nvidia_installer_url(version, arch)
+    mirror_hash = fetch_nvidia_hash_from_mirror(version, arch)
+    if mirror_hash:
+        return mirror_hash
+
+    log(f"Mirror hash unavailable, prefetching: {url}")
     result = subprocess.run(
         [
             "nix",
@@ -78,7 +110,8 @@ def render_pin_file(version: str, sha256: str) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Update NVIDIA driver version and hash in a host pin file."
+        prog="update-nvidia-version",
+        description="Update NVIDIA driver version and hash in a host pin file.",
     )
     parser.add_argument("version", nargs="?", default=None)
     parser.add_argument("target", nargs="?", default=None)
