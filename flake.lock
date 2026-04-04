@@ -439,37 +439,19 @@
         "type": "github"
       }
     },
-    "nix-manipulator": {
-      "inputs": {
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "lastModified": 1772204831,
-        "narHash": "sha256-sl+7CCR310uTVJJ+luf9Nr1C03QFp0RbuTuVeMJaQGA=",
-        "owner": "hoh",
-        "repo": "nix-manipulator",
-        "rev": "e09a23af708d05ec907e1c826092c1a7b50a4ef4",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hoh",
-        "repo": "nix-manipulator",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1769584980,
-        "narHash": "sha256-5ZR+lN7X3EVCADFFPKsPPkqDj3+L7eLu5wxTIdk6c4Y=",
-        "owner": "hoh",
+        "lastModified": 1774829192,
+        "narHash": "sha256-ZnEgpvuDKh7FeLyTdJ7a/8YVOb+1su7mq88z8FAPGnU=",
+        "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e91e354e9e2dc9ca71f4e02db98af20bdd1e035e",
+        "rev": "f221b6e8676d3dc7c4eeb569971f840a9bb02a1b",
         "type": "github"
       },
       "original": {
-        "owner": "hoh",
+        "owner": "NixOS",
+        "ref": "release-25.11",
         "repo": "nixpkgs",
-        "rev": "e91e354e9e2dc9ca71f4e02db98af20bdd1e035e",
         "type": "github"
       }
     },
@@ -485,22 +467,6 @@
       "original": {
         "owner": "NixOS",
         "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1774829192,
-        "narHash": "sha256-ZnEgpvuDKh7FeLyTdJ7a/8YVOb+1su7mq88z8FAPGnU=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "f221b6e8676d3dc7c4eeb569971f840a9bb02a1b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "release-25.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -539,8 +505,7 @@
         "import-tree": "import-tree",
         "llm-agents": "llm-agents",
         "nix-darwin": "nix-darwin",
-        "nix-manipulator": "nix-manipulator",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "stylix": "stylix",
         "zen-browser": "zen-browser"

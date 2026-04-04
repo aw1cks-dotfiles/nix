@@ -79,6 +79,64 @@ It can be invoked as such:
 nix run .#home-manager -- switch --flake .
 ```
 
+### Home Manager NVIDIA schema
+
+Standalone Home Manager Linux hosts can opt into the shared NVIDIA contract at the top level of `configurations.home.<name>`:
+
+```nix
+{
+  system = "x86_64-linux";
+  nvidia = {
+    enable = true;
+    pinFile = ./nvidia.json;
+  };
+  module = {
+    imports = [
+      profiles.home.base
+      profiles.home.developer
+      profiles.home.desktop
+    ];
+
+    home = {
+      username = "alex";
+      homeDirectory = "/home/alex";
+      stateVersion = "25.05";
+    };
+  };
+}
+```
+
+When `nvidia.enable = true`, the shared Home Manager layer automatically enables `targets.genericLinux` and wires `targets.genericLinux.gpu.nvidia` from the pin file.
+
+Pin files are stored as JSON and default to `hosts/<short-host>/nvidia.json`, where `<short-host>` is inferred from the Home Manager attribute name convention `user@host` or `user@host.domain`.
+
+The JSON file must contain:
+
+```json
+{
+  "version": "595.58.03",
+  "sha256": "sha256-jA1Plnt5MsSrVxQnKu6BAzkrCnAskq+lVRdtNiBYKfk="
+}
+```
+
+This metadata is also exposed as `homeNvidiaConfigurations` for updater tooling.
+
+### Updating NVIDIA pins
+
+Use the packaged updater to refresh the version and installer hash for the current machine:
+
+```sh
+nix run .#update-nvidia-version
+```
+
+For a remote target, pass the version and short hostname explicitly:
+
+```sh
+nix run .#update-nvidia-version -- 595.58.03 desktop
+```
+
+The updater rewrites the configured JSON pin file directly and no longer edits host Nix modules in place.
+
 ### Darwin host schema
 
 Darwin hosts in `configurations.darwin` currently use this top-level shape:
