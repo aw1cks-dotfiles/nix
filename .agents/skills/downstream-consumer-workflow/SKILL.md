@@ -65,6 +65,8 @@ Use the real local path for the machine. Keep the override temporary unless the 
 - Downstream repos should consume reusable module/profile exports, not repo-local public hosts.
 - Prefer adding `flake.profiles.*` instead of making downstream hosts repeat long import lists.
 - Be careful with export-surface changes because they can silently change downstream outputs.
+- Standalone Home Manager NVIDIA consumers should prefer the top-level `configurations.home.<name>.nvidia` contract instead of wiring `targets.genericLinux.gpu.nvidia` directly.
+- If downstream tooling needs to bump NVIDIA pins, keep them in host-local JSON files and consume them through the shared contract.
 
 If a change is only for a public host defined in this repo, keep it scoped to that host output. If a change is reusable, shape it as part of the exported shared interface.
 

@@ -16,6 +16,7 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - Prefer composed bundles in `flake.profiles.{home,nixos,darwin}` when hosts would otherwise repeat long import lists.
 - Add `flake.aspects.*` only for narrow, cross-cutting machine traits such as `generic-linux`, `nvidia`, or `manuals`.
 - Keep host-only facts in hosts: machine name, darwin primary user, home directory, driver pins, local paths, and other machine-specific settings.
+- For standalone Home Manager NVIDIA hosts, keep driver pins in host-local JSON files such as `hosts/<host>/nvidia.json`; keep the reusable contract and wiring in `modules/home-manager/configurations.nix`.
 
 ## Export Boundary Rules
 

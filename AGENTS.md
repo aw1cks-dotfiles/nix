@@ -10,6 +10,7 @@ This file applies to the entire public repo.
 - Other flakes may consume this repo as an input, including a separate private corporate repo that layers corporate modules and work hosts on top of the shared library.
 - `flake.nix` is generated. Do not edit it directly; regenerate with `nix run .#write-flake` when needed.
 - Common workflows are exposed through `just`, especially `just rebuild` and `just update`.
+- Standalone Home Manager NVIDIA hosts use the shared `configurations.home.<name>.nvidia` contract with host-local JSON pin files such as `hosts/<host>/nvidia.json`.
 
 ## Load Skills When Relevant
 
@@ -74,6 +75,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - Prefer editing files under `modules/` and future `profiles/` trees over generated outputs.
 - If a change affects generated flake output, regenerate `flake.nix` rather than hand-editing it.
 - Prefer introducing or consuming profiles instead of expanding repeated host import lists.
+- For NVIDIA driver bumps, prefer updating host-local JSON pin files rather than editing host modules in place.
 
 ## Verification
 
