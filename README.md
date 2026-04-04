@@ -1,12 +1,12 @@
 # nix
 
-My Nix configuration.
+Reusable Nix library plus public live host configurations for NixOS, standalone Home Manager, and nix-darwin.
 
 ## Platforms
 
 - NixOS
 - Generic Linux (home-manager)
-- MacOS (nix-darwin)
+- macOS (nix-darwin)
 
 ## Patterns used in this repository
 
@@ -24,35 +24,85 @@ My Nix configuration.
 
 ### Prerequisites
 
-Install the Nix daemon.
+Install a standard multi-user Nix daemon. For nix-darwin hosts, prefer the standard Nix installer over Determinate if you want nix-darwin to manage the Nix installation.
 
 On Arch Linux: `sudo pacman -S nix`
 
 For other distros:
-```
-$ sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
-$ curl -L https://nixos.org/nix/install | sh
-$ sudo systemctl enable --now nix-daemon
-$
+
+```sh
+sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
+curl -L https://nixos.org/nix/install | sh
+sudo systemctl enable --now nix-daemon
 ```
 
 If running on a domain-joined machine, you may need to install `nscd`.
 
 Ensure the user is in the `trusted-users` list to prevent annoying warnings:
 
-```
-$ echo "trusted-users = $(whoami)" | sudo tee -a /etc/nix/nix.conf
-$ sudo systemctl restart nix-daemon
-$
+```sh
+echo "trusted-users = $(whoami)" | sudo tee -a /etc/nix/nix.conf
+sudo systemctl restart nix-daemon
 ```
 
-### Running home-manager for the current machine
+### Bootstrap note
 
-The home-manager CLI is exposed as the default app for hosts which have `configurations.home` declared.
+If you are bootstrapping on a machine where `nix` does not yet have flakes enabled, run commands with:
+
+```sh
+NIX_CONFIG='experimental-features = nix-command flakes'
+```
+
+This is mainly needed for first-run bootstrapping before this repo's own Nix settings are active.
+
+### Rebuilding the current machine
+
+Common rebuild flows are wrapped in `just rebuild`.
+
+- nix-darwin: `just rebuild`
+- NixOS: `just rebuild`
+- standalone Home Manager on non-NixOS Linux: `just rebuild`
+
+On macOS and NixOS, the recipe preserves `NIX_CONFIG`, so bootstrap commands like the following work before the managed Nix settings are live:
+
+```sh
+NIX_CONFIG='experimental-features = nix-command flakes' just rebuild
+```
+
+### Running Home Manager directly
+
+The Home Manager CLI is also exposed as an app for hosts which have `configurations.home` declared.
 
 It can be invoked as such:
 
+```sh
+nix run .#home-manager -- switch --flake .
 ```
-$ nix run . -- switch --flake .
-$
+
+### Darwin host schema
+
+Darwin hosts in `configurations.darwin` currently use this top-level shape:
+
+```nix
+{
+  system = "aarch64-darwin";
+  user = "alex";
+  homeDirectory = "/Users/alex";
+  module = {
+    networking.hostName = "mbp";
+    nixpkgs.hostPlatform = "aarch64-darwin";
+    system.stateVersion = 6;
+  };
+  home = {
+    imports = [
+      profiles.home.base
+      profiles.home.developer
+      profiles.home.desktop
+    ];
+
+    home.stateVersion = "25.11";
+  };
+}
 ```
+
+The shared darwin layer derives `system.primaryUser`, `users.users.<name>.home`, `home-manager.users.<name>.home.username`, and `home-manager.users.<name>.home.homeDirectory` from `user` and `homeDirectory`.

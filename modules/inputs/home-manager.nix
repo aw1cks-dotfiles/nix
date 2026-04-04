@@ -233,7 +233,7 @@ in
       '';
     in
     {
-      apps.default = {
+      apps.home-manager = {
         type = "app";
         program = "${inputs.home-manager.packages.${system}.home-manager}/bin/home-manager";
       };

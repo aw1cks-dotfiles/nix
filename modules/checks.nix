@@ -12,6 +12,29 @@ let
     };
   }) config.flake.nixosConfigurations;
 
+  darwinChecks = lib.mapAttrsToList (
+    name: darwin:
+    let
+      system = darwin.config.nixpkgs.hostPlatform.system;
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      user = darwin.config.system.primaryUser;
+      hmUsers = darwin.config.home-manager.users or { };
+      hasHmUser = user != null && builtins.hasAttr user hmUsers;
+      hmUser = lib.attrByPath [ user ] null hmUsers;
+      homeUser = if hasHmUser then hmUser.home.username else "";
+      homeDir = if hasHmUser then toString hmUser.home.homeDirectory else "";
+    in
+    {
+      ${system}."darwin-${name}-eval" = pkgs.writeText "darwin-${name}-eval" ''
+        hostName=${darwin.config.networking.hostName}
+        user=${user}
+        hasHomeManager=${if hasHmUser then "true" else "false"}
+        homeUser=${homeUser}
+        homeDir=${homeDir}
+      '';
+    }
+  ) config.flake.darwinConfigurations;
+
   # Keep one tiny synthetic Home Manager build per system so flake check still
   # exercises the activation pipeline in CI without depending on any specific
   # real host's package closure. Real desktop and GPU hosts in this repo have
@@ -44,5 +67,5 @@ let
   ) homeSystems;
 in
 {
-  config.flake.checks = lib.mkMerge (nixosChecks ++ homeSmokeChecks);
+  config.flake.checks = lib.mkMerge (nixosChecks ++ darwinChecks ++ homeSmokeChecks);
 }

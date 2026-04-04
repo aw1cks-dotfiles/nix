@@ -9,7 +9,7 @@ This file applies to the entire public repo.
 - This repo is the public reusable Nix library plus a small set of public live host configs.
 - Other flakes may consume this repo as an input, including a separate private corporate repo that layers corporate modules and work hosts on top of the shared library.
 - `flake.nix` is generated. Do not edit it directly; regenerate with `nix run .#write-flake` when needed.
-- Common workflows are exposed through `just`, especially `just hm-switch` and `just update-flake`.
+- Common workflows are exposed through `just`, especially `just rebuild` and `just update`.
 
 ## Load Skills When Relevant
 
@@ -79,7 +79,9 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 
 - For configuration changes, prefer the narrowest useful validation first.
 - Use `nix flake check` when it meaningfully covers the change.
-- Use `just hm-switch` for local Home Manager apply flows.
-- Use `just update-flake` when inputs changed.
+- Use `just rebuild` for local apply flows across nix-darwin, NixOS, and standalone Home Manager.
+- On macOS bootstrap flows, preserving `NIX_CONFIG` may be required until managed Nix settings are active.
+- nix-darwin hosts in this repo currently declare top-level `user` and `homeDirectory`; the shared darwin layer derives the embedded Home Manager username/home directory from those values.
+- Use `just update` when inputs changed.
 - When changing shared exports or configuration contracts, mention whether downstream consumer validation was performed.
 - Mention clearly if a change was validated only by static inspection and not by a switch/build.

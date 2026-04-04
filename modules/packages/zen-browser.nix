@@ -78,6 +78,7 @@
           profiles.default = {
             id = 0;
             isDefault = true;
+            path = "default";
           };
           policies =
             let

@@ -15,7 +15,7 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - Keep atomic reusable feature modules in `flake.modules.{home,nixos,darwin}`.
 - Prefer composed bundles in `flake.profiles.{home,nixos,darwin}` when hosts would otherwise repeat long import lists.
 - Add `flake.aspects.*` only for narrow, cross-cutting machine traits such as `generic-linux`, `nvidia`, or `manuals`.
-- Keep host-only facts in hosts: machine name, home directory, driver pins, local paths, and other machine-specific settings.
+- Keep host-only facts in hosts: machine name, darwin primary user, home directory, driver pins, local paths, and other machine-specific settings.
 
 ## Export Boundary Rules
 
@@ -34,6 +34,7 @@ In other words:
 - Keep `flake.modules.*` atomic and move repeated import bundles into `flake.profiles.*`.
 - Improve validation so active Home Manager configurations are included in `flake.checks`.
 - Normalize the top-level `system` contract across `configurations.home`, `configurations.nixos`, and `configurations.darwin`.
+- For darwin hosts in this repo, prefer the current host contract: top-level `system`, `user`, `homeDirectory`, `module`, and optional embedded `home`.
 
 ## Naming Guidance
 

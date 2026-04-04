@@ -25,7 +25,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nix-darwin = {
-      url = "github:LnL7/nix-darwin";
+      url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-manipulator.url = "github:hoh/nix-manipulator";

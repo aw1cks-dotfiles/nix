@@ -30,9 +30,9 @@
       nixos.nix-settings.nix.settings = config.nix.settings;
       darwin.nix-settings.nix.settings = config.nix.settings;
       home.nix-settings =
-        { pkgs, ... }:
+        { lib, pkgs, osConfig ? null, ... }:
         {
-          nix.package = pkgs.nix;
+          nix.package = lib.mkDefault (if osConfig != null then osConfig.nix.package else pkgs.nix);
           nix.settings = config.nix.settings;
         };
     };
