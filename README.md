@@ -108,7 +108,7 @@ Standalone Home Manager Linux hosts can opt into the shared NVIDIA contract at t
 
 When `nvidia.enable = true`, the shared Home Manager layer automatically enables `targets.genericLinux` and wires `targets.genericLinux.gpu.nvidia` from the pin file.
 
-Pin files are stored as JSON and default to `hosts/<short-host>/nvidia.json`, where `<short-host>` is inferred from the Home Manager attribute name convention `user@host` or `user@host.domain`.
+Pin files are stored as JSON. NVIDIA-enabled Home Manager hosts must set `nvidia.pinFile` explicitly, typically to a host-local path such as `./nvidia.json`.
 
 The JSON file must contain:
 

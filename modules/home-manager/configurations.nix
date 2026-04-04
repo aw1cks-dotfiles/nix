@@ -34,14 +34,12 @@ let
     { system, nvidia, ... }:
     let
       shortHost = extractShortHost name;
-      pinFile =
-        if nvidia.pinFile != null then toString nvidia.pinFile else "hosts/${shortHost}/nvidia.nix";
     in
     {
       inherit name system shortHost;
       nvidia = {
         enable = nvidia.enable;
-        pinFile = if nvidia.enable then pinFile else null;
+        pinFile = if nvidia.enable then nvidia.pinFile else null;
         arch = if nvidia.enable then nvidiaArchForSystem system else null;
       };
     }
@@ -50,7 +48,7 @@ let
   nvidiaModuleFor =
     meta:
     let
-      pins = builtins.fromJSON (builtins.readFile ../../${meta.nvidia.pinFile});
+      pins = builtins.fromJSON (builtins.readFile meta.nvidia.pinFile);
     in
     {
       targets.genericLinux = {
@@ -100,7 +98,7 @@ in
               default = null;
               description = ''
                 Path to the host-local Nix file containing NVIDIA driver pins.
-                Defaults to hosts/<shortHost>/nvidia.json based on the configuration name.
+                Required when nvidia.enable = true.
               '';
             };
           };
@@ -136,7 +134,11 @@ in
                 message = "configurations.home.${name}.nvidia.enable requires a Linux system.";
               }
               {
-                assertion = (!nvidia.enable) || builtins.pathExists ../../${meta.nvidia.pinFile};
+                assertion = (!nvidia.enable) || meta.nvidia.pinFile != null;
+                message = "configurations.home.${name}.nvidia.pinFile is required when nvidia.enable = true.";
+              }
+              {
+                assertion = (!nvidia.enable) || builtins.pathExists meta.nvidia.pinFile;
                 message = "configurations.home.${name}.nvidia.pinFile does not exist: ${meta.nvidia.pinFile}";
               }
               {
@@ -144,7 +146,7 @@ in
                   (!nvidia.enable)
                   || (
                     let
-                      pins = builtins.fromJSON (builtins.readFile ../../${meta.nvidia.pinFile});
+                      pins = builtins.fromJSON (builtins.readFile meta.nvidia.pinFile);
                     in
                     builtins.isAttrs pins && builtins.hasAttr "version" pins && builtins.hasAttr "sha256" pins
                   );
