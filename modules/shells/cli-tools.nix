@@ -100,6 +100,9 @@
           bat-extras.core
         ];
         config = {
+          nonprintable-notation = "caret";
+          paging = "auto";
+          style = "changes,numbers";
           theme = "Catppuccin Mocha";
         };
       };
