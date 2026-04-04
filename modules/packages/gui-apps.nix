@@ -10,17 +10,14 @@
           cascadia-code
           # Temporarily disabled: current calibre in pinned nixpkgs evaluates as broken on darwin.
           # calibre
-          firefox
           gitkraken
           ibm-plex
           meld
           mumble
           obsidian
-          podman-desktop
           qbittorrent
           slack
           syncplay
-          utm
           unstable.wezterm
           vscode
           wireshark
@@ -28,6 +25,8 @@
         ]
         ++ lib.optionals pkgs.stdenv.isDarwin [
           nerd-fonts.caskaydia-mono
+          podman-desktop
+          utm
           zoom-us
         ];
     };

@@ -9,8 +9,6 @@
       casks = [
         "calibre"
         "crystalfetch"
-        "flox"
-        "folx"
         "mactex"
         "microsoft-auto-update"
         "microsoft-remote-desktop"
