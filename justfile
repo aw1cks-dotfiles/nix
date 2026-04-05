@@ -7,7 +7,7 @@ rebuild_command := if os() == "macos" {
   if is_wsl == "true" {
     error("WSL is not supported yet")
   } else if is_nixos == "true" {
-    "sudo --preserve-env=NIX_CONFIG nixos-rebuild"
+    "sudo -H --preserve-env=NIX_CONFIG nixos-rebuild"
   } else {
     "nix run .#home-manager --"
   }
@@ -36,11 +36,20 @@ fix-nix-daemon:
 update:
   nix flake update
 
+nix_sudo := if os() == "macos" { "sudo -H nix" } else { "nix" }
+gc_command := if os() == "macos" {
+  "sudo -H nix-env --profile /nix/var/nix/profiles/system --delete-generations"
+} else {
+  "nix profile wipe-history" 
+}
+gc_day0_value := if os() == "macos" { "old" } else { "" }
+
 gc days="7":
-  nix profile wipe-history {{ if days == "0" { "" } else { "--older-than " + days + "d" } }}
-  nix store gc
+  {{gc_command}} \
+    {{ if days == "0" { gc_day0_value } else { if os() == "macos" {"+" + days} else {"--older-than " + days + "d"} } }}
+  {{nix_sudo}} store gc
 
 optimise:
-  nix store optimise
+  {{nix_sudo}} store optimise
 
 clean days="7": (gc days) optimise
