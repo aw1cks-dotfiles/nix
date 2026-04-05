@@ -74,6 +74,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - Make the smallest correct change.
 - Prefer editing files under `modules/` and future `profiles/` trees over generated outputs.
 - If a change affects generated flake output, regenerate `flake.nix` rather than hand-editing it.
+- For any new file that must be evaluated by Nix, ensure it is tracked by git before relying on `nix` commands for validation; untracked files are ignored by flake evaluation.
 - Prefer introducing or consuming profiles instead of expanding repeated host import lists.
 - For NVIDIA driver bumps, prefer updating host-local JSON pin files rather than editing host modules in place.
 
