@@ -2,7 +2,12 @@
 { ... }:
 {
   flake.modules.home.ai =
-    { config, pkgs, lib, ... }:
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
     let
       cfg = config.modules.ai;
     in

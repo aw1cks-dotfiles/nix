@@ -143,7 +143,13 @@ disabled = false
 
 [dotnet]
 detect_extensions = ['csproj', 'fsproj', 'xproj']
-detect_files = ['global.json', 'project.json', 'Directory.Build.props', 'Directory.Build.targets', 'Packages.props']
+detect_files = [
+  'global.json',
+  'project.json',
+  'Directory.Build.props',
+  'Directory.Build.targets',
+  'Packages.props',
+]
 detect_folders = []
 format = '(\[[$symbol]($style)[$version](dimmed)([🎯$tfm]($style))\])'
 heuristic = true
@@ -227,7 +233,14 @@ disabled = false
 
 [golang]
 detect_extensions = ['go']
-detect_files = ['go.mod', 'go.sum', 'glide.yaml', 'Gopkg.yml', 'Gopkg.lock', '.go-version']
+detect_files = [
+  'go.mod',
+  'go.sum',
+  'glide.yaml',
+  'Gopkg.yml',
+  'Gopkg.lock',
+  '.go-version',
+]
 detect_folders = ['Godeps']
 format = '( \[([${symbol}]($style)[$version](dimmed))\])'
 style = 'cyan'
@@ -260,7 +273,15 @@ disabled = false
 
 [java]
 detect_extensions = ['java', 'class', 'jar', 'gradle', 'clj', 'cljc']
-detect_files = ['pom.xml', 'build.gradle.kts', 'build.sbt', '.java-version', 'deps.edn', 'project.clj', 'build.boot']
+detect_files = [
+  'pom.xml',
+  'build.gradle.kts',
+  'build.sbt',
+  '.java-version',
+  'deps.edn',
+  'project.clj',
+  'build.boot',
+]
 detect_folders = []
 format = '( \[[${symbol}]($style)[${version}](dimmed white)\])'
 style = 'red dimmed'
@@ -366,7 +387,15 @@ disabled = false
 
 [perl]
 detect_extensions = ['pl', 'pm', 'pod']
-detect_files = ['Makefile.PL', 'Build.PL', 'cpanfile', 'cpanfile.snapshot', 'META.json', 'META.yml', '.perl-version']
+detect_files = [
+  'Makefile.PL',
+  'Build.PL',
+  'cpanfile',
+  'cpanfile.snapshot',
+  'META.json',
+  'META.yml',
+  '.perl-version',
+]
 detect_folders = []
 format = '( \[([$symbol]($style)[$version](dimmed))\])'
 style = '149 bold'
@@ -392,7 +421,15 @@ disabled = true
 
 [python]
 detect_extensions = ['py']
-detect_files = ['requirements.txt', '.python-version', 'pyproject.toml', 'Pipfile', 'tox.ini', 'setup.py', '__init__.py']
+detect_files = [
+  'requirements.txt',
+  '.python-version',
+  'pyproject.toml',
+  'Pipfile',
+  'tox.ini',
+  'setup.py',
+  '__init__.py',
+]
 detect_folders = []
 format = '( \[[${symbol}](yellow)[${version}](dimmed)(|[${pyenv_prefix}]($style))(|[${virtualenv}]($style))\])'
 pyenv_prefix = 'pyenv'

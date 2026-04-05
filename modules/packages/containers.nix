@@ -4,7 +4,8 @@
   flake.modules.home.containers =
     { pkgs, ... }:
     {
-      home.packages = with pkgs;
+      home.packages =
+        with pkgs;
         [
           crane
           dive
