@@ -21,6 +21,18 @@ default:
 rebuild target=".":
   {{rebuild_command}} switch --flake {{target}}
 
+fix-nix-daemon:
+  @set -e; \
+  if [ "$(uname -s)" != "Darwin" ]; then echo "fix-nix-daemon is only supported on macOS"; exit 1; fi; \
+  if ! launchctl print system/org.nixos.nix-daemon >/dev/null 2>&1 && nix store ping --store daemon >/dev/null 2>&1; then echo "nix-daemon is responding via a manual process; stopping here to avoid breaking the current session"; exit 1; fi; \
+  if nix store ping --store daemon >/dev/null 2>&1; then echo "nix-daemon is already responding"; exit 0; fi; \
+  sudo launchctl bootout system/org.nixos.nix-daemon >/dev/null 2>&1 || true; \
+  sudo rm -f /nix/var/nix/daemon-socket/socket; \
+  sudo launchctl bootstrap system /Library/LaunchDaemons/org.nixos.nix-daemon.plist; \
+  sudo launchctl enable system/org.nixos.nix-daemon; \
+  sudo launchctl kickstart -k system/org.nixos.nix-daemon; \
+  if nix store ping --store daemon >/dev/null 2>&1; then echo "nix-daemon recovered"; else echo "launchd did not recover nix-daemon; a reboot is likely required"; exit 1; fi
+
 update:
   nix flake update
 
