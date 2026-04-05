@@ -2,6 +2,12 @@
 {
   imports = [ inputs.flake-file.flakeModules.default ];
 
+  perSystem = {
+    apps.write-inputs.meta.description = "Regenerate flake inputs from the flake-file source";
+    apps.write-lock.meta.description = "Regenerate the flake lockfile from the flake-file source";
+    apps.write-flake.meta.description = "Regenerate the generated flake.nix from the flake-file source";
+  };
+
   flake-file = {
     description = lib.mkDefault "Dendritic Nix library — reusable NixOS, home-manager, and nix-darwin modules";
     outputs = lib.mkDefault "inputs: import ./outputs.nix inputs";

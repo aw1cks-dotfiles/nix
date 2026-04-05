@@ -37,6 +37,7 @@
       apps.home-manager = {
         type = "app";
         program = "${inputs.home-manager.packages.${system}.home-manager}/bin/home-manager";
+        meta.description = "Run the Home Manager CLI from this flake's pinned input";
       };
 
       packages.update-nvidia-version = nvidiaUpdateScript;
