@@ -18,9 +18,8 @@ in
     };
     home = {
       imports = [
-        profiles.home.base
-        profiles.home.developer
-        profiles.home.desktop
+        profiles.home.dev-workstation
+        profiles.home.multimedia
       ];
 
       home = {

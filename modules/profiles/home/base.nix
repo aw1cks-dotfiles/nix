@@ -4,16 +4,11 @@ let
 in
 {
   flake.profiles.home.base = {
-    # Daily shell and nix tooling shared by all current home hosts.
+    # Minimal Home Manager and Nix plumbing shared by all home hosts.
     imports = [
-      modules.home.nixpkgs
       modules.home.home-manager
-      modules.home.cli-tools
-      modules.home.gpg
-      modules.home.zsh
-      modules.home.git
-      modules.home.git-config
       modules.home.nix-settings
+      modules.home.nixpkgs
     ];
   };
 }

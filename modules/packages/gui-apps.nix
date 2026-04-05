@@ -79,17 +79,8 @@
           nerd-fonts.caskaydia-mono
           # Temporarily disabled: current calibre in pinned nixpkgs evaluates as broken on darwin.
           # calibre
-          gitkraken
           ibm-plex
-          meld
-          mumble
-          obsidian
-          qbittorrent
-          slack
           syncplay
-          vscode
-          wireshark
-          zeal
         ]
         ++ lib.optionals pkgs.stdenv.isLinux [
           appleColorEmoji
@@ -97,8 +88,6 @@
           xclip
         ]
         ++ lib.optionals pkgs.stdenv.isDarwin [
-          podman-desktop
-          utm
           zoom-us
         ];
 
@@ -106,6 +95,11 @@
 
       programs = {
         formiko.enable = pkgs.stdenv.isLinux;
+        obsidian = {
+          enable = true;
+          # not available on hm-25.11 yet
+          # cli.enable = true;
+        };
         wezterm = {
           colorSchemes = {
             "Oxocarbon Dark" = {

@@ -39,7 +39,7 @@
             enableMcpIntegration = true;
             package = pkgs.llm-agents.opencode;
 
-            rules = ./opencode/AGENTS.md;
+            rules = ./files/opencode/AGENTS.md;
 
             settings = {
               plugin = [ "opencode-gemini-auth@latest" ];

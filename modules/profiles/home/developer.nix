@@ -4,14 +4,14 @@ let
 in
 {
   flake.profiles.home.developer = {
-    # General development toolchain used across workstation-style hosts.
+    # Development toolchain for machines used for software work.
     imports = [
-      modules.home.dev-tools
       modules.home.ai
       modules.home.containers
-      modules.home.rust
-      modules.home.kubernetes
+      modules.home.dev-tools
       modules.home.java
+      modules.home.kubernetes
+      modules.home.rust
     ];
   };
 }
