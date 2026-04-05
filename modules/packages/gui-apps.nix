@@ -1,5 +1,5 @@
 # GUI applications - migrated from nix-old/modules/gui-apps.nix
-{ lib, ... }:
+{ inputs, lib, ... }:
 {
   flake.modules.home.gui-apps =
     { pkgs, ... }:
@@ -63,8 +63,10 @@
               else
                 "24"
             },
-            padding = ${if pkgs.stdenv.isDarwin then ''"1.75%"'' else "16"},
+            padding = "2%",
             macos_background_blur = ${if pkgs.stdenv.isDarwin then "20" else "nil"},
+            native_macos_fullscreen_mode = ${if pkgs.stdenv.isDarwin then "false" else "nil"},
+            macos_fullscreen_extend_behind_notch = ${if pkgs.stdenv.isDarwin then "true" else "nil"},
           },
         }
       '';
@@ -162,7 +164,7 @@
             };
           };
           enable = true;
-          package = pkgs.unstable.wezterm;
+          package = inputs.wezterm.packages.${pkgs.stdenv.hostPlatform.system}.default;
         };
       };
 

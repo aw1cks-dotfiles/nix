@@ -6,10 +6,20 @@ local function background(config, settings)
   if settings.window.macos_background_blur then
     config.macos_window_background_blur = settings.window.macos_background_blur
   end
+
+  if settings.window.native_macos_fullscreen_mode ~= nil then
+    config.native_macos_fullscreen_mode = settings.window.native_macos_fullscreen_mode
+  end
+
+  if settings.window.macos_fullscreen_extend_behind_notch ~= nil then
+    config.macos_fullscreen_extend_behind_notch = settings.window.macos_fullscreen_extend_behind_notch
+  end
 end
 
 local function colour_scheme(config, settings)
   config.color_scheme = settings.color_scheme
+  config.colors = config.colors or {}
+  config.colors.background = "#161616"
 end
 
 local function cursor(config, settings)
