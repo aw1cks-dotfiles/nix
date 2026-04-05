@@ -1,3 +1,8 @@
+---
+name: repo-architecture
+description: Use this skill when changing module layout, host composition, flake schemas, export surfaces, or validation in the public repo.
+---
+
 # Repo Architecture
 
 Use this skill when changing module layout, host composition, flake schemas, export surfaces, or validation in the public repo.

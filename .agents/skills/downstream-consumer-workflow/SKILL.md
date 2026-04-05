@@ -1,3 +1,8 @@
+---
+name: downstream-consumer-workflow
+description: Use this skill when a change in the public repo affects the private consumer repo or any other downstream flake.
+---
+
 # Downstream Consumer Workflow
 
 Use this skill when a change in the public repo affects the private consumer repo or any other downstream flake.
