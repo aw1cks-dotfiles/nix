@@ -71,6 +71,7 @@
         }
         (lib.mkIf (user != null) {
           system.primaryUser = lib.mkDefault user;
+          nix.settings.trusted-users = lib.mkAfter [ user ];
         })
         (lib.mkIf (user != null && homeDirectory != null) {
           users.users.${user}.home = lib.mkDefault homeDirectory;

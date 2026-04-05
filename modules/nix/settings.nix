@@ -1,6 +1,12 @@
 # Nix daemon settings — projected to all configuration classes
 { lib, config, ... }:
 {
+  options.nix.trustedUsers = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    description = "Additional trusted users to pass through to nix-darwin's nix.settings.trusted-users.";
+  };
+
   options.nix.settings = lib.mkOption {
     type = lib.types.attrsOf lib.types.anything;
     default = { };
@@ -26,6 +32,9 @@
       ];
 
       keep-outputs = true;
+    }
+    // lib.optionalAttrs (config.nix.trustedUsers != [ ]) {
+      trusted-users = lib.unique config.nix.trustedUsers;
     };
 
     flake.modules = {
