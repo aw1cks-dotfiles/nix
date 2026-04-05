@@ -1,0 +1,19 @@
+{ inputs, ... }:
+{
+  imports = [ inputs.treefmt-nix.flakeModule ];
+
+  perSystem =
+    { ... }:
+    {
+      treefmt = {
+        projectRootFile = "flake.nix";
+
+        programs = {
+          nixfmt.enable = true;
+          taplo.enable = true;
+          yamlfmt.enable = true;
+          stylua.enable = true;
+        };
+      };
+    };
+}
