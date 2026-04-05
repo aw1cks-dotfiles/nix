@@ -17,6 +17,7 @@
           opensshWithKerberos
           powershell
           pwgen
+          tree
           tmux
           uutils-coreutils-noprefix
           uutils-diffutils
