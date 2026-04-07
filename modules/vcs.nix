@@ -1,9 +1,20 @@
-# Git configuration — converted from dotconfig/.gitconfig
 { lib, ... }:
 {
-  flake.modules.home.git-config =
+  flake.modules.home.vcs =
     { pkgs, ... }:
+    let
+      user = {
+        name = "Alex Wicks";
+        email = "alex@awicks.io";
+      };
+    in
     {
+      home.packages = with pkgs; [
+        gg-jj
+        onefetch
+        tig
+      ];
+
       programs = {
         delta = {
           enable = true;
@@ -20,10 +31,6 @@
         };
 
         difftastic.enable = true;
-
-        mergiraf = {
-          enable = true;
-        };
 
         gh = {
           enable = true;
@@ -57,15 +64,17 @@
           lfs.enable = true;
 
           ignores = [
+            "__pycache__"
+            "venv"
+            ".venv"
+
             "kls_database.db"
+
             "**/.claude/settings.local.json"
           ];
 
           settings = {
-            user = {
-              email = "alex@awicks.io";
-              name = "Alex Wicks";
-            };
+            inherit user;
 
             advice.addIgnoredFile = false;
 
@@ -179,7 +188,7 @@
 
             grep.extendedRegexp = true;
 
-            init.defaultBranch = "master";
+            init.defaultBranch = "main";
 
             log = {
               abbrevCommit = true;
@@ -260,6 +269,19 @@
             };
           };
         };
+
+        jjui.enable = true;
+        jujutsu = {
+          enable = true;
+          settings = {
+            inherit user;
+          };
+        };
+
+        mergiraf = {
+          enable = true;
+        };
+
       };
     };
 }

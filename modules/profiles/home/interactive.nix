@@ -7,9 +7,8 @@ in
     # Interactive shell and identity tooling for human-operated machines.
     imports = [
       modules.home.cli-tools
-      modules.home.git
-      modules.home.git-config
       modules.home.gpg
+      modules.home.vcs
       modules.home.zsh
     ];
   };
