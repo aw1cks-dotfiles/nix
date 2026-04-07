@@ -7,6 +7,7 @@
         mumble
         qbittorrent
         syncplay
+        ytmdesktop
       ];
 
       programs = {
