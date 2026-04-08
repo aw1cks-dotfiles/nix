@@ -65,11 +65,13 @@
         programs.mcp = cfg.mcp;
         programs.opencode = cfg.opencode;
 
-        # Home Manager release-25.11 does not expose programs.opencode.skills yet,
-        # so install the skills tree into XDG data until that option lands there.
-        xdg.dataFile."opencode/skill" = {
-          source = ./files/opencode/skills;
-          recursive = true;
+        xdg.configFile = lib.mkIf cfg.opencode.enable {
+          # Home Manager release-25.11 does not expose `programs.opencode.skills` yet,
+          # so install the skills tree into XDG config until that option lands there.
+          "opencode/skills" = {
+            source = ./files/opencode/skills;
+            recursive = true;
+          };
         };
 
         home.sessionVariables = {

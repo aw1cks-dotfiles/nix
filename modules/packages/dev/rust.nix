@@ -12,7 +12,7 @@
       # manually until that lands here.
       home.sessionVariables.CARGO_HOME = "${config.xdg.dataHome}/cargo";
 
-      xdg.dataFile."cargo/config.toml".source = cargoToml.generate "cargo-config.toml" {
+      xdg.configFile."cargo/config.toml".source = cargoToml.generate "cargo-config.toml" {
         alias = {
           b = "build";
           c = "check";
