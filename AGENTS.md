@@ -10,6 +10,7 @@ This file applies to the entire public repo.
 - Other flakes may consume this repo as an input, including a separate private corporate repo that layers corporate modules and work hosts on top of the shared library.
 - `flake.nix` is generated. Do not edit it directly; regenerate with `nix run .#write-flake` when needed.
 - Common workflows are exposed through `just`, especially `just rebuild` and `just update`.
+- Repo-supported automation should be exposed through flake `apps` or `packages`. Avoid introducing raw `scripts/*` entrypoints as the primary interface when the command should be reproducible and discoverable through the flake.
 - Standalone Home Manager NVIDIA hosts use the shared `configurations.home.<name>.nvidia` contract with host-local JSON pin files such as `hosts/<host>/nvidia.json`.
 
 ## Load Skills When Relevant
@@ -23,6 +24,7 @@ This file applies to the entire public repo.
 - Treat this repo as the shared library layer: reusable modules, profiles, flake schemas, and generic tooling belong here.
 - Public hosts may live here, but they are repo-local outputs, not part of the reusable downstream interface consumed by other flakes.
 - Keep hosts as explicit composition roots.
+- When adding repo-supported tooling, prefer a flake `app` for executable workflows and a flake `package` for reusable build artifacts or wrapped tools.
 - Shared host metadata belongs in `hosts/_facts.nix`; `hosts/facts.nix` exposes it as `config.flake.hostFacts`.
 - Constructors inject `hostFacts` and expand role-derived imports automatically from `hostFacts.roles`.
 - Prefer consuming shared facts in constructors instead of repeating the same values in repo-local host declarations.
@@ -87,6 +89,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - Prefer editing files under `modules/` and future `profiles/` trees over generated outputs.
 - If a change affects generated flake output, regenerate `flake.nix` rather than hand-editing it.
 - For any new file that must be evaluated by Nix, ensure it is tracked by git before relying on `nix` commands for validation; untracked files are ignored by flake evaluation.
+- Prefer exposing maintained operational commands via `nix run .#<name>` or `nix build .#<name>` instead of telling users to run repository-local shell scripts directly.
 - Prefer introducing or consuming profiles instead of expanding repeated host import lists.
 - Prefer mapping `hostFacts.roles` to existing profiles in `modules/roles/defaults.nix` rather than making hosts import repeated role bundles directly.
 - For NVIDIA driver bumps, prefer updating host-local JSON pin files rather than editing host modules in place.
