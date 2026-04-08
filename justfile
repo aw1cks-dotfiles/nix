@@ -2,14 +2,14 @@ is_wsl := path_exists("/proc/sys/fs/binfmt_misc/WSLInterop")
 is_nixos := path_exists("/run/current-system/nixos-version")
 
 rebuild_command := if os() == "macos" {
-  "sudo -H --preserve-env=NIX_CONFIG nix run .#darwin --"
+  "nix run .#nh -- darwin switch"
 } else if os() == "linux" {
   if is_wsl == "true" {
     error("WSL is not supported yet")
   } else if is_nixos == "true" {
-    "sudo -H --preserve-env=NIX_CONFIG nixos-rebuild"
+    "nix run .#nh -- os switch"
   } else {
-    "nix run .#home-manager --"
+    "nix run .#nh -- home switch"
   }
 } else {
   error("Unsupported OS: " + os())
@@ -19,7 +19,7 @@ default:
   @just --list --unsorted
 
 rebuild target=".":
-  {{rebuild_command}} switch --flake {{target}}
+  {{rebuild_command}} {{target}}
 
 fix-nix-daemon:
   @set -e; \
