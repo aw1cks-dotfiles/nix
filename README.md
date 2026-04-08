@@ -57,25 +57,34 @@ This is mainly needed for first-run bootstrapping before this repo's own Nix set
 
 ### Rebuilding the current machine
 
-Common rebuild flows are wrapped in `just rebuild`.
+The pinned `nh` CLI is exposed as a flake app on all supported platforms.
+
+Bootstrap rebuilds can be run directly with:
+
+```sh
+NIX_CONFIG='experimental-features = nix-command flakes' nix run .#nh -- darwin switch .
+NIX_CONFIG='experimental-features = nix-command flakes' nix run .#nh -- os switch .
+NIX_CONFIG='experimental-features = nix-command flakes' nix run .#nh -- home switch .
+```
+
+Once `just` is available, `just rebuild` wraps the same pinned `nh` entrypoint:
 
 - nix-darwin: `just rebuild`
 - NixOS: `just rebuild`
 - standalone Home Manager on non-NixOS Linux: `just rebuild`
 
-On macOS and NixOS, the recipe preserves `NIX_CONFIG`, so bootstrap commands like the following work before the managed Nix settings are live:
+### Running pinned frontends directly
+
+This flake exposes pinned app entrypoints for the shared frontends:
+
+- `nix run .#nh -- ...`
+- `nix run .#darwin -- ...`
+- `nix run .#home-manager -- ...`
+
+For example:
 
 ```sh
-NIX_CONFIG='experimental-features = nix-command flakes' just rebuild
-```
-
-### Running Home Manager directly
-
-The Home Manager CLI is also exposed as an app for hosts which have `configurations.home` declared.
-
-It can be invoked as such:
-
-```sh
+nix run .#nh -- home switch .
 nix run .#home-manager -- switch --flake .
 ```
 
