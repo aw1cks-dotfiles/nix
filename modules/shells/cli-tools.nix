@@ -31,6 +31,7 @@
 
           # networking
           cfssl
+          curlFull
           dnsutils
           grpcurl
           inetutils
