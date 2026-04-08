@@ -5,20 +5,10 @@
   ...
 }:
 let
+  xlib = import ../_lib/default.nix;
   facts = config.flake.hostFacts;
   darwinRoleMappings = config.flake.roles.darwin;
   homeRoleMappings = config.flake.roles.home;
-
-  hostFactsFor =
-    name:
-    if builtins.hasAttr name facts then
-      facts.${name}
-    else
-      throw "configurations.darwin.${name}: missing entry in hosts/facts.nix.";
-
-  roleModulesFor =
-    mappings: hostFacts:
-    mappings.base ++ lib.concatMap (role: mappings.roles.${role} or [ ]) (hostFacts.roles or [ ]);
 in
 {
   options.configurations.darwin = lib.mkOption {
@@ -63,48 +53,51 @@ in
       home ? null,
     }:
     let
-      hostFacts = hostFactsFor name;
+      hostFacts = xlib.hostFactsFor {
+        inherit facts name;
+        target = "darwin";
+      };
       resolvedUser = if user != null then user else hostFacts.user or null;
       resolvedHomeDirectory =
         if homeDirectory != null then homeDirectory else hostFacts.homeDirectory or null;
     in
     inputs.nix-darwin.lib.darwinSystem {
       inherit system;
-      specialArgs = {
-        inherit hostFacts;
-      };
-      modules = [
-        ({
-          assertions = [
-            {
-              assertion = hostFacts.system == system;
-              message = "configurations.darwin.${name}: facts system ${hostFacts.system} does not match declared system ${system}.";
-            }
-            {
-              assertion = hostFacts.kind == "darwin";
-              message = "configurations.darwin.${name}: facts kind must be darwin, got ${hostFacts.kind}.";
-            }
-            {
-              assertion = resolvedUser != null;
-              message = "configurations.darwin.${name}: facts user is required for darwin hosts.";
-            }
-            {
-              assertion = resolvedHomeDirectory != null;
-              message = "configurations.darwin.${name}: facts homeDirectory is required for darwin hosts.";
-            }
-          ];
+      inherit
+        (xlib.constructorArgsFor {
+          inherit hostFacts;
+          target = "darwin";
         })
+        specialArgs
+        ;
+      modules = [
+        (xlib.mkAssertionModule (
+          xlib.targetAssertions {
+            inherit name system hostFacts;
+            target = "darwin";
+            extra = [
+              {
+                assertion = resolvedUser != null;
+                message = "configurations.darwin.${name}: facts user is required for darwin hosts.";
+              }
+              {
+                assertion = resolvedHomeDirectory != null;
+                message = "configurations.darwin.${name}: facts homeDirectory is required for darwin hosts.";
+              }
+            ];
+          }
+        ))
       ]
-      ++ roleModulesFor darwinRoleMappings hostFacts
+      ++ xlib.roleModulesFor {
+        mappings = darwinRoleMappings;
+        inherit hostFacts;
+      }
+      ++ xlib.baseModulesFor {
+        inherit inputs config;
+        target = "darwin";
+      }
       ++ [
         module
-        inputs.agenix.darwinModules.default
-        inputs.home-manager.darwinModules.home-manager
-        config.flake.modules.shared.nixpkgs
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-        }
         {
           nixpkgs.hostPlatform = lib.mkDefault hostFacts.system;
         }
@@ -116,13 +109,18 @@ in
           users.users.${resolvedUser}.home = lib.mkDefault resolvedHomeDirectory;
         })
         (lib.mkIf (home != null && resolvedUser != null && resolvedHomeDirectory != null) {
-          home-manager.users.${resolvedUser} = {
-            imports = roleModulesFor homeRoleMappings hostFacts ++ [
-              inputs.stylix.homeModules.stylix
-              home
-            ];
-            home.username = lib.mkDefault resolvedUser;
-            home.homeDirectory = lib.mkDefault resolvedHomeDirectory;
+          home-manager.users.${resolvedUser} = xlib.mkHomeUserModule {
+            inherit resolvedUser resolvedHomeDirectory;
+            imports =
+              xlib.roleModulesFor {
+                mappings = homeRoleMappings;
+                inherit hostFacts;
+              }
+              ++ xlib.baseModulesFor {
+                inherit inputs config;
+                target = "homeEmbedded";
+              }
+              ++ [ home ];
           };
         })
       ];

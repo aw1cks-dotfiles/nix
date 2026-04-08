@@ -173,3 +173,19 @@ Darwin hosts in `configurations.darwin` currently use this top-level shape:
 ```
 
 The shared darwin layer derives `system.primaryUser`, `users.users.<name>.home`, `home-manager.users.<name>.home.username`, and `home-manager.users.<name>.home.homeDirectory` from `user` and `homeDirectory`.
+
+## Constructor Helpers
+
+Cross-target constructor assembly is normalized through small helpers in `modules/_lib/default.nix`.
+These helpers are intended to keep repeated constructor policy consistent without hiding the
+actual NixOS, nix-darwin, and Home Manager constructor calls.
+
+Current helper responsibilities:
+
+- `hostFactsFor`: resolve a host facts entry and keep error messages consistent
+- `roleModulesFor`: expand role-derived profile imports from `config.flake.roles.*`
+- `targetAssertions`: emit shared `system` and `kind` assertions
+- `constructorArgsFor`: keep `specialArgs` vs `extraSpecialArgs` explicit per target
+- `baseModulesFor`: centralize repo-wide baseline imports for `nixos`, `darwin`, `home`, and embedded Home Manager contexts
+- `mkHomeUserModule`: shape shared Home Manager user defaults for standalone and embedded use
+- `mkPerSystemCheck` and `mergeChecks`: reduce repeated check attrset boilerplate in `modules/checks.nix`

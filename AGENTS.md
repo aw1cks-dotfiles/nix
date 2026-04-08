@@ -27,6 +27,7 @@ This file applies to the entire public repo.
 - When adding repo-supported tooling, prefer a flake `app` for executable workflows and a flake `package` for reusable build artifacts or wrapped tools.
 - Shared host metadata belongs in `hosts/_facts.nix`; `hosts/facts.nix` exposes it as `config.flake.hostFacts`.
 - Constructors inject `hostFacts` and expand role-derived imports automatically from `hostFacts.roles`.
+- Cross-target constructor helpers live in `modules/_lib/default.nix`; keep them small, contract-focused, and avoid turning them into a second module system.
 - Prefer consuming shared facts in constructors instead of repeating the same values in repo-local host declarations.
 - Prefer `flake.profiles.*` for repeated intent bundles; keep `flake.modules.*` atomic.
 - Add `flake.aspects.*` only for narrow cross-cutting machine traits.
@@ -92,6 +93,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - Prefer exposing maintained operational commands via `nix run .#<name>` or `nix build .#<name>` instead of telling users to run repository-local shell scripts directly.
 - Prefer introducing or consuming profiles instead of expanding repeated host import lists.
 - Prefer mapping `hostFacts.roles` to existing profiles in `modules/roles/defaults.nix` rather than making hosts import repeated role bundles directly.
+- When changing constructor assembly, update the docs that describe constructor-owned defaults and helper responsibilities.
 - For NVIDIA driver bumps, prefer updating host-local JSON pin files rather than editing host modules in place.
 
 ## Verification

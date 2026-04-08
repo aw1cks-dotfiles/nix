@@ -5,20 +5,9 @@
   ...
 }:
 let
+  xlib = import ../_lib/default.nix;
   facts = config.flake.hostFacts;
   roleMappings = config.flake.roles.nixos;
-
-  hostFactsFor =
-    name:
-    if builtins.hasAttr name facts then
-      facts.${name}
-    else
-      throw "configurations.nixos.${name}: missing entry in hosts/facts.nix.";
-
-  roleModulesFor =
-    hostFacts:
-    roleMappings.base
-    ++ lib.concatMap (role: roleMappings.roles.${role} or [ ]) (hostFacts.roles or [ ]);
 in
 {
   options.configurations.nixos = lib.mkOption {
@@ -43,31 +32,38 @@ in
     name:
     { module, system }:
     let
-      hostFacts = hostFactsFor name;
+      hostFacts = xlib.hostFactsFor {
+        inherit facts name;
+        target = "nixos";
+      };
     in
     lib.nixosSystem {
       inherit system;
-      specialArgs = {
-        inherit hostFacts;
-      };
+      inherit
+        (xlib.constructorArgsFor {
+          inherit hostFacts;
+          target = "nixos";
+        })
+        specialArgs
+        ;
       modules = [
-        {
-          assertions = [
-            {
-              assertion = hostFacts.system == system;
-              message = "configurations.nixos.${name}: facts system ${hostFacts.system} does not match declared system ${system}.";
-            }
-            {
-              assertion = hostFacts.kind == "nixos";
-              message = "configurations.nixos.${name}: facts kind must be nixos, got ${hostFacts.kind}.";
-            }
-          ];
-        }
+        (xlib.mkAssertionModule (
+          xlib.targetAssertions {
+            inherit name system hostFacts;
+            target = "nixos";
+          }
+        ))
       ]
-      ++ roleModulesFor hostFacts
+      ++ xlib.roleModulesFor {
+        mappings = roleMappings;
+        inherit hostFacts;
+      }
+      ++ xlib.baseModulesFor {
+        inherit inputs config;
+        target = "nixos";
+      }
       ++ [
         module
-        inputs.agenix.nixosModules.default
       ];
     }
   ) config.configurations.nixos;
