@@ -12,6 +12,7 @@
           direnv
           fd
           fzf
+          glow
           moreutils
           ncdu
           opensshWithKerberos
