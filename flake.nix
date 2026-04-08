@@ -8,7 +8,10 @@
   inputs = {
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        home-manager.follows = "home-manager";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
@@ -44,7 +47,10 @@
     };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs = {
+        home-manager.follows = "home-manager";
+        nixpkgs.follows = "nixpkgs-unstable";
+      };
     };
   };
 }
