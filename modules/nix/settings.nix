@@ -1,5 +1,15 @@
 # Nix daemon settings — projected to all configuration classes
 { lib, config, ... }:
+let
+  sharedSettings = config.nix.settings;
+
+  mkSettingsAdapter =
+    extra:
+    {
+      nix.settings = sharedSettings;
+    }
+    // extra;
+in
 {
   options.nix.trustedUsers = lib.mkOption {
     type = lib.types.listOf lib.types.str;
@@ -38,8 +48,8 @@
     };
 
     flake.modules = {
-      nixos.nix-settings.nix.settings = config.nix.settings;
-      darwin.nix-settings.nix.settings = config.nix.settings;
+      nixos.nix-settings = mkSettingsAdapter { };
+      darwin.nix-settings = mkSettingsAdapter { };
       home.nix-settings =
         {
           lib,
@@ -47,9 +57,8 @@
           osConfig ? null,
           ...
         }:
-        {
+        mkSettingsAdapter {
           nix.package = lib.mkDefault (if osConfig != null then osConfig.nix.package else pkgs.nix);
-          nix.settings = config.nix.settings;
         };
     };
   };

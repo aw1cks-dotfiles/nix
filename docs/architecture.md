@@ -66,6 +66,15 @@ Constructors read `config.flake.hostFacts`, assert that a host entry exists, and
 - nix-darwin uses `specialArgs = { hostFacts = ...; }`
 - standalone Home Manager uses `extraSpecialArgs = { hostFacts = ...; }`
 
+That constructor assembly is now normalized through small shared helpers in
+`modules/_lib/default.nix`:
+
+- `hostFactsFor` resolves the facts entry and keeps missing-host errors consistent
+- `roleModulesFor` expands `config.flake.roles.*` mappings from `hostFacts.roles`
+- `targetAssertions` emits the shared `system` and `kind` assertions
+- `constructorArgsFor` keeps the `specialArgs` vs `extraSpecialArgs` difference explicit
+- `baseModulesFor` centralizes repo-wide baseline imports by target class
+
 Constructors also assert that `hostFacts.system` matches the declared system and that `hostFacts.kind` matches the constructor target.
 
 Where a shared field already exists in facts, prefer consuming it in constructors rather than repeating it in host roots. In this repo that includes `user`, `homeDirectory`, and darwin `nixpkgs.hostPlatform` defaults derived from facts.
@@ -91,7 +100,7 @@ This preserves the current profile model rather than replacing it with a separat
 Role defaults behave like defaults because constructors import them before host-local payloads.
 
 - standalone Home Manager ordering: role defaults, then host module, then host-local extras like NVIDIA wiring
-- darwin ordering: darwin role defaults, then host system module, then shared constructor wiring
+- darwin ordering: darwin role defaults, then shared constructor baseline imports, then host system module, then darwin-specific local wiring
 - embedded Home Manager in darwin: home role defaults, then embedded host `home`
 
 Because host-local modules come later, they can override role-derived values through normal Nix module semantics.

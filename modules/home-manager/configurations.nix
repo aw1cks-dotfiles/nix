@@ -5,16 +5,10 @@
   ...
 }:
 let
+  xlib = import ../_lib/default.nix;
   cfg = config.configurations.home;
   facts = config.flake.hostFacts;
   roleMappings = config.flake.roles.home;
-
-  hostFactsFor =
-    name:
-    if builtins.hasAttr name facts then
-      facts.${name}
-    else
-      throw "configurations.home.${name}: missing entry in hosts/facts.nix.";
 
   extractShortHost =
     name:
@@ -69,11 +63,6 @@ let
         };
       };
     };
-
-  roleModulesFor =
-    hostFacts:
-    roleMappings.base
-    ++ lib.concatMap (role: roleMappings.roles.${role} or [ ]) (hostFacts.roles or [ ]);
 
   nvidiaEntries = lib.mapAttrsToList (
     _: meta:
@@ -133,74 +122,81 @@ in
       }:
       let
         meta = homeMetadata.${name};
-        hostFacts = hostFactsFor name;
+        hostFacts = xlib.hostFactsFor {
+          inherit facts name;
+          target = "home";
+        };
         resolvedUser = hostFacts.user or null;
         resolvedHomeDirectory = hostFacts.homeDirectory or null;
       in
       inputs.home-manager.lib.homeManagerConfiguration {
         pkgs = inputs.nixpkgs.legacyPackages.${system};
-        extraSpecialArgs = {
-          inherit hostFacts;
-        };
+        inherit
+          (xlib.constructorArgsFor {
+            inherit hostFacts;
+            target = "home-manager";
+          })
+          extraSpecialArgs
+          ;
         modules = [
-          {
-            assertions = [
-              {
-                assertion = hostFacts.system == system;
-                message = "configurations.home.${name}: facts system ${hostFacts.system} does not match declared system ${system}.";
-              }
-              {
-                assertion = hostFacts.kind == "home-manager";
-                message = "configurations.home.${name}: facts kind must be home-manager, got ${hostFacts.kind}.";
-              }
-              {
-                assertion = duplicateShortHosts == [ ];
-                message = "Duplicate inferred home short hostnames: ${lib.concatStringsSep ", " duplicateShortHosts}";
-              }
-              {
-                assertion = (!nvidia.enable) || lib.hasSuffix "-linux" system;
-                message = "configurations.home.${name}.nvidia.enable requires a Linux system.";
-              }
-              {
-                assertion = (!nvidia.enable) || meta.nvidia.pinFile != null;
-                message = "configurations.home.${name}.nvidia.pinFile is required when nvidia.enable = true.";
-              }
-              {
-                assertion = (!nvidia.enable) || builtins.pathExists meta.nvidia.pinFile;
-                message = "configurations.home.${name}.nvidia.pinFile does not exist: ${meta.nvidia.pinFile}";
-              }
-              {
-                assertion = resolvedUser != null;
-                message = "configurations.home.${name}: facts user is required for standalone Home Manager hosts.";
-              }
-              {
-                assertion = resolvedHomeDirectory != null;
-                message = "configurations.home.${name}: facts homeDirectory is required for standalone Home Manager hosts.";
-              }
-              {
-                assertion =
-                  (!nvidia.enable)
-                  || (
-                    let
-                      pins = builtins.fromJSON (builtins.readFile meta.nvidia.pinFile);
-                    in
-                    builtins.isAttrs pins && builtins.hasAttr "version" pins && builtins.hasAttr "sha256" pins
-                  );
-                message = "configurations.home.${name}.nvidia.pinFile must be a JSON object with version and sha256 keys: ${meta.nvidia.pinFile}";
-              }
-            ];
-          }
+          (xlib.mkAssertionModule (
+            xlib.targetAssertions {
+              inherit name system hostFacts;
+              target = "home-manager";
+              extra = [
+                {
+                  assertion = duplicateShortHosts == [ ];
+                  message = "Duplicate inferred home short hostnames: ${lib.concatStringsSep ", " duplicateShortHosts}";
+                }
+                {
+                  assertion = (!nvidia.enable) || lib.hasSuffix "-linux" system;
+                  message = "configurations.home.${name}.nvidia.enable requires a Linux system.";
+                }
+                {
+                  assertion = (!nvidia.enable) || meta.nvidia.pinFile != null;
+                  message = "configurations.home.${name}.nvidia.pinFile is required when nvidia.enable = true.";
+                }
+                {
+                  assertion = (!nvidia.enable) || builtins.pathExists meta.nvidia.pinFile;
+                  message = "configurations.home.${name}.nvidia.pinFile does not exist: ${meta.nvidia.pinFile}";
+                }
+                {
+                  assertion = resolvedUser != null;
+                  message = "configurations.home.${name}: facts user is required for standalone Home Manager hosts.";
+                }
+                {
+                  assertion = resolvedHomeDirectory != null;
+                  message = "configurations.home.${name}: facts homeDirectory is required for standalone Home Manager hosts.";
+                }
+                {
+                  assertion =
+                    (!nvidia.enable)
+                    || (
+                      let
+                        pins = builtins.fromJSON (builtins.readFile meta.nvidia.pinFile);
+                      in
+                      builtins.isAttrs pins && builtins.hasAttr "version" pins && builtins.hasAttr "sha256" pins
+                    );
+                  message = "configurations.home.${name}.nvidia.pinFile must be a JSON object with version and sha256 keys: ${meta.nvidia.pinFile}";
+                }
+              ];
+            }
+          ))
         ]
-        ++ roleModulesFor hostFacts
+        ++ xlib.roleModulesFor {
+          mappings = roleMappings;
+          inherit hostFacts;
+        }
+        ++ xlib.baseModulesFor {
+          inherit inputs config;
+          target = "home";
+        }
         ++ [
-          {
-            home.username = lib.mkDefault resolvedUser;
-            home.homeDirectory = lib.mkDefault resolvedHomeDirectory;
-          }
+          (xlib.mkHomeUserModule {
+            inherit resolvedUser resolvedHomeDirectory;
+          })
           module
           (lib.mkIf nvidia.enable (nvidiaModuleFor meta))
-          inputs.agenix.homeManagerModules.default
-          inputs.stylix.homeModules.stylix
         ];
       }
     ) cfg;

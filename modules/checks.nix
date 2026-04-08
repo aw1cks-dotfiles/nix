@@ -6,10 +6,14 @@
   ...
 }:
 let
+  xlib = import ./_lib/default.nix;
   nixosChecks = lib.mapAttrsToList (name: nixos: {
-    ${nixos.config.nixpkgs.hostPlatform.system} = {
-      "nixos-${name}" = nixos.config.system.build.toplevel;
-    };
+    ${nixos.config.nixpkgs.hostPlatform.system} =
+      (xlib.mkPerSystemCheck {
+        system = nixos.config.nixpkgs.hostPlatform.system;
+        name = "nixos-${name}";
+        value = nixos.config.system.build.toplevel;
+      }).${nixos.config.nixpkgs.hostPlatform.system};
   }) config.flake.nixosConfigurations;
 
   darwinChecks = lib.mapAttrsToList (
@@ -24,8 +28,10 @@ let
       homeUser = if hasHmUser then hmUser.home.username else "";
       homeDir = if hasHmUser then toString hmUser.home.homeDirectory else "";
     in
-    {
-      ${system}."darwin-${name}-eval" = pkgs.writeText "darwin-${name}-eval" ''
+    xlib.mkPerSystemCheck {
+      inherit system;
+      name = "darwin-${name}-eval";
+      value = pkgs.writeText "darwin-${name}-eval" ''
         hostName=${darwin.config.networking.hostName}
         user=${user}
         hasHomeManager=${if hasHmUser then "true" else "false"}
@@ -61,11 +67,19 @@ let
         ];
       };
     in
-    {
-      ${system}."home-smoke" = smokeHome.activationPackage;
+    xlib.mkPerSystemCheck {
+      inherit system;
+      name = "home-smoke";
+      value = smokeHome.activationPackage;
     }
   ) homeSystems;
 in
 {
-  config.flake.checks = lib.mkMerge (nixosChecks ++ darwinChecks ++ homeSmokeChecks);
+  config.flake.checks = lib.mkMerge (
+    map xlib.mergeChecks [
+      nixosChecks
+      darwinChecks
+      homeSmokeChecks
+    ]
+  );
 }
