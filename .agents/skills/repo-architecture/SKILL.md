@@ -20,8 +20,17 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - Keep atomic reusable feature modules in `flake.modules.{home,nixos,darwin}`.
 - Prefer composed bundles in `flake.profiles.{home,nixos,darwin}` when hosts would otherwise repeat long import lists.
 - Add `flake.aspects.*` only for narrow, cross-cutting machine traits such as `generic-linux`, `nvidia`, or `manuals`.
-- Keep host-only facts in hosts: machine name, darwin primary user, home directory, driver pins, local paths, and other machine-specific settings.
+- Keep shared host facts in `hosts/_facts.nix` and keep composition-only values in host files or constructors.
 - For standalone Home Manager NVIDIA hosts, keep driver pins in host-local JSON files such as `hosts/<host>/nvidia.json`; keep the reusable contract and wiring in `modules/home-manager/configurations.nix`.
+
+## Host Facts Rules
+
+- `hosts/_facts.nix` is plain data only, and `hosts/facts.nix` exposes it to the flake.
+- Facts are limited to safe shared metadata such as `system`, `kind`, `roles`, `user`, `homeDirectory`, `hostName`, and tags.
+- Constructors inject `hostFacts` and own automatic role expansion.
+- Prefer consuming shared facts in constructors instead of repeating the same values in repo-local host declarations.
+- Keep `module`, embedded `home`, local paths, NVIDIA pin file paths, and other composition parameters out of facts.
+- Keep agenix-managed values and any `age.secrets.*` material out of facts.
 
 ## Export Boundary Rules
 
@@ -38,9 +47,10 @@ In other words:
 
 - Favor adding a profile layer before adding an aspect layer.
 - Keep `flake.modules.*` atomic and move repeated import bundles into `flake.profiles.*`.
+- Map `hostFacts.roles` onto existing profiles centrally in constructor-owned role mappings.
 - Improve validation so active Home Manager configurations are included in `flake.checks`.
 - Normalize the top-level `system` contract across `configurations.home`, `configurations.nixos`, and `configurations.darwin`.
-- For darwin hosts in this repo, prefer the current host contract: top-level `system`, `user`, `homeDirectory`, `module`, and optional embedded `home`.
+- For darwin hosts in this repo, preserve the current top-level host contract while allowing host files to consume shared values from `hostFacts`.
 
 ## Naming Guidance
 
