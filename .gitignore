@@ -1,1 +1,4 @@
 /result
+
+/docs/prompts/*
+!/docs/prompts/.keep
