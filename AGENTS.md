@@ -15,6 +15,7 @@ This file applies to the entire public repo.
 ## Load Skills When Relevant
 
 - `.agents/skills/repo-architecture/SKILL.md`: public module boundaries, profiles vs aspects, export-surface rules, generated flake rules, validation expectations.
+- `.agents/skills/host-facts/SKILL.md`: host facts schema, constructor injection, role-default mapping, and facts vs composition vs secrets boundaries.
 - `.agents/skills/downstream-consumer-workflow/SKILL.md`: changes that affect private downstream consumers, including temporary local path overrides from the private repo.
 
 ## Architecture Rules
@@ -22,9 +23,20 @@ This file applies to the entire public repo.
 - Treat this repo as the shared library layer: reusable modules, profiles, flake schemas, and generic tooling belong here.
 - Public hosts may live here, but they are repo-local outputs, not part of the reusable downstream interface consumed by other flakes.
 - Keep hosts as explicit composition roots.
+- Shared host metadata belongs in `hosts/_facts.nix`; `hosts/facts.nix` exposes it as `config.flake.hostFacts`.
+- Constructors inject `hostFacts` and expand role-derived imports automatically from `hostFacts.roles`.
+- Prefer consuming shared facts in constructors instead of repeating the same values in repo-local host declarations.
 - Prefer `flake.profiles.*` for repeated intent bundles; keep `flake.modules.*` atomic.
 - Add `flake.aspects.*` only for narrow cross-cutting machine traits.
 - Do not hand-edit generated outputs when the source of truth is `modules/flake-file.nix` or `outputs.nix`.
+
+## Host Facts Boundary
+
+- Facts: safe shared metadata such as `system`, `kind`, `roles`, `user`, `homeDirectory`, `hostName`, and tags.
+- Composition: host-local `module` wiring, embedded `home` payloads, local file paths, and NVIDIA pin file paths.
+- Secrets: any agenix-managed value, `age.secrets.*` material, credentials, tokens, private endpoints, and private keys.
+- Never put composition-only values or secrets in `hosts/_facts.nix`.
+- Do not repeat values in host roots when constructors already derive them from facts.
 
 ## Export Boundary Rules
 
@@ -76,6 +88,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - If a change affects generated flake output, regenerate `flake.nix` rather than hand-editing it.
 - For any new file that must be evaluated by Nix, ensure it is tracked by git before relying on `nix` commands for validation; untracked files are ignored by flake evaluation.
 - Prefer introducing or consuming profiles instead of expanding repeated host import lists.
+- Prefer mapping `hostFacts.roles` to existing profiles in `modules/roles/defaults.nix` rather than making hosts import repeated role bundles directly.
 - For NVIDIA driver bumps, prefer updating host-local JSON pin files rather than editing host modules in place.
 
 ## Verification
@@ -84,7 +97,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - Use `nix flake check` when it meaningfully covers the change.
 - Use `just rebuild` for local apply flows across nix-darwin, NixOS, and standalone Home Manager.
 - On macOS bootstrap flows, preserving `NIX_CONFIG` may be required until managed Nix settings are active.
-- nix-darwin hosts in this repo currently declare top-level `user` and `homeDirectory`; the shared darwin layer derives the embedded Home Manager username/home directory from those values.
+- nix-darwin and standalone Home Manager constructors now inject `hostFacts` and should be the first place to derive shared defaults like user, home directory, and host platform from facts.
 - Use `just update` when inputs changed.
 - When changing shared exports or configuration contracts, mention whether downstream consumer validation was performed.
 - Mention clearly if a change was validated only by static inspection and not by a switch/build.
