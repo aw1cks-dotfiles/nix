@@ -9,9 +9,6 @@
         [
           # shell utils
           dust
-          direnv
-          fd
-          fzf
           glow
           moreutils
           ncdu
@@ -23,12 +20,7 @@
           uutils-coreutils-noprefix
           uutils-diffutils
           uutils-findutils
-          zsh
           zstd
-
-          # theming
-          starship
-          vivid
 
           # networking
           cfssl
@@ -61,7 +53,6 @@
 
           # nix
           nixfmt
-          nix-direnv
           statix
 
           # linters
