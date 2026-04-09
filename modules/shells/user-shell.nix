@@ -164,6 +164,7 @@ in
         carapace.enable = true;
         direnv = {
           enable = true;
+          package = pkgs.unstable.direnv;
           # config = {};
           nix-direnv.enable = true;
         };
