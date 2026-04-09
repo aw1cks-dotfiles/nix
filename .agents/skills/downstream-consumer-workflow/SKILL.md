@@ -65,6 +65,14 @@ nix run .#write-flake
 
 Use the real local path for the machine. Keep the override temporary unless the user explicitly wants it committed.
 
+## Downstream Flake-File Contract
+
+When a downstream repo generates its own `flake.nix` via `flake-file`, use this repo's exported `flakeModules.downstream-flake-file` as the shared source of truth for the public library's reusable transitive inputs, alongside the base `flake-file` module.
+
+Reference `modules/_internal/flake-file-inputs/default.nix` and `modules/flake-modules.nix` in this repo when you need the exact contract shape.
+
+Downstream repos should not duplicate those public-library `flake-file.inputs.*` declarations manually unless they are intentionally overriding the contract.
+
 ## Interface Rules
 
 - Downstream repos should consume reusable module/profile exports, not repo-local public hosts.

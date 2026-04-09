@@ -13,12 +13,24 @@ Reusable Nix library plus public live host configurations for NixOS, standalone 
 - [flake-parts](https://flake.parts) is used throughout
 - The [dendritic pattern](https://github.com/mightyiam/dendritic) is followed; each Nix file is a standalone flake-parts module
 - The main [`flake.nix`](./flake.nix) is generated using [flake-file](http://github.com/vic/flake-file)
+- Downstream `flake-file` consumers can import `inputs.dendritic-lib.flakeModules.downstream-flake-file` alongside `inputs.flake-file.flakeModules.default` to share the library's reusable flake input contract
 - [import-tree](https://github.com/vic/import-tree) is used within the [modules](./modules/flake-modules.nix)
     - All Nix files in the path are recursively imported, except for any path beginning with `_`, e.g. [`_lib`](./modules/_lib)
     - [Hosts](./modules/hosts/) themselves are also modules. These import other modules, which are groups of configuration the host opts into.
-    - All modules are [outputs](./outputs.nix) of the flake, so that they can be consumed from other flakes.
+    - All modules are outputs of the flake, so that they can be consumed from other flakes.
 - Secrets are managed with [agenix](https://github.com/ryantm/agenix)
 - TODO: Adopt [den](https://github.com/vic/den) to create aspect-based groupings of modules
+
+## Downstream Flake-File Contract
+
+Reusable public `flake-file.inputs.*` declarations live in `modules/_internal/flake-file-inputs/default.nix`.
+That hidden module is exported as `flakeModules.downstream-flake-file` and is imported explicitly by this repo's own flake generation and reusable module surface.
+
+Downstream consumers should use `flakeModules.downstream-flake-file` as the source of truth for the reusable transitive input contract and wire it into their `flake-file` source alongside the base `flake-file` module.
+
+That keeps the public library's reusable transitive inputs in one place and avoids duplicating the contract in downstream repos.
+
+Runtime integrations that consume those inputs live under `modules/integrations/`.
 
 ## Deploying
 
