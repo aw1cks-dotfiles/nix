@@ -159,6 +159,11 @@ in
         };
       };
 
+      home.packages = with pkgs; [
+        starship
+        vivid
+      ];
+
       programs = {
         btop.enable = true;
         carapace.enable = true;
