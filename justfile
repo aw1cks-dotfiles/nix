@@ -1,11 +1,3 @@
-# WORKAROUND: suppress upstream broken-string-indentation warnings from
-# zen-browser-flake until https://github.com/0xc000022070/zen-browser-flake/pull/268 lands.
-nix_config_prefix := if env_var_or_default("NIX_CONFIG", "") == "" {
-  "extra-deprecated-features = broken-string-indentation"
-} else {
-  trim_end(env_var("NIX_CONFIG")) + "\nextra-deprecated-features = broken-string-indentation"
-}
-
 is_wsl := path_exists("/proc/sys/fs/binfmt_misc/WSLInterop")
 is_nixos := path_exists("/run/current-system/nixos-version")
 
@@ -27,7 +19,7 @@ default:
   @just --list --unsorted
 
 rebuild target=".":
-  NIX_CONFIG='{{nix_config_prefix}}' {{rebuild_command}} {{target}}
+  {{rebuild_command}} {{target}}
 
 fix-nix-daemon:
   @set -e; \
