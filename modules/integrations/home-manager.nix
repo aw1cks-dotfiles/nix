@@ -1,16 +1,9 @@
 {
   inputs,
-  lib,
   config,
   ...
 }:
 {
-  flake-file.inputs.home-manager = {
-    url = lib.mkDefault "github:nix-community/home-manager/release-25.11";
-    inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
-  };
-
-  # Expose home-manager CLI as the default app
   perSystem =
     {
       system,
@@ -18,7 +11,7 @@
       ...
     }:
     let
-      updateScript = pkgs.replaceVars ./update-nvidia-version.py {
+      updateScript = pkgs.replaceVars ./files/update-nvidia-version.py {
         nvidiaHostsJson = builtins.toJSON config.flake.homeNvidiaConfigurations;
       };
       nvidiaUpdateScript = pkgs.writeShellApplication {

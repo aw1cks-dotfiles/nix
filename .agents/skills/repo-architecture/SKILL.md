@@ -40,6 +40,8 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - Repo-local hosts belong in this repo's own outputs, not in the reusable module interface consumed downstream.
 - When changing `modules/flake-modules.nix`, preserve a distinction between reusable shared exports and repo-local host imports.
 - If a public host stays in this repo, keep that intent explicit rather than letting it leak through `flakeModules.default` by accident.
+- Keep reusable downstream `flake-file.inputs.*` declarations in `modules/_internal/flake-file-inputs/default.nix` and export that hidden module as `flakeModules.downstream-flake-file`.
+- Because `_internal/*` paths are skipped by `import-tree`, import that hidden module explicitly anywhere the contract must exist, rather than relying on tree recursion.
 
 In other words:
 - this repo may build its own hosts
@@ -58,11 +60,12 @@ In other words:
 
 - Prefer names that describe behavior, not implementation leftovers.
 - Treat existing `packages/*` and `shells/*` modules as feature modules unless they genuinely represent only packages or shells.
+- Prefer `modules/integrations/*` for runtime consumers of flake inputs when the file is not itself the source of truth for `flake-file.inputs.*` declarations.
 - Keep profile files short: imports plus a brief membership comment.
 
 ## Output And Generation Rules
 
-- `flake.nix` is generated. Edit `modules/flake-file.nix` or `outputs.nix`, then regenerate with `nix run .#write-flake`.
+- `flake.nix` is generated. Edit `modules/flake-file.nix`, then regenerate with `nix run .#write-flake`.
 - Prefer editing files under `modules/` and `profiles/` over generated outputs.
 - Keep the exported surface intentionally small and documented.
 

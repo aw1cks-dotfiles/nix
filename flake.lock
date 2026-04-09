@@ -462,7 +462,7 @@
         "narHash": "sha256-bONRPjhk5OZdnkQZexZNJzlvwIPg31Gy7fNiwGoX3BQ=",
         "rev": "bc9fb560ac2d36cd317a856ee96785ea2055fbff",
         "type": "tarball",
-        "url": "https://git.lix.systems/api/v1/repos/lix-project/lix/archive/bc9fb560ac2d36cd317a856ee96785ea2055fbff.tar.gz?rev=bc9fb560ac2d36cd317a856ee96785ea2055fbff"
+        "url": "https://git.lix.systems/api/v1/repos/lix-project/lix/archive/bc9fb560ac2d36cd317a856ee96785ea2055fbff.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -504,11 +504,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1775705124,
-        "narHash": "sha256-OUtgrn0k7DYnAP9skY2rOJSWJyn4w5tnUcF3lSJdfME=",
+        "lastModified": 1775746837,
+        "narHash": "sha256-WrZCxhx82aBBQb6CMJwXimgOIcv9Eytl1zFsjfxiWSc=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "ca76524952b00135dba57da62ce2dd123a1ba4be",
+        "rev": "b91b0e1583091847cf4f8a8fcaad92d66227abfb",
         "type": "github"
       },
       "original": {
@@ -905,11 +905,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775699406,
-        "narHash": "sha256-YpDALorsidLjSyS5ozvsNI7Gz/bkmDs/ls/9oHKPv40=",
+        "lastModified": 1775744672,
+        "narHash": "sha256-Qg3Wnn3WYiiii35CE9kE+XX4ooSFzupAnGC1/NjI5C8=",
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
-        "rev": "b05c87c1a474cdd6979a4e5f7058edf4073554df",
+        "rev": "14a238beb0621977e9bf04cba68919d5650deea9",
         "type": "github"
       },
       "original": {
