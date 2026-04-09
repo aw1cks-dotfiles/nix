@@ -13,6 +13,12 @@ let
       system = pkgs.stdenv.hostPlatform.system;
     in
     {
+      options.repo.lix.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Whether this module should enable the shared Lix overlay and module wiring.";
+      };
+
       options.repo.nixpkgs.enable = lib.mkOption {
         type = lib.types.bool;
         default = true;
@@ -26,7 +32,7 @@ let
             allowUnfreePredicate = _: true;
             nvidia.acceptLicense = true;
           };
-          overlays = [
+          overlays = lib.optional config.repo.lix.enable inputs.lix-module.overlays.default ++ [
             (_final: _prev: {
               unstable = import inputs.nixpkgs-unstable {
                 inherit system;

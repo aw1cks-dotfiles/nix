@@ -54,11 +54,19 @@ in
         {
           lib,
           pkgs,
+          config,
           osConfig ? null,
           ...
         }:
         mkSettingsAdapter {
-          nix.package = lib.mkDefault (if osConfig != null then osConfig.nix.package else pkgs.nix);
+          nix.package = lib.mkDefault (
+            if osConfig != null then
+              osConfig.nix.package
+            else if lib.attrByPath [ "repo" "lix" "enable" ] false config then
+              pkgs.lix
+            else
+              pkgs.nix
+          );
         };
     };
   };

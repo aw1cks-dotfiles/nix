@@ -89,7 +89,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - Make the smallest correct change.
 - Prefer editing files under `modules/` and future `profiles/` trees over generated outputs.
 - If a change affects generated flake output, regenerate `flake.nix` rather than hand-editing it.
-- For any new file that must be evaluated by Nix, ensure it is tracked by git before relying on `nix` commands for validation; untracked files are ignored by flake evaluation.
+- For any new file that must be evaluated by Nix, stage it with git before relying on `nix` commands for validation; untracked files are ignored by flake evaluation, and staged files are the safest default for accurate testing.
 - Prefer exposing maintained operational commands via `nix run .#<name>` or `nix build .#<name>` instead of telling users to run repository-local shell scripts directly.
 - Prefer introducing or consuming profiles instead of expanding repeated host import lists.
 - Prefer mapping `hostFacts.roles` to existing profiles in `modules/roles/defaults.nix` rather than making hosts import repeated role bundles directly.
@@ -99,6 +99,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 ## Verification
 
 - For configuration changes, prefer the narrowest useful validation first.
+- Before running validation for changes that add new Nix files or change generated flake inputs, stage the relevant new files first so evaluation sees the intended source tree.
 - Use `nix flake check` when it meaningfully covers the change.
 - Use `just rebuild` for local apply flows across nix-darwin, NixOS, and standalone Home Manager.
 - On macOS bootstrap flows, preserving `NIX_CONFIG` may be required until managed Nix settings are active.
