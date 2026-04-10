@@ -14,6 +14,11 @@
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
     };
 
+    nix-index-database = {
+      url = lib.mkDefault "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
+    };
+
     nix-darwin = {
       url = lib.mkDefault "github:nix-darwin/nix-darwin/nix-darwin-25.11";
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
