@@ -90,6 +90,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 
 - Make the smallest correct change.
 - Prefer editing files under `modules/` and future `profiles/` trees over generated outputs.
+- Temporary agent prompt files belong in `docs/prompts/`. Treat that directory as the standard scratch location for implementation/review prompts that should not be committed.
 - If a change affects generated flake output, regenerate `flake.nix` rather than hand-editing it.
 - For any new file that must be evaluated by Nix, stage it with git before relying on `nix` commands for validation; untracked files are ignored by flake evaluation, and staged files are the safest default for accurate testing.
 - Prefer exposing maintained operational commands via `nix run .#<name>` or `nix build .#<name>` instead of telling users to run repository-local shell scripts directly.
