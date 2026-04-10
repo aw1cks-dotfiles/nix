@@ -39,10 +39,6 @@
           s5cmd
           step-cli
 
-          # editor & deps
-          neovim
-          tree-sitter
-
           # db
           clickhouse
           etcd

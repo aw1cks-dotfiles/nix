@@ -108,7 +108,6 @@ in
         sessionVariables = {
           CLICOLOR = 1;
           DOCKER_BUILDKIT = 1;
-          EDITOR = "nvim";
           FZF_DEFAULT_OPTS = "--height 30% --layout=reverse";
         };
 
