@@ -31,28 +31,45 @@
         };
 
         opencode = lib.mkOption {
-          type = lib.types.anything;
-          description = "OpenCode home-manager configuration";
+          type = lib.types.submoduleWith {
+            shorthandOnlyDefinesConfig = true;
+            modules = [
+              (
+                { lib, ... }:
+                {
+                  freeformType = lib.types.attrsOf lib.types.anything;
 
-          default = {
-            enable = true;
-            enableMcpIntegration = true;
-            package = pkgs.llm-agents.opencode;
+                  options.skillsSource = lib.mkOption {
+                    type = lib.types.path;
+                    default = ./files/opencode/skills;
+                    description = "Bundled OpenCode skills directory exposed as a stable downstream contract.";
+                  };
 
-            rules = ./files/opencode/AGENTS.md;
+                  config = {
+                    enable = lib.mkDefault true;
+                    enableMcpIntegration = lib.mkDefault true;
+                    package = lib.mkDefault pkgs.llm-agents.opencode;
 
-            settings = {
-              plugin = [ "opencode-gemini-auth@latest" ];
+                    rules = lib.mkDefault ./files/opencode/AGENTS.md;
 
-              permission = {
-                glob = "allow";
-                grep = "allow";
-                list = "allow";
-                lsp = "allow";
-                read = "allow";
-              };
-            };
+                    settings = lib.mkDefault {
+                      plugin = [ "opencode-gemini-auth@latest" ];
+
+                      permission = {
+                        glob = "allow";
+                        grep = "allow";
+                        list = "allow";
+                        lsp = "allow";
+                        read = "allow";
+                      };
+                    };
+                  };
+                }
+              )
+            ];
           };
+          default = { };
+          description = "OpenCode home-manager configuration";
         };
       };
 
@@ -63,13 +80,13 @@
         ];
 
         programs.mcp = cfg.mcp;
-        programs.opencode = cfg.opencode;
+        programs.opencode = builtins.removeAttrs cfg.opencode [ "skillsSource" ];
 
         xdg.configFile = lib.mkIf cfg.opencode.enable {
           # Home Manager release-25.11 does not expose `programs.opencode.skills` yet,
           # so install the skills tree into XDG config until that option lands there.
           "opencode/skills" = {
-            source = ./files/opencode/skills;
+            source = cfg.opencode.skillsSource;
             recursive = true;
           };
         };
