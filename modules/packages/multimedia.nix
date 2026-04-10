@@ -13,6 +13,8 @@
       programs = {
         mpv = {
           enable = true;
+          # stable mpv does not build on Darwin
+          package = pkgs.unstable.mpv;
           defaultProfiles = [
             "high-quality"
           ];
