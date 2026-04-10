@@ -33,6 +33,13 @@ jobs:
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', 'flake.lock') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
+          # Save caches on active refs for faster PR reruns, but purge older
+          # same-ref caches so rebases and follow-up commits do not accumulate.
+          save: true
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-primary-key: never
           gc-max-store-size-linux: 2G
           gc-max-store-size-macos: 2G
       - name: Run flake checks (${{ matrix.system }})
