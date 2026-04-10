@@ -9,6 +9,8 @@
         projectRootFile = "flake.nix";
 
         programs = {
+          shellcheck.enable = true;
+          shfmt.enable = true;
           nixfmt.enable = true;
           taplo.enable = true;
           yamlfmt.enable = true;
