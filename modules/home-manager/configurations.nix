@@ -54,13 +54,10 @@ let
       pins = builtins.fromJSON (builtins.readFile meta.nvidia.pinFile);
     in
     {
-      targets.genericLinux = {
+      targets.genericLinux.gpu.nvidia = {
         enable = true;
-        gpu.nvidia = {
-          enable = true;
-          version = pins.version;
-          sha256 = pins.sha256;
-        };
+        version = pins.version;
+        sha256 = pins.sha256;
       };
     };
 
@@ -196,6 +193,13 @@ in
             inherit resolvedUser resolvedHomeDirectory;
           })
           module
+          # Enable genericLinux for all standalone Linux Home Manager hosts.
+          # This is the home-manager-supported mechanism for non-NixOS PATH,
+          # XDG dirs, and shell integration. The nvidia GPU sub-option is
+          # layered on top only when a pin file is provided.
+          (lib.mkIf (lib.hasSuffix "-linux" system) {
+            targets.genericLinux.enable = true;
+          })
           (lib.mkIf nvidia.enable (nvidiaModuleFor meta))
         ];
       }
