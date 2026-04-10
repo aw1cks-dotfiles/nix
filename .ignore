@@ -1,4 +1,5 @@
 # Ignore patterns used by ripgrep & opencode
 # This is used to exclude temporary prompts from git,
 # but allow opencode to see them
+docs/prompts/.keep
 !docs/prompts/*.md
