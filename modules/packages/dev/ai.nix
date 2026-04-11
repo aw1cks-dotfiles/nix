@@ -61,6 +61,17 @@
                         list = "allow";
                         lsp = "allow";
                         read = "allow";
+                        external_directory = {
+                          "/tmp" = "allow";
+                          "/nix/**" = "allow";
+                          "~/Documents/git/**" = "allow";
+                        };
+                        edit = {
+                          "/nix/**" = "deny";
+                          "~/Documents/git/**" = "ask";
+                        };
+                        "context7_*" = "allow";
+                        "websearch" = "allow";
                       };
                     };
                   };

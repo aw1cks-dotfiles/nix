@@ -6,5 +6,8 @@
       "command": ["uvx", "mcp-nixos"],
       "enabled": true
     }
+  },
+  "permission": {
+    "nix_nix": "allow"
   }
 }
