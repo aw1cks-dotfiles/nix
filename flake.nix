@@ -50,6 +50,10 @@
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    mermaid-rs-renderer = {
+      url = "github:1jehuang/mermaid-rs-renderer";
+      flake = false;
+    };
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
