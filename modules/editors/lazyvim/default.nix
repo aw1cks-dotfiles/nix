@@ -7,6 +7,25 @@
       inherit (cfg) configDir;
       configDirString = toString configDir;
       sqliteLibraryPath = lib.makeLibraryPath [ pkgs.sqlite ];
+      mermaidRendererPackage = import ../../packages/dev/_mermaid.nix {
+        inherit inputs lib;
+      } pkgs;
+      mmdrLightConfig = ./files/mmdr-light.json;
+      mmdrDarkConfig = ./files/mmdr-dark.json;
+      mmdcScript = pkgs.replaceVars ./files/mmdc.sh {
+        mmdrBin = "${mermaidRendererPackage}/bin/mmdr";
+        inherit mmdrDarkConfig mmdrLightConfig;
+      };
+      mmdcWrapper = pkgs.writeShellApplication {
+        name = "mmdc";
+        runtimeInputs = [
+          mermaidRendererPackage
+          pkgs.gawk
+        ];
+        text = ''
+          exec ${pkgs.runtimeShell} ${mmdcScript} "$@"
+        '';
+      };
       ftpluginFiles = builtins.filter (
         file:
         let
@@ -193,6 +212,7 @@
             hadolint
             helm-ls
             impl
+            imagemagick
             jq
             ktlint
             kotlin-language-server
@@ -201,6 +221,7 @@
             markdown-toc
             markdownlint-cli2
             marksman
+            mmdcWrapper
             mercurial
             nixd
             nodejs
@@ -217,11 +238,13 @@
             statix
             stylua
             taplo
+            tectonic
             terraform
             terraform-ls
             trash-cli
             tflint
             tree-sitter
+            mermaidRendererPackage
             stdenv.cc
             ty
             vscode-langservers-extracted
@@ -246,6 +269,7 @@
             kotlin
             latex
             make
+            mermaid
             nix
             perl
             ruby
