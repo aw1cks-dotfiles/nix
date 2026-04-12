@@ -68,6 +68,7 @@
           # misc
           coder
           pandoc
+          tectonic
           fswatch
           lazyjournal
           terraform
