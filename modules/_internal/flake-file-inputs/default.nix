@@ -21,6 +21,11 @@
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
     };
 
+    mermaid-rs-renderer = {
+      url = lib.mkDefault "github:1jehuang/mermaid-rs-renderer";
+      flake = false;
+    };
+
     nix-index-database = {
       url = lib.mkDefault "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";

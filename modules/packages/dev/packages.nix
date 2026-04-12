@@ -1,9 +1,14 @@
 # Core development tools — from nix-upstream/modules/development/default.nix
 # Language-specific tools are in separate modules: ai.nix, containers.nix, java.nix, rust.nix
-{ lib, ... }:
+{ inputs, lib, ... }:
 {
   flake.modules.home.dev-tools =
     { config, pkgs, ... }:
+    let
+      mmdr = import ./_mermaid.nix {
+        inherit inputs lib;
+      } pkgs;
+    in
     {
       home.packages =
         with pkgs;
@@ -11,6 +16,7 @@
           # build tooling
           cmake
           just
+          mmdr
 
           # dotnet
           dotnet-sdk

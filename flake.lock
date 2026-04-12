@@ -557,6 +557,22 @@
         "type": "github"
       }
     },
+    "mermaid-rs-renderer": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773028907,
+        "narHash": "sha256-QrXzfZ4HczY6/dMIHWQtoDoKRJKJ7s4IJFz8UK9yA9Y=",
+        "owner": "1jehuang",
+        "repo": "mermaid-rs-renderer",
+        "rev": "84e95ab1060c8e4957e28150578e3c1c71116bfb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "1jehuang",
+        "repo": "mermaid-rs-renderer",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -666,6 +682,7 @@
         "lix": "lix",
         "lix-module": "lix-module",
         "llm-agents": "llm-agents",
+        "mermaid-rs-renderer": "mermaid-rs-renderer",
         "nix-darwin": "nix-darwin",
         "nix-index-database": "nix-index-database",
         "nixpkgs": "nixpkgs",
