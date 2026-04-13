@@ -19,7 +19,7 @@ Create a normalized entry in `hosts/_facts.nix`:
 }
 ```
 
-For standalone Home Manager hosts, the facts key should match the configuration name such as `"alex@desktop"`.
+For standalone Home Manager hosts, the facts key should match the configuration name and follow `user@host` or `user@host.domain`, such as `"alex@desktop"`.
 
 Keep these out of facts:
 
@@ -39,9 +39,7 @@ Keep host declarations minimal. Constructors fill in shared user and home-direct
 { ... }:
 {
   configurations.darwin.my-host = {
-    system = "aarch64-darwin";
     module = {
-      networking.hostName = "my-host";
       system.stateVersion = 6;
     };
     home = {
@@ -53,9 +51,11 @@ Keep host declarations minimal. Constructors fill in shared user and home-direct
 
 Do not manually import repeated role profiles in host files. Constructors already expand role-derived imports from the matching facts entry and fill in shared user metadata from facts.
 
-For darwin hosts, constructors also default `nixpkgs.hostPlatform` from `hostFacts.system`, so hosts normally do not need to restate it unless they have an unusual override.
+For darwin hosts, constructors also default the top-level constructor `system`, `nixpkgs.hostPlatform`, and `networking.hostName` from shared facts, so hosts normally do not need to restate any of them unless they have an unusual override.
 
-For standalone Home Manager hosts, constructors also default `home.username` and `home.homeDirectory` from facts, so host roots normally only need to keep host-local settings such as `home.stateVersion`.
+For standalone Home Manager hosts, constructors also default the top-level constructor `system`, plus `home.username` and `home.homeDirectory`, from facts, so host roots normally only need to keep host-local settings such as `home.stateVersion`.
+
+For standalone Home Manager hosts, the `user` segment in the configuration attr name must match the resolved constructor user from facts or identity selection.
 
 ## 3. Keep Local Concerns Local
 
@@ -63,7 +63,6 @@ These belong in the host composition root instead of facts:
 
 - local file paths
 - embedded `home` payloads
-- `networking.hostName` assignments
 - NVIDIA enablement and `nvidia.pinFile`
 - other constructor-specific toggles
 

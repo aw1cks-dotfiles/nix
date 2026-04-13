@@ -10,18 +10,20 @@ let
   facts = config.aw1cks.hostFacts;
   roleMappings = config.aw1cks.roles.home;
 
-  extractShortHost =
+  parseHomeConfigName =
     name:
     let
-      match = builtins.match "^[^@]+@([^.]+)(\\..*)?$" name;
+      match = builtins.match "^([^@]+)@([^.]+)(\\..*)?$" name;
     in
     if match == null then
       throw ''
-        configurations.home attribute names must follow user@host or user@host.domain
-        when nvidia.enable = true; got: ${name}
+        configurations.home attribute names must follow user@host or user@host.domain; got: ${name}
       ''
     else
-      builtins.elemAt match 0;
+      {
+        user = builtins.elemAt match 0;
+        shortHost = builtins.elemAt match 1;
+      };
 
   nvidiaArchForSystem =
     system:
@@ -36,14 +38,21 @@ let
     name:
     { system, nvidia, ... }:
     let
-      shortHost = extractShortHost name;
+      parsedName = parseHomeConfigName name;
+      hostFacts = xlib.hostFactsFor {
+        inherit facts name;
+        target = "home";
+      };
+      resolvedSystem = if system != null then system else hostFacts.system;
     in
     {
-      inherit name system shortHost;
+      inherit name;
+      inherit (parsedName) user shortHost;
+      system = resolvedSystem;
       nvidia = {
         enable = nvidia.enable;
         pinFile = if nvidia.enable then nvidia.pinFile else null;
-        arch = if nvidia.enable then nvidiaArchForSystem system else null;
+        arch = if nvidia.enable then nvidiaArchForSystem resolvedSystem else null;
       };
     }
   ) cfg;
@@ -86,8 +95,9 @@ in
             type = lib.types.deferredModule;
           };
           system = lib.mkOption {
-            type = lib.types.str;
-            description = "System string, e.g. x86_64-linux or aarch64-darwin.";
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Optional system string, e.g. x86_64-linux or aarch64-darwin. Defaults from host facts when omitted.";
           };
 
           nvidia = {
@@ -113,7 +123,7 @@ in
       name:
       {
         module,
-        system,
+        system ? null,
         nvidia,
         ...
       }:
@@ -126,14 +136,16 @@ in
         identity = xlib.selectedIdentityFor {
           inherit config hostFacts;
         };
+        resolvedSystem = if system != null then system else hostFacts.system;
         resolvedUser = hostFacts.user or identity.username;
         resolvedHomeDirectory = xlib.resolvedHomeDirectoryFor {
-          inherit hostFacts identity system;
+          inherit hostFacts identity;
+          system = resolvedSystem;
           target = "home-manager";
         };
       in
       inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = inputs.nixpkgs.legacyPackages.${system};
+        pkgs = inputs.nixpkgs.legacyPackages.${resolvedSystem};
         inherit
           (xlib.constructorArgsFor {
             inherit hostFacts;
@@ -144,45 +156,56 @@ in
         modules = [
           (xlib.mkAssertionModule (
             xlib.targetAssertions {
-              inherit name system hostFacts;
+              inherit name hostFacts;
+              system = resolvedSystem;
               target = "home-manager";
-              extra = [
-                {
-                  assertion = duplicateShortHosts == [ ];
-                  message = "Duplicate inferred home short hostnames: ${lib.concatStringsSep ", " duplicateShortHosts}";
+              extra =
+                xlib.validateRolesFor {
+                  allMappings = config.aw1cks.roles;
+                  inherit hostFacts name;
+                  target = "home-manager";
                 }
-                {
-                  assertion = (!nvidia.enable) || lib.hasSuffix "-linux" system;
-                  message = "configurations.home.${name}.nvidia.enable requires a Linux system.";
-                }
-                {
-                  assertion = (!nvidia.enable) || meta.nvidia.pinFile != null;
-                  message = "configurations.home.${name}.nvidia.pinFile is required when nvidia.enable = true.";
-                }
-                {
-                  assertion = (!nvidia.enable) || builtins.pathExists meta.nvidia.pinFile;
-                  message = "configurations.home.${name}.nvidia.pinFile does not exist: ${meta.nvidia.pinFile}";
-                }
-                {
-                  assertion = resolvedUser != null;
-                  message = "configurations.home.${name}: resolved identity username is required for standalone Home Manager hosts.";
-                }
-                {
-                  assertion = resolvedHomeDirectory != null;
-                  message = "configurations.home.${name}: resolved identity homeDirectory is required for standalone Home Manager hosts.";
-                }
-                {
-                  assertion =
-                    (!nvidia.enable)
-                    || (
-                      let
-                        pins = builtins.fromJSON (builtins.readFile meta.nvidia.pinFile);
-                      in
-                      builtins.isAttrs pins && builtins.hasAttr "version" pins && builtins.hasAttr "sha256" pins
-                    );
-                  message = "configurations.home.${name}.nvidia.pinFile must be a JSON object with version and sha256 keys: ${meta.nvidia.pinFile}";
-                }
-              ];
+                ++ [
+                  {
+                    assertion = duplicateShortHosts == [ ];
+                    message = "Duplicate inferred home short hostnames: ${lib.concatStringsSep ", " duplicateShortHosts}";
+                  }
+                  {
+                    assertion = (!nvidia.enable) || lib.hasSuffix "-linux" resolvedSystem;
+                    message = "configurations.home.${name}.nvidia.enable requires a Linux system.";
+                  }
+                  {
+                    assertion = (!nvidia.enable) || meta.nvidia.pinFile != null;
+                    message = "configurations.home.${name}.nvidia.pinFile is required when nvidia.enable = true.";
+                  }
+                  {
+                    assertion = (!nvidia.enable) || builtins.pathExists meta.nvidia.pinFile;
+                    message = "configurations.home.${name}.nvidia.pinFile does not exist: ${meta.nvidia.pinFile}";
+                  }
+                  {
+                    assertion = resolvedUser != null;
+                    message = "configurations.home.${name}: resolved identity username is required for standalone Home Manager hosts.";
+                  }
+                  {
+                    assertion = resolvedUser == null || meta.user == resolvedUser;
+                    message = "configurations.home.${name}: attribute-name user '${meta.user}' must match resolved user '${resolvedUser}'.";
+                  }
+                  {
+                    assertion = resolvedHomeDirectory != null;
+                    message = "configurations.home.${name}: resolved identity homeDirectory is required for standalone Home Manager hosts.";
+                  }
+                  {
+                    assertion =
+                      (!nvidia.enable)
+                      || (
+                        let
+                          pins = builtins.fromJSON (builtins.readFile meta.nvidia.pinFile);
+                        in
+                        builtins.isAttrs pins && builtins.hasAttr "version" pins && builtins.hasAttr "sha256" pins
+                      );
+                    message = "configurations.home.${name}.nvidia.pinFile must be a JSON object with version and sha256 keys: ${meta.nvidia.pinFile}";
+                  }
+                ];
             }
           ))
         ]
@@ -203,7 +226,7 @@ in
           # This is the home-manager-supported mechanism for non-NixOS PATH,
           # XDG dirs, and shell integration. The nvidia GPU sub-option is
           # layered on top only when a pin file is provided.
-          (lib.mkIf (lib.hasSuffix "-linux" system) {
+          (lib.mkIf (lib.hasSuffix "-linux" resolvedSystem) {
             targets.genericLinux.enable = true;
           })
           (lib.mkIf nvidia.enable (nvidiaModuleFor meta))
