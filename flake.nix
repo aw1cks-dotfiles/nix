@@ -7,9 +7,6 @@
     inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
-        ./modules/_schema/host-facts.nix
-        ./modules/_schema/home-nvidia-configurations.nix
-        ./modules/_schema/identity.nix
         (inputs.import-tree ./modules)
         (inputs.import-tree ./hosts)
         ./modules/_internal/flake-file-inputs

@@ -33,6 +33,7 @@ This file applies to the entire public repo.
 - Add `flake.aspects.*` only for narrow cross-cutting machine traits.
 - Do not hand-edit generated outputs when the source of truth is `modules/flake-file.nix`.
 - Reusable downstream `flake-file.inputs.*` declarations belong only in `modules/_internal/flake-file-inputs/default.nix`, exported as `flake.flakeModules.downstream-flake-file`.
+- Keep reusable schema declarations in `modules/schema/` and host constructors in `modules/constructors/` so the normal `import-tree` can discover them without extra underscore-specific wiring.
 - Keep runtime consumers of those inputs in visible modules such as `modules/integrations/*`; do not put runtime app/package/module exports in the hidden flake-file contract module.
 
 ## Host Facts Boundary
@@ -94,7 +95,8 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - If a change affects generated flake output, regenerate `flake.nix` rather than hand-editing it.
 - For any new file that must be evaluated by Nix, stage it with git before relying on `nix` commands for validation; untracked files are ignored by flake evaluation, and staged files are the safest default for accurate testing.
 - Prefer exposing maintained operational commands via `nix run .#<name>` or `nix build .#<name>` instead of telling users to run repository-local shell scripts directly.
-- When changing the downstream flake-file contract, update both `modules/flake-modules.nix` and any explicit imports needed in `modules/flake-file.nix`; `_internal/*` paths are skipped by `import-tree`.
+- When changing the downstream flake-file contract, update `modules/flake-file.nix` and any explicit imports it carries for `modules/_internal/flake-file-inputs`; `_internal/*` paths are skipped by `import-tree`.
+- If a category should be auto-discovered by the normal module tree, prefer a non-underscored path like `modules/schema/` or `modules/constructors/` instead of adding another explicit import-tree exception.
 - Prefer introducing or consuming profiles instead of expanding repeated host import lists.
 - Prefer mapping `hostFacts.roles` to existing profiles in `modules/roles/defaults.nix` rather than making hosts import repeated role bundles directly.
 - When changing constructor assembly, update the docs that describe constructor-owned defaults and helper responsibilities.

@@ -21,7 +21,7 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - Prefer composed bundles in `flake.profiles.{home,nixos,darwin}` when hosts would otherwise repeat long import lists.
 - Add `flake.aspects.*` only for narrow, cross-cutting machine traits such as `generic-linux`, `nvidia`, or `manuals`.
 - Keep shared host facts in `hosts/_facts.nix` and keep composition-only values in host files or constructors.
-- Keep cross-target constructor helpers in `modules/_lib/default.nix` small and contract-focused; do not let them become a second module system.
+- Keep cross-target constructor helpers in `modules/constructors/_lib.nix` small and contract-focused; do not let them become a second module system.
 - For standalone Home Manager NVIDIA hosts, keep driver pins in host-local JSON files such as `hosts/<host>/nvidia.json`; keep the reusable contract and wiring in `modules/home-manager/configurations.nix`.
 
 ## Host Facts Rules
@@ -29,7 +29,7 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - `hosts/_facts.nix` is plain data only, and `hosts/facts.nix` exposes it to the flake.
 - Facts are limited to safe shared metadata such as `system`, `kind`, `roles`, `user`, `homeDirectory`, `hostName`, and tags.
 - Constructors inject `hostFacts` and own automatic role expansion.
-- Constructors share helper logic for host lookup, role expansion, target assertions, baseline imports, and constructor arg wiring through `modules/_lib/default.nix`.
+- Constructors share helper logic for host lookup, role expansion, target assertions, baseline imports, and constructor arg wiring through `modules/constructors/_lib.nix`.
 - Prefer consuming shared facts in constructors instead of repeating the same values in repo-local host declarations.
 - Keep `module`, embedded `home`, local paths, NVIDIA pin file paths, and other composition parameters out of facts.
 - Keep agenix-managed values and any `age.secrets.*` material out of facts.
