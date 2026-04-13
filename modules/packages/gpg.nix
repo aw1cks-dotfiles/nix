@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.modules.home.gpg =
+  aw1cks.modules.home.gpg =
     { pkgs, ... }:
     let
       pinentryPackage = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-tty;

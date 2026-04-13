@@ -1,7 +1,7 @@
 # Container tools — from nix-upstream/modules/development/containers.nix
 { lib, ... }:
 {
-  flake.modules.home.containers =
+  aw1cks.modules.home.containers =
     { pkgs, ... }:
     {
       home.packages =

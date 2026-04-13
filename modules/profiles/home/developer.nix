@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  inherit (config.flake) modules;
+  inherit (config.aw1cks) modules;
 in
 {
-  flake.profiles.home.developer = {
+  aw1cks.profiles.home.developer = {
     # Development toolchain for machines used for software work.
     imports = [
       modules.home.ai

@@ -12,7 +12,7 @@
     }:
     let
       updateScript = pkgs.replaceVars ./files/update-nvidia-version.py {
-        nvidiaHostsJson = builtins.toJSON config.flake.homeNvidiaConfigurations;
+        nvidiaHostsJson = builtins.toJSON config.aw1cks.homeNvidiaConfigurations;
       };
       nvidiaUpdateScript = pkgs.writeShellApplication {
         name = "update-nvidia-version";

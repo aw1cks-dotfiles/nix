@@ -7,8 +7,8 @@
 let
   xlib = import ../_lib/default.nix;
   cfg = config.configurations.home;
-  facts = config.flake.hostFacts;
-  roleMappings = config.flake.roles.home;
+  facts = config.aw1cks.hostFacts;
+  roleMappings = config.aw1cks.roles.home;
 
   extractShortHost =
     name:
@@ -205,6 +205,6 @@ in
       }
     ) cfg;
 
-    flake.homeNvidiaConfigurations = builtins.listToAttrs nvidiaEntries;
+    aw1cks.homeNvidiaConfigurations = builtins.listToAttrs nvidiaEntries;
   };
 }

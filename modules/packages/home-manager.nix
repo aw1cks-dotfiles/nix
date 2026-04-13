@@ -1,10 +1,10 @@
 # Home-manager self-management — migrated from nix-old/modules/home-manager.nix
 { config, ... }:
 {
-  flake.modules.home.home-manager = {
+  aw1cks.modules.home.home-manager = {
     imports = [
-      config.flake.modules.home.nix-index-database
-      config.flake.modules.home.command-not-found
+      config.aw1cks.modules.home.nix-index-database
+      config.aw1cks.modules.home.command-not-found
     ];
 
     programs = {
@@ -14,7 +14,7 @@
         enable = true;
         # We disable these in favour of our own command-not-found implementation.
         # This was done to customise the output format.
-        # See config.flake.modules.home.command-not-found
+        # See config.aw1cks.modules.home.command-not-found
         enableBashIntegration = false;
         enableZshIntegration = false;
       };

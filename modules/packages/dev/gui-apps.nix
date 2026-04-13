@@ -1,6 +1,6 @@
 { inputs, lib, ... }:
 {
-  flake.modules.home.dev-gui-apps =
+  aw1cks.modules.home.dev-gui-apps =
     { pkgs, ... }:
     {
       home.packages =

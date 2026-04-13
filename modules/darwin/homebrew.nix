@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.modules.darwin.homebrew = {
+  aw1cks.modules.darwin.homebrew = {
     security.pam.services.sudo_local.touchIdAuth = true;
 
     homebrew = {

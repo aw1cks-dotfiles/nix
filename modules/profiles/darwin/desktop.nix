@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  inherit (config.flake) modules;
+  inherit (config.aw1cks) modules;
 in
 {
-  flake.profiles.darwin.desktop = {
+  aw1cks.profiles.darwin.desktop = {
     imports = [
       modules.darwin.nix-settings
       modules.darwin.homebrew

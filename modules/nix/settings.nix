@@ -47,7 +47,7 @@ in
       trusted-users = lib.unique config.nix.trustedUsers;
     };
 
-    flake.modules = {
+    aw1cks.modules = {
       nixos.nix-settings = mkSettingsAdapter { };
       darwin.nix-settings = mkSettingsAdapter { };
       home.nix-settings =

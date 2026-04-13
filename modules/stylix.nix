@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.modules.home.stylix-theme =
+  aw1cks.modules.home.stylix-theme =
     { pkgs, ... }:
     {
       stylix = {

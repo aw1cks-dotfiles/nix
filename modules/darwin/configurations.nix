@@ -6,9 +6,9 @@
 }:
 let
   xlib = import ../_lib/default.nix;
-  facts = config.flake.hostFacts;
-  darwinRoleMappings = config.flake.roles.darwin;
-  homeRoleMappings = config.flake.roles.home;
+  facts = config.aw1cks.hostFacts;
+  darwinRoleMappings = config.aw1cks.roles.darwin;
+  homeRoleMappings = config.aw1cks.roles.home;
 in
 {
   options.configurations.darwin = lib.mkOption {

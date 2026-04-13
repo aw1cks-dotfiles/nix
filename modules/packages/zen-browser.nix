@@ -3,7 +3,7 @@
 # The zen-browser home module is imported via inputs in the deferred module.
 { inputs, ... }:
 {
-  flake.modules.home.zen-browser =
+  aw1cks.modules.home.zen-browser =
     {
       config,
       pkgs,

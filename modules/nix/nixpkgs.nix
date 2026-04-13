@@ -46,13 +46,21 @@ let
     };
 in
 {
-  flake.modules.shared.nixpkgs = sharedNixpkgsModule;
+  options.aw1cks.modules.shared = lib.mkOption {
+    type = lib.types.lazyAttrsOf lib.types.deferredModule;
+    default = { };
+    description = "Named shared deferred modules available across targets.";
+  };
 
-  flake.modules.home.nixpkgs =
-    { config, ... }:
-    {
-      imports = [ sharedNixpkgsModule ];
+  config = {
+    aw1cks.modules.shared.nixpkgs = sharedNixpkgsModule;
 
-      repo.nixpkgs.enable = !(config.submoduleSupport.externalPackageInstall or false);
-    };
+    aw1cks.modules.home.nixpkgs =
+      { config, ... }:
+      {
+        imports = [ sharedNixpkgsModule ];
+
+        repo.nixpkgs.enable = !(config.submoduleSupport.externalPackageInstall or false);
+      };
+  };
 }

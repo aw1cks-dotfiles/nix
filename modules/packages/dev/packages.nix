@@ -2,7 +2,7 @@
 # Language-specific tools are in separate modules: ai.nix, containers.nix, java.nix, rust.nix
 { inputs, lib, ... }:
 {
-  flake.modules.home.dev-tools =
+  aw1cks.modules.home.dev-tools =
     { config, pkgs, ... }:
     let
       mmdr = import ./_mermaid.nix {
