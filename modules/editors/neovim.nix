@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.modules.home.neovim =
+  aw1cks.modules.home.neovim =
     { config, pkgs, ... }:
     {
       programs.neovim = {

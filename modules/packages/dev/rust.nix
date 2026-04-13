@@ -1,7 +1,7 @@
 # Rust tooling — from nix-upstream/modules/development/rust.nix
 { pkgs, ... }:
 {
-  flake.modules.home.rust =
+  aw1cks.modules.home.rust =
     { config, pkgs, ... }:
     let
       cargoToml = pkgs.formats.toml { };

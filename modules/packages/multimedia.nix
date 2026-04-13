@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.modules.home.multimedia-apps =
+  aw1cks.modules.home.multimedia-apps =
     { pkgs, ... }:
     {
       home.packages = with pkgs; [

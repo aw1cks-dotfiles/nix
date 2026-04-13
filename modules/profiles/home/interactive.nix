@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  inherit (config.flake) modules;
+  inherit (config.aw1cks) modules;
 in
 {
-  flake.profiles.home.interactive = {
+  aw1cks.profiles.home.interactive = {
     # Interactive shell and identity tooling for human-operated machines.
     imports = [
       modules.home.cli-tools

@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  inherit (config.flake) modules;
+  inherit (config.aw1cks) modules;
 in
 {
-  flake.profiles.home.base = {
+  aw1cks.profiles.home.base = {
     # Minimal Home Manager and Nix plumbing shared by all home hosts.
     imports = [
       modules.home.home-manager

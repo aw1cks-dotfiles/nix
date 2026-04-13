@@ -1,6 +1,6 @@
 { inputs, lib, ... }:
 {
-  flake.modules.home.lazyvim =
+  aw1cks.modules.home.lazyvim =
     { config, pkgs, ... }:
     let
       cfg = config.modules.lazyvim;

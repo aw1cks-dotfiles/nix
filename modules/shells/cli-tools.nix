@@ -1,7 +1,7 @@
 # Shell CLI tools — migrated from nix-old/modules/shell.nix
 { ... }:
 {
-  flake.modules.home.cli-tools =
+  aw1cks.modules.home.cli-tools =
     { pkgs, lib, ... }:
     {
       home.packages =

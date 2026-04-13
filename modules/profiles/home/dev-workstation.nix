@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  inherit (config.flake) profiles;
+  inherit (config.aw1cks) profiles;
 in
 {
-  flake.profiles.home.dev-workstation = {
+  aw1cks.profiles.home.dev-workstation = {
     # Developer graphical workstation.
     imports = [
       profiles.home.base
@@ -14,10 +14,10 @@ in
     ];
   };
 
-  flake.profiles.home.dev-gui = {
+  aw1cks.profiles.home.dev-gui = {
     # Developer-focused GUI applications for interactive workstations.
     imports = [
-      config.flake.modules.home.dev-gui-apps
+      config.aw1cks.modules.home.dev-gui-apps
     ];
   };
 }

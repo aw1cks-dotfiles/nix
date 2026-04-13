@@ -6,8 +6,8 @@
 }:
 let
   xlib = import ../_lib/default.nix;
-  facts = config.flake.hostFacts;
-  roleMappings = config.flake.roles.nixos;
+  facts = config.aw1cks.hostFacts;
+  roleMappings = config.aw1cks.roles.nixos;
 in
 {
   options.configurations.nixos = lib.mkOption {

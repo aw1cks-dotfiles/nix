@@ -75,7 +75,7 @@
       darwin = [
         inputs.agenix.darwinModules.default
         inputs.home-manager.darwinModules.home-manager
-        config.flake.modules.shared.nixpkgs
+        config.aw1cks.modules.shared.nixpkgs
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;

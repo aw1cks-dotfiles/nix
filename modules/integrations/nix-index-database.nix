@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.modules = {
+  aw1cks.modules = {
     home.nix-index-database = inputs.nix-index-database.homeModules.default;
 
     # These are only useful if we want to enable nix-index/command-not-found

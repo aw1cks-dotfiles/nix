@@ -1,7 +1,7 @@
 # GUI applications - migrated from nix-old/modules/gui-apps.nix
 { inputs, lib, ... }:
 {
-  flake.modules.home.gui-apps =
+  aw1cks.modules.home.gui-apps =
     { pkgs, ... }:
     let
       appleColorEmoji = pkgs.stdenvNoCC.mkDerivation {

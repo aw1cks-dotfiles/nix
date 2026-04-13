@@ -29,7 +29,7 @@ let
   '';
 in
 {
-  flake.modules.home.zsh =
+  aw1cks.modules.home.zsh =
     { config, pkgs, ... }:
     let
       clipboardHelpers =

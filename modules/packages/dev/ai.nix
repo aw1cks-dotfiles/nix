@@ -1,7 +1,7 @@
 # AI coding tools — from nix-upstream/modules/development/ai.nix
 { ... }:
 {
-  flake.modules.home.ai =
+  aw1cks.modules.home.ai =
     {
       config,
       pkgs,

@@ -1,6 +1,6 @@
 { lib, ... }:
 {
-  flake.modules.home.vcs =
+  aw1cks.modules.home.vcs =
     { pkgs, ... }:
     let
       user = {
