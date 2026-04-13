@@ -57,9 +57,18 @@ in
         inherit facts name;
         target = "darwin";
       };
-      resolvedUser = if user != null then user else hostFacts.user or null;
+      identity = xlib.selectedIdentityFor {
+        inherit config hostFacts;
+      };
+      resolvedUser = if user != null then user else hostFacts.user or identity.username;
       resolvedHomeDirectory =
-        if homeDirectory != null then homeDirectory else hostFacts.homeDirectory or null;
+        if homeDirectory != null then
+          homeDirectory
+        else
+          xlib.resolvedHomeDirectoryFor {
+            inherit hostFacts identity system;
+            target = "darwin";
+          };
     in
     inputs.nix-darwin.lib.darwinSystem {
       inherit system;
@@ -78,11 +87,11 @@ in
             extra = [
               {
                 assertion = resolvedUser != null;
-                message = "configurations.darwin.${name}: facts user is required for darwin hosts.";
+                message = "configurations.darwin.${name}: resolved identity username is required for darwin hosts.";
               }
               {
                 assertion = resolvedHomeDirectory != null;
-                message = "configurations.darwin.${name}: facts homeDirectory is required for darwin hosts.";
+                message = "configurations.darwin.${name}: resolved identity homeDirectory is required for darwin hosts.";
               }
             ];
           }

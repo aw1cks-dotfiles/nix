@@ -1,11 +1,23 @@
-{ lib, ... }:
+{ lib, config, ... }:
 {
-  aw1cks.modules.home.vcs =
+  options.aw1cks.vcs.identity = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    description = "Optional identity name from aw1cks.identities for Git and Jujutsu.";
+  };
+
+  config.aw1cks.modules.home.vcs =
     { pkgs, ... }:
     let
+      identityName = config.aw1cks.vcs.identity or config.aw1cks.identity.default;
+      identity =
+        if builtins.hasAttr identityName config.aw1cks.identities then
+          config.aw1cks.identities.${identityName}
+        else
+          throw "aw1cks.vcs.identity must be null or reference an entry in aw1cks.identities.";
       user = {
-        name = "Alex Wicks";
-        email = "alex@awicks.io";
+        name = lib.mkDefault identity.fullName;
+        email = lib.mkDefault identity.email;
       };
     in
     {

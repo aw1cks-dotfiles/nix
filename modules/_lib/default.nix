@@ -1,4 +1,4 @@
-{
+rec {
   # Generate a module for both NixOS and darwin from a single config
   mkSystemModule = mod: {
     nixos = mod;
@@ -100,6 +100,47 @@
       home.username = resolvedUser;
       home.homeDirectory = resolvedHomeDirectory;
     };
+
+  defaultHomeDirectoryFor =
+    {
+      system ? null,
+      target ? null,
+      username,
+    }:
+    if target == "darwin" || (system != null && builtins.match ".*-darwin" system != null) then
+      "/Users/${username}"
+    else
+      "/home/${username}";
+
+  selectedIdentityFor =
+    {
+      config,
+      hostFacts,
+    }:
+    let
+      identityName = hostFacts.identity or config.aw1cks.identity.default;
+    in
+    if builtins.hasAttr identityName config.aw1cks.identities then
+      config.aw1cks.identities.${identityName}
+    else
+      throw "aw1cks identity '${identityName}' is not defined in aw1cks.identities.";
+
+  resolvedHomeDirectoryFor =
+    {
+      hostFacts,
+      identity,
+      system ? null,
+      target ? null,
+    }:
+    if hostFacts ? homeDirectory then
+      hostFacts.homeDirectory
+    else if identity.homeDirectory != null then
+      identity.homeDirectory
+    else
+      defaultHomeDirectoryFor {
+        inherit system target;
+        username = identity.username;
+      };
 
   mergeChecks = checks: builtins.foldl' (acc: next: acc // next) { } checks;
 
