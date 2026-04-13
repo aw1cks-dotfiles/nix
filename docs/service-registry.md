@@ -32,7 +32,7 @@ Any future registry should derive from safe shared metadata first.
 
 Primary input:
 
-- `hosts/_facts.nix` as exposed through `config.flake.hostFacts`
+- `hosts/_facts.nix` as exposed through `config.aw1cks.hostFacts`
 
 Possible later inputs, only if a concrete use case appears:
 
@@ -53,13 +53,13 @@ flake.lib.serviceRegistry = {
   services = {
     syncthing = {
       providers = [ "mbp" "alex@desktop" ];
-      roles = [ "desktop" "interactive" ];
+      roles = [ "<role>" ];
     };
   };
 
   hosts = {
     mbp = {
-      roles = [ "desktop" "developer" "interactive" "multimedia" ];
+      roles = [ "<role>" ];
       services = [ "syncthing" ];
     };
   };
@@ -88,7 +88,7 @@ Any future implementation should follow these rules:
 
 Roles and services are related but not identical.
 
-- roles describe host intent such as `desktop`, `developer`, or `interactive`
+- roles describe host intent labels from `hosts/_facts.nix` and the constructor-owned role mapping
 - services describe concrete provided capabilities such as a future `syncthing` or `attic` surface
 
 Roles may inform default service expectations later, but the registry seam should not assume a one-to-one mapping. A role can imply reusable configuration without claiming that every host exposes a user-visible or network-visible service.

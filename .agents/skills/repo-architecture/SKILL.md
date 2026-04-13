@@ -14,6 +14,7 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - Reusable modules and schema live here.
 - Public hosts may also live here, but they should not leak through the reusable interface consumed by downstream flakes.
 - Hosts remain the final composition roots.
+- `docs/architecture.md`, `docs/validation.md`, and `docs/downstream-template.md` are the authoritative human docs. Keep agent guidance additive, not duplicative.
 
 ## Required Composition Pattern
 
@@ -22,7 +23,7 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - Add `flake.aspects.*` only for narrow, cross-cutting machine traits such as `generic-linux`, `nvidia`, or `manuals`.
 - Keep shared host facts in `hosts/_facts.nix` and keep composition-only values in host files or constructors.
 - Keep cross-target constructor helpers in `modules/constructors/_lib.nix` small and contract-focused; do not let them become a second module system.
-- For standalone Home Manager NVIDIA hosts, keep driver pins in host-local JSON files such as `hosts/<host>/nvidia.json`; keep the reusable contract and wiring in `modules/home-manager/configurations.nix`.
+- For standalone Home Manager NVIDIA hosts, keep driver pins in host-local JSON files such as `hosts/<host>/nvidia.json`; keep the reusable contract and wiring in `modules/constructors/home-manager.nix`.
 
 ## Host Facts Rules
 
@@ -38,7 +39,7 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 
 - Shared reusable features belong in the exported library surface.
 - Repo-local hosts belong in this repo's own outputs, not in the reusable module interface consumed downstream.
-- When changing `modules/flake-modules.nix`, preserve a distinction between reusable shared exports and repo-local host imports.
+- When changing `modules/flake-file.nix`, preserve a distinction between reusable shared exports and repo-local host imports.
 - If a public host stays in this repo, keep that intent explicit rather than letting it leak through `flakeModules.default` by accident.
 - Keep reusable downstream `flake-file.inputs.*` declarations in `modules/_internal/flake-file-inputs/default.nix` and export that hidden module as `flakeModules.downstream-flake-file`.
 - Because `_internal/*` paths are skipped by `import-tree`, import that hidden module explicitly anywhere the contract must exist, rather than relying on tree recursion.
@@ -47,14 +48,11 @@ In other words:
 - this repo may build its own hosts
 - downstream repos should inherit shared features, not those host declarations
 
-## Current Direction
+## Design Bias
 
 - Favor adding a profile layer before adding an aspect layer.
-- Keep `flake.modules.*` atomic and move repeated import bundles into `flake.profiles.*`.
-- Map `hostFacts.roles` onto existing profiles centrally in constructor-owned role mappings.
-- Improve validation so active Home Manager configurations are included in `flake.checks`.
-- Normalize the top-level `system` contract across `configurations.home`, `configurations.nixos`, and `configurations.darwin`.
-- For darwin hosts in this repo, preserve the current top-level host contract while allowing host files to consume shared values from `hostFacts`.
+- Keep exported contracts small and explicit.
+- Prefer describing stable shapes and authoritative files over enumerating churn-prone inventories in prose.
 
 ## Naming Guidance
 

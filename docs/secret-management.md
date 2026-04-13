@@ -34,9 +34,9 @@ It complements:
 
 This repo already wires agenix into all three constructor paths:
 
-- NixOS via `modules/nixos/configurations.nix`
-- nix-darwin via `modules/darwin/configurations.nix`
-- standalone Home Manager via `modules/home-manager/configurations.nix`
+- NixOS via `modules/constructors/nixos.nix`
+- nix-darwin via `modules/constructors/darwin.nix`
+- standalone Home Manager via `modules/constructors/home-manager.nix`
 
 Repository tooling should be exposed through flake `apps` or `packages`, not as undocumented ad hoc scripts. This repo already follows that pattern for commands such as `nix run .#write-flake`, `nix run .#home-manager`, `nix run .#darwin`, and `nix run .#update-nvidia-version`.
 

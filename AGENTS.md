@@ -8,6 +8,7 @@ This file applies to the entire public repo.
 
 - This repo is the public reusable Nix library plus a small set of public live host configs.
 - Other flakes may consume this repo as an input, including a separate private corporate repo that layers corporate modules and work hosts on top of the shared library.
+- Authoritative human docs live in `docs/architecture.md`, `docs/adding-a-host.md`, `docs/adding-a-role.md`, `docs/validation.md`, `docs/downstream-template.md`, and `docs/secret-management.md`.
 - `flake.nix` is generated. Do not edit it directly; regenerate with `nix run .#write-flake` when needed.
 - Common workflows are exposed through `just`, especially `just rebuild` and `just update`.
 - Repo-supported automation should be exposed through flake `apps` or `packages`. Avoid introducing raw `scripts/*` entrypoints as the primary interface when the command should be reproducible and discoverable through the flake.
@@ -15,44 +16,19 @@ This file applies to the entire public repo.
 
 ## Load Skills When Relevant
 
-- `.agents/skills/repo-architecture/SKILL.md`: public module boundaries, profiles vs aspects, export-surface rules, generated flake rules, validation expectations.
-- `.agents/skills/host-facts/SKILL.md`: host facts schema, constructor injection, role-default mapping, and facts vs composition vs secrets boundaries.
-- `.agents/skills/downstream-consumer-workflow/SKILL.md`: changes that affect private downstream consumers, including temporary local path overrides from the private repo.
+- Load `.agents/skills/repo-architecture/SKILL.md` for module layout, flake surface, generated flake rules, and validation expectations.
+- Load `.agents/skills/host-facts/SKILL.md` for host facts schema, constructor-owned defaults, and facts vs composition vs secrets boundaries.
+- Load `.agents/skills/downstream-consumer-workflow/SKILL.md` for reusable-contract changes that affect the downstream private repo.
 
-## Architecture Rules
+## Core Rules
 
 - Treat this repo as the shared library layer: reusable modules, profiles, flake schemas, and generic tooling belong here.
 - Public hosts may live here, but they are repo-local outputs, not part of the reusable downstream interface consumed by other flakes.
 - Keep hosts as explicit composition roots.
-- When adding repo-supported tooling, prefer a flake `app` for executable workflows and a flake `package` for reusable build artifacts or wrapped tools.
-- Shared host metadata belongs in `hosts/_facts.nix`; `hosts/facts.nix` exposes it as `config.flake.hostFacts`.
-- Constructors inject `hostFacts` and expand role-derived imports automatically from `hostFacts.roles`.
-- Cross-target constructor helpers live in `modules/_lib/default.nix`; keep them small, contract-focused, and avoid turning them into a second module system.
-- Prefer consuming shared facts in constructors instead of repeating the same values in repo-local host declarations.
+- Prefer flake `apps` and `packages` for supported operational tooling.
+- Keep reusable schema in `modules/schema/`, constructors in `modules/constructors/`, hidden flake-file contract inputs in `modules/_internal/flake-file-inputs/default.nix`, and runtime consumers in visible modules such as `modules/integrations/*`.
 - Prefer `flake.profiles.*` for repeated intent bundles; keep `flake.modules.*` atomic.
-- Add `flake.aspects.*` only for narrow cross-cutting machine traits.
-- Do not hand-edit generated outputs when the source of truth is `modules/flake-file.nix`.
-- Reusable downstream `flake-file.inputs.*` declarations belong only in `modules/_internal/flake-file-inputs/default.nix`, exported as `flake.flakeModules.downstream-flake-file`.
-- Keep reusable schema declarations in `modules/schema/` and host constructors in `modules/constructors/` so the normal `import-tree` can discover them without extra underscore-specific wiring.
-- Keep runtime consumers of those inputs in visible modules such as `modules/integrations/*`; do not put runtime app/package/module exports in the hidden flake-file contract module.
-
-## Host Facts Boundary
-
-- Facts: safe shared metadata such as `system`, `kind`, `roles`, `user`, `homeDirectory`, `hostName`, and tags.
-- Composition: host-local `module` wiring, embedded `home` payloads, local file paths, and NVIDIA pin file paths.
-- Secrets: any agenix-managed value, `age.secrets.*` material, credentials, tokens, private endpoints, and private keys.
-- Never put composition-only values or secrets in `hosts/_facts.nix`.
-- Do not repeat values in host roots when constructors already derive them from facts.
-
-## Export Boundary Rules
-
-- Downstream flakes should consume reusable module/profile exports, not repo-local host declarations.
-- When changing `flakeModules`, preserve a clear separation between shared exports and this repo's own host outputs.
-- Reusable changes should be validated from at least one real downstream consumer when practical.
-
-The key distinction is:
-- this repo can be both a reusable library and a live-config repo for its own public hosts
-- downstream consumers should only inherit the reusable library surface
+- Downstream flakes should consume reusable exports, not repo-local host declarations.
 
 ## Nix MCP
 
@@ -90,26 +66,20 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 ## Editing Guidance
 
 - Make the smallest correct change.
-- Prefer editing files under `modules/` and future `profiles/` trees over generated outputs.
+- Prefer editing files under `modules/`, `hosts/`, and `docs/` rather than generated outputs.
 - Temporary agent prompt files belong in `docs/prompts/`. Treat that directory as the standard scratch location for implementation/review prompts that should not be committed.
-- If a change affects generated flake output, regenerate `flake.nix` rather than hand-editing it.
+- If a change affects generated flake output, update `modules/flake-file.nix` first and regenerate with `nix run .#write-flake`.
+- For bootstrap-only refactors where the generated flake cannot evaluate far enough to regenerate itself, a minimal temporary bridge edit to `flake.nix` is acceptable only until regeneration succeeds.
 - For any new file that must be evaluated by Nix, stage it with git before relying on `nix` commands for validation; untracked files are ignored by flake evaluation, and staged files are the safest default for accurate testing.
 - Prefer exposing maintained operational commands via `nix run .#<name>` or `nix build .#<name>` instead of telling users to run repository-local shell scripts directly.
-- When changing the downstream flake-file contract, update `modules/flake-file.nix` and any explicit imports it carries for `modules/_internal/flake-file-inputs`; `_internal/*` paths are skipped by `import-tree`.
-- If a category should be auto-discovered by the normal module tree, prefer a non-underscored path like `modules/schema/` or `modules/constructors/` instead of adding another explicit import-tree exception.
-- Prefer introducing or consuming profiles instead of expanding repeated host import lists.
-- Prefer mapping `hostFacts.roles` to existing profiles in `modules/roles/defaults.nix` rather than making hosts import repeated role bundles directly.
-- When changing constructor assembly, update the docs that describe constructor-owned defaults and helper responsibilities.
-- For NVIDIA driver bumps, prefer updating host-local JSON pin files rather than editing host modules in place.
+- When changing host facts, constructors, or reusable downstream contracts, rely on the matching skill doc for the detailed workflow instead of duplicating that guidance here.
 
 ## Verification
 
 - For configuration changes, prefer the narrowest useful validation first.
 - Before running validation for changes that add new Nix files or change generated flake inputs, stage the relevant new files first so evaluation sees the intended source tree.
 - Use `nix flake check` when it meaningfully covers the change.
-- Use `just rebuild` for local apply flows across nix-darwin, NixOS, and standalone Home Manager.
-- On macOS bootstrap flows, preserving `NIX_CONFIG` may be required until managed Nix settings are active.
-- nix-darwin and standalone Home Manager constructors now inject `hostFacts` and should be the first place to derive shared defaults like user, home directory, and host platform from facts.
+- Use `just rebuild` or a narrower target-specific command only when the change affects actual configuration behavior.
 - Use `just update` when inputs changed.
 - When changing shared exports or configuration contracts, mention whether downstream consumer validation was performed.
 - Mention clearly if a change was validated only by static inspection and not by a switch/build.
