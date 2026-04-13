@@ -7,7 +7,7 @@
       inherit (cfg) configDir;
       configDirString = toString configDir;
       sqliteLibraryPath = lib.makeLibraryPath [ pkgs.sqlite ];
-      mermaidRendererPackage = import ../../packages/dev/_mermaid.nix {
+      mermaidRendererPackage = import ../../dev/_mermaid.nix {
         inherit inputs lib;
       } pkgs;
       mmdrLightConfig = ./files/mmdr-light.json;
