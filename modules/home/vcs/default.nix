@@ -9,7 +9,11 @@
   config.aw1cks.modules.home.vcs =
     { pkgs, ... }:
     let
-      identityName = config.aw1cks.vcs.identity or config.aw1cks.identity.default;
+      identityName =
+        if config.aw1cks.vcs.identity != null then
+          config.aw1cks.vcs.identity
+        else
+          config.aw1cks.identity.default;
       identity =
         if builtins.hasAttr identityName config.aw1cks.identities then
           config.aw1cks.identities.${identityName}
