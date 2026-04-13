@@ -15,6 +15,11 @@
     };
   };
 
+  flake.templates.default = {
+    path = ../templates/default;
+    description = "Starter downstream flake using dendritic-lib";
+  };
+
   perSystem = {
     apps = {
       write-inputs.meta.description = "Regenerate flake inputs from the flake-file source";
