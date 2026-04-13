@@ -8,7 +8,7 @@ This template is a minimal downstream flake that consumes `dendritic-lib` as a s
 - `hosts/facts.nix`: exposes local host facts through `config.aw1cks.hostFacts`
 - `hosts/_facts.nix`: commented examples for standalone Home Manager and NixOS hosts
 - `hosts/examples.nix`: commented host configuration examples showing how to import layered profiles
-- `modules/org/meta.nix`: example downstream namespace, options, and a second identity
+- `modules/org/meta.nix`: example downstream namespace, options, and an identity extension
 - `modules/org/git.nix`: example of layering repo-local git behavior on top of the shared identity model
 - `modules/org/certificates/ssl.nix`: example of layering an internal CA bundle on top of the shared home-manager stack
 - `modules/org/profiles/home/work.nix`: example downstream profile composed from repo-local modules

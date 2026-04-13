@@ -63,12 +63,9 @@ Never put composition-only values or secrets in `hosts/_facts.nix`.
 
 ## Role Defaults
 
-- Central mapping lives in `modules/roles/defaults.nix` as `config.flake.roles`.
-- Reuse existing `flake.profiles.*` bundles rather than replacing the profile model.
-- Current mappings:
-  - home: always include `profiles.home.base`, then map `developer`, `desktop`, `interactive`, and `multimedia`
-  - darwin: map `desktop` to `profiles.darwin.desktop`
-  - nixos: keep a future-ready empty mapping for constructor consistency
+- Central mapping lives in `modules/roles/defaults.nix` as `config.aw1cks.roles`.
+- Reuse existing profile bundles rather than replacing the profile model.
+- Do not restate the live role inventory in docs or reviews unless the exact mapping is the point of the change. Treat `modules/roles/defaults.nix` and `docs/adding-a-role.md` as authoritative.
 
 ## Override Semantics
 
