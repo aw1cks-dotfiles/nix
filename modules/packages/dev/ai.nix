@@ -46,6 +46,10 @@
                   };
 
                   config = {
+                    agents = lib.mkDefault {
+                      explore = ./files/opencode/agents/explore.md;
+                      general = ./files/opencode/agents/general.md;
+                    };
                     enable = lib.mkDefault true;
                     enableMcpIntegration = lib.mkDefault true;
                     package = lib.mkDefault pkgs.llm-agents.opencode;
@@ -96,6 +100,9 @@
         xdg.configFile = lib.mkIf cfg.opencode.enable {
           # Home Manager release-25.11 does not expose `programs.opencode.skills` yet,
           # so install the skills tree into XDG config until that option lands there.
+          # Agents are wired through `programs.opencode.agents`; Home Manager writes
+          # `opencode/agent/`, which OpenCode still supports as a backwards-compatible
+          # alias for the documented canonical `opencode/agents/` directory.
           "opencode/skills" = {
             source = cfg.opencode.skillsSource;
             recursive = true;
