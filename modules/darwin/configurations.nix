@@ -19,8 +19,9 @@ in
             type = lib.types.deferredModule;
           };
           system = lib.mkOption {
-            type = lib.types.str;
-            description = "System string, e.g. x86_64-darwin or aarch64-darwin.";
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Optional system string, e.g. x86_64-darwin or aarch64-darwin. Defaults from host facts when omitted.";
           };
           user = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
@@ -47,7 +48,7 @@ in
     name:
     {
       module,
-      system,
+      system ? null,
       user ? null,
       homeDirectory ? null,
       home ? null,
@@ -60,18 +61,20 @@ in
       identity = xlib.selectedIdentityFor {
         inherit config hostFacts;
       };
+      resolvedSystem = if system != null then system else hostFacts.system;
       resolvedUser = if user != null then user else hostFacts.user or identity.username;
       resolvedHomeDirectory =
         if homeDirectory != null then
           homeDirectory
         else
           xlib.resolvedHomeDirectoryFor {
-            inherit hostFacts identity system;
+            inherit hostFacts identity;
+            system = resolvedSystem;
             target = "darwin";
           };
     in
     inputs.nix-darwin.lib.darwinSystem {
-      inherit system;
+      system = resolvedSystem;
       inherit
         (xlib.constructorArgsFor {
           inherit hostFacts;
@@ -82,18 +85,25 @@ in
       modules = [
         (xlib.mkAssertionModule (
           xlib.targetAssertions {
-            inherit name system hostFacts;
+            inherit name hostFacts;
+            system = resolvedSystem;
             target = "darwin";
-            extra = [
-              {
-                assertion = resolvedUser != null;
-                message = "configurations.darwin.${name}: resolved identity username is required for darwin hosts.";
+            extra =
+              xlib.validateRolesFor {
+                allMappings = config.aw1cks.roles;
+                inherit hostFacts name;
+                target = "darwin";
               }
-              {
-                assertion = resolvedHomeDirectory != null;
-                message = "configurations.darwin.${name}: resolved identity homeDirectory is required for darwin hosts.";
-              }
-            ];
+              ++ [
+                {
+                  assertion = resolvedUser != null;
+                  message = "configurations.darwin.${name}: resolved identity username is required for darwin hosts.";
+                }
+                {
+                  assertion = resolvedHomeDirectory != null;
+                  message = "configurations.darwin.${name}: resolved identity homeDirectory is required for darwin hosts.";
+                }
+              ];
           }
         ))
       ]
@@ -109,6 +119,7 @@ in
         module
         {
           nixpkgs.hostPlatform = lib.mkDefault hostFacts.system;
+          networking.hostName = lib.mkDefault (hostFacts.hostName or name);
         }
         (lib.mkIf (resolvedUser != null) {
           system.primaryUser = lib.mkDefault resolvedUser;

@@ -28,6 +28,26 @@ rec {
     mappings.base
     ++ builtins.concatLists (map (role: mappings.roles.${role} or [ ]) (hostFacts.roles or [ ]));
 
+  validateRolesFor =
+    {
+      allMappings,
+      hostFacts,
+      target,
+      name,
+    }:
+    let
+      knownRoles = builtins.attrNames (
+        builtins.foldl' (acc: mapping: acc // mapping.roles) { } (builtins.attrValues allMappings)
+      );
+      unknownRoles = builtins.filter (role: !(builtins.elem role knownRoles)) (hostFacts.roles or [ ]);
+    in
+    [
+      {
+        assertion = unknownRoles == [ ];
+        message = "configurations.${target}.${name}: unknown role name(s) in hosts/facts.nix: ${builtins.concatStringsSep ", " unknownRoles}.";
+      }
+    ];
+
   targetAssertions =
     {
       name,
@@ -71,7 +91,11 @@ rec {
       target,
     }:
     {
-      nixos = [ inputs.agenix.nixosModules.default ];
+      nixos = [
+        inputs.agenix.nixosModules.default
+        config.aw1cks.modules.shared.nixpkgs
+      ];
+      nixosEmbedded = [ inputs.stylix.homeModules.stylix ];
       darwin = [
         inputs.agenix.darwinModules.default
         inputs.home-manager.darwinModules.home-manager
