@@ -30,7 +30,10 @@ in
 
       nixos = {
         base = [ ];
-        roles = { };
+        roles = {
+          desktop = [ profiles.nixos.desktop ];
+          server = [ profiles.nixos.server ];
+        };
       };
     };
   };
