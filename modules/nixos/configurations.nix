@@ -8,6 +8,7 @@ let
   xlib = import ../_lib/default.nix;
   facts = config.aw1cks.hostFacts;
   roleMappings = config.aw1cks.roles.nixos;
+  homeRoleMappings = config.aw1cks.roles.home;
 in
 {
   options.configurations.nixos = lib.mkOption {
@@ -132,7 +133,11 @@ in
           home-manager.users.${resolvedUser} = xlib.mkHomeUserModule {
             inherit resolvedUser resolvedHomeDirectory;
             imports =
-              xlib.baseModulesFor {
+              xlib.roleModulesFor {
+                mappings = homeRoleMappings;
+                inherit hostFacts;
+              }
+              ++ xlib.baseModulesFor {
                 inherit inputs config;
                 target = "nixosEmbedded";
               }
