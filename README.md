@@ -14,7 +14,7 @@ Reusable Nix library plus public live host configurations for NixOS, standalone 
 - The [dendritic pattern](https://github.com/mightyiam/dendritic) is followed; each Nix file is a standalone flake-parts module
 - The main [`flake.nix`](./flake.nix) is generated using [flake-file](http://github.com/vic/flake-file)
 - Downstream `flake-file` consumers can import `inputs.dendritic-lib.flakeModules.downstream-flake-file` alongside `inputs.flake-file.flakeModules.default` to share the library's reusable flake input contract
-- [import-tree](https://github.com/vic/import-tree) is used within the [modules](./modules/flake-modules.nix)
+- [import-tree](https://github.com/vic/import-tree) is used within the [modules](./modules/flake-file.nix)
     - All Nix files in the path are recursively imported, except for any path beginning with `_`, e.g. [`_lib`](./modules/_lib)
     - [Hosts](./modules/hosts/) themselves are also modules. These import other modules, which are groups of configuration the host opts into.
     - All modules are outputs of the flake, so that they can be consumed from other flakes.

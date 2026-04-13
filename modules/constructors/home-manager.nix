@@ -5,7 +5,7 @@
   ...
 }:
 let
-  xlib = import ../_lib/default.nix;
+  xlib = import ./_lib.nix;
   cfg = config.configurations.home;
   facts = config.aw1cks.hostFacts;
   roleMappings = config.aw1cks.roles.home;

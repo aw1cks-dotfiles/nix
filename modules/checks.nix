@@ -6,10 +6,21 @@
   ...
 }:
 let
-  xlib = import ./_lib/default.nix;
+  mergeChecks = checks: builtins.foldl' (acc: next: acc // next) { } checks;
+
+  mkPerSystemCheck =
+    {
+      system,
+      name,
+      value,
+    }:
+    {
+      ${system}.${name} = value;
+    };
+
   nixosChecks = lib.mapAttrsToList (name: nixos: {
     ${nixos.config.nixpkgs.hostPlatform.system} =
-      (xlib.mkPerSystemCheck {
+      (mkPerSystemCheck {
         system = nixos.config.nixpkgs.hostPlatform.system;
         name = "nixos-${name}";
         value = nixos.config.system.build.toplevel;
@@ -28,7 +39,7 @@ let
       homeUser = if hasHmUser then hmUser.home.username else "";
       homeDir = if hasHmUser then toString hmUser.home.homeDirectory else "";
     in
-    xlib.mkPerSystemCheck {
+    mkPerSystemCheck {
       inherit system;
       name = "darwin-${name}-eval";
       value = pkgs.writeText "darwin-${name}-eval" ''
@@ -67,7 +78,7 @@ let
         ];
       };
     in
-    xlib.mkPerSystemCheck {
+    mkPerSystemCheck {
       inherit system;
       name = "home-smoke";
       value = smokeHome.activationPackage;
@@ -76,7 +87,7 @@ let
 in
 {
   config.flake.checks = lib.mkMerge (
-    map xlib.mergeChecks [
+    map mergeChecks [
       nixosChecks
       darwinChecks
       homeSmokeChecks

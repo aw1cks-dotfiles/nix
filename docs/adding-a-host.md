@@ -57,6 +57,8 @@ For standalone Home Manager hosts, constructors also default the top-level const
 
 For standalone Home Manager hosts, the `user` segment in the configuration attr name must match the resolved constructor user from facts or identity selection.
 
+The current resolution rules come from `modules/constructors/*.nix`, `modules/constructors/_lib.nix`, and `modules/schema/identity.nix`.
+
 ## 3. Keep Local Concerns Local
 
 These belong in the host composition root instead of facts:

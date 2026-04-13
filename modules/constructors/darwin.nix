@@ -5,39 +5,38 @@
   ...
 }:
 let
-  xlib = import ../_lib/default.nix;
+  xlib = import ./_lib.nix;
   facts = config.aw1cks.hostFacts;
-  roleMappings = config.aw1cks.roles.nixos;
+  darwinRoleMappings = config.aw1cks.roles.darwin;
   homeRoleMappings = config.aw1cks.roles.home;
 in
 {
-  options.configurations.nixos = lib.mkOption {
+  options.configurations.darwin = lib.mkOption {
     type = lib.types.lazyAttrsOf (
       lib.types.submodule {
         options = {
           module = lib.mkOption {
             type = lib.types.deferredModule;
-            description = "The NixOS module for this configuration.";
           };
           system = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
-            description = "Optional system string, e.g. x86_64-linux or aarch64-linux. Defaults from host facts when omitted.";
+            description = "Optional system string, e.g. x86_64-darwin or aarch64-darwin. Defaults from host facts when omitted.";
           };
           user = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
-            description = "User name for embedded Home Manager configuration.";
+            description = "User name for home-manager configuration.";
           };
           homeDirectory = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
-            description = "Home directory for the primary NixOS user and embedded Home Manager config.";
+            description = "Home directory for the primary darwin user and embedded Home Manager config.";
           };
           home = lib.mkOption {
             type = lib.types.nullOr lib.types.deferredModule;
             default = null;
-            description = "Optional Home Manager configuration to embed via the HM NixOS module.";
+            description = "Optional home-manager configuration to embed via the HM darwin module.";
           };
         };
       }
@@ -45,7 +44,7 @@ in
     default = { };
   };
 
-  config.flake.nixosConfigurations = lib.mapAttrs (
+  config.flake.darwinConfigurations = lib.mapAttrs (
     name:
     {
       module,
@@ -57,12 +56,12 @@ in
     let
       hostFacts = xlib.hostFactsFor {
         inherit facts name;
-        target = "nixos";
+        target = "darwin";
       };
-      resolvedSystem = if system != null then system else hostFacts.system;
       identity = xlib.selectedIdentityFor {
         inherit config hostFacts;
       };
+      resolvedSystem = if system != null then system else hostFacts.system;
       resolvedUser = if user != null then user else hostFacts.user or identity.username;
       resolvedHomeDirectory =
         if homeDirectory != null then
@@ -71,15 +70,15 @@ in
           xlib.resolvedHomeDirectoryFor {
             inherit hostFacts identity;
             system = resolvedSystem;
-            target = "nixos";
+            target = "darwin";
           };
     in
-    lib.nixosSystem {
+    inputs.nix-darwin.lib.darwinSystem {
       system = resolvedSystem;
       inherit
         (xlib.constructorArgsFor {
           inherit hostFacts;
-          target = "nixos";
+          target = "darwin";
         })
         specialArgs
         ;
@@ -88,33 +87,33 @@ in
           xlib.targetAssertions {
             inherit name hostFacts;
             system = resolvedSystem;
-            target = "nixos";
+            target = "darwin";
             extra =
               xlib.validateRolesFor {
                 allMappings = config.aw1cks.roles;
                 inherit hostFacts name;
-                target = "nixos";
+                target = "darwin";
               }
               ++ [
                 {
                   assertion = resolvedUser != null;
-                  message = "configurations.nixos.${name}: resolved identity username is required for NixOS hosts.";
+                  message = "configurations.darwin.${name}: resolved identity username is required for darwin hosts.";
                 }
                 {
                   assertion = resolvedHomeDirectory != null;
-                  message = "configurations.nixos.${name}: resolved identity homeDirectory is required for NixOS hosts.";
+                  message = "configurations.darwin.${name}: resolved identity homeDirectory is required for darwin hosts.";
                 }
               ];
           }
         ))
       ]
       ++ xlib.roleModulesFor {
-        mappings = roleMappings;
+        mappings = darwinRoleMappings;
         inherit hostFacts;
       }
       ++ xlib.baseModulesFor {
         inherit inputs config;
-        target = "nixos";
+        target = "darwin";
       }
       ++ [
         module
@@ -123,13 +122,13 @@ in
           networking.hostName = lib.mkDefault (hostFacts.hostName or name);
         }
         (lib.mkIf (resolvedUser != null) {
+          system.primaryUser = lib.mkDefault resolvedUser;
+          nix.settings.trusted-users = lib.mkAfter [ resolvedUser ];
+        })
+        (lib.mkIf (resolvedUser != null && resolvedHomeDirectory != null) {
           users.users.${resolvedUser}.home = lib.mkDefault resolvedHomeDirectory;
         })
         (lib.mkIf (home != null && resolvedUser != null && resolvedHomeDirectory != null) {
-          imports = [ config.aw1cks.modules.nixos-home-manager.default ];
-
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
           home-manager.users.${resolvedUser} = xlib.mkHomeUserModule {
             inherit resolvedUser resolvedHomeDirectory;
             imports =
@@ -139,12 +138,12 @@ in
               }
               ++ xlib.baseModulesFor {
                 inherit inputs config;
-                target = "nixosEmbedded";
+                target = "homeEmbedded";
               }
               ++ [ home ];
           };
         })
       ];
     }
-  ) config.configurations.nixos;
+  ) config.configurations.darwin;
 }

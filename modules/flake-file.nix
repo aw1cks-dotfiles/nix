@@ -5,6 +5,16 @@
     ./_internal/flake-file-inputs
   ];
 
+  flake.flakeModules = {
+    downstream-flake-file = ./_internal/flake-file-inputs;
+    default = {
+      imports = [
+        (inputs.import-tree ./.)
+        ./_internal/flake-file-inputs
+      ];
+    };
+  };
+
   perSystem = {
     apps = {
       write-inputs.meta.description = "Regenerate flake inputs from the flake-file source";
@@ -18,9 +28,6 @@
     outputs = lib.mkDefault ''
       inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } {
         imports = [
-          ./modules/_schema/host-facts.nix
-          ./modules/_schema/home-nvidia-configurations.nix
-          ./modules/_schema/identity.nix
           (inputs.import-tree ./modules)
           (inputs.import-tree ./hosts)
           ./modules/_internal/flake-file-inputs
