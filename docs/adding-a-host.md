@@ -2,18 +2,19 @@
 
 Add hosts in two places:
 
-- `hosts/_facts.nix` for shared metadata
+- `hosts/facts.nix` for shared metadata
 - `hosts/<name>/configuration.nix` for repo-local composition
 
 ## 1. Add Facts
 
-Create a normalized entry in `hosts/_facts.nix`.
+Create a normalized entry in `hosts/facts.nix` under `aw1cks.hostFacts`.
 
 Example darwin host:
 
 ```nix
+{ ... }:
 {
-  my-host = {
+  aw1cks.hostFacts.my-host = {
     system = "aarch64-darwin";
     kind = "darwin";
     roles = [ "<role>" ];
@@ -26,8 +27,9 @@ Example darwin host:
 Example standalone Home Manager host:
 
 ```nix
+{ ... }:
 {
-  "alex@laptop" = {
+  aw1cks.hostFacts."alex@laptop" = {
     system = "x86_64-linux";
     kind = "home-manager";
     roles = [ "<role>" ];
@@ -134,7 +136,7 @@ If the host needs secrets:
 
 - wire them through agenix
 - add `age.secrets.*` declarations in the relevant module layer
-- keep encrypted files and secret values out of `hosts/_facts.nix`
+- keep encrypted files and secret values out of `hosts/facts.nix`
 
 See [`docs/secret-management.md`](./secret-management.md).
 

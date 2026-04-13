@@ -30,7 +30,7 @@ Constructor assertions still matter even when the final check derivation is smal
 
 Examples include:
 
-- missing `hosts/_facts.nix` entries
+- missing `hosts/facts.nix` entries
 - target-kind mismatches
 - system mismatches
 - unknown roles

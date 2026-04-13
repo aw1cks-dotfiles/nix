@@ -1,6 +1,6 @@
 # Adding A Role
 
-Roles are shared intent labels declared in `hosts/_facts.nix`.
+Roles are shared intent labels declared in `hosts/facts.nix`.
 
 In this repo, roles are constructor-owned metadata, not a second module tree. Constructors expand them through the central mapping in `modules/roles/defaults.nix`.
 
@@ -34,7 +34,7 @@ Add the mapping in the target layer where it belongs:
 - `config.aw1cks.roles.darwin`
 - `config.aw1cks.roles.nixos`
 
-Hosts only need the new role label in `hosts/_facts.nix` once the mapping exists.
+Hosts only need the new role label in `hosts/facts.nix` once the mapping exists.
 
 ## 4. Preserve Override Semantics
 
@@ -48,7 +48,7 @@ Unknown roles are treated as constructor assertion failures.
 
 ## 5. Update Facts Entries
 
-After adding the mapping, add the new role string to the relevant hosts in `hosts/_facts.nix`.
+After adding the mapping, add the new role string to the relevant hosts in `hosts/facts.nix`.
 
 ## 6. Document And Validate
 
