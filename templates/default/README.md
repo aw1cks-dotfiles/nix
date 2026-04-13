@@ -5,8 +5,7 @@ This template is a minimal downstream flake that consumes `dendritic-lib` as a s
 ## Layout
 
 - `modules/flake-file.nix`: downstream flake-file source of truth
-- `hosts/facts.nix`: exposes local host facts through `config.aw1cks.hostFacts`
-- `hosts/_facts.nix`: commented examples for standalone Home Manager and NixOS hosts
+- `hosts/facts.nix`: declares local host facts through `config.aw1cks.hostFacts`, with commented examples
 - `hosts/examples.nix`: commented host configuration examples showing how to import layered profiles
 - `modules/org/meta.nix`: example downstream namespace, options, and an identity extension
 - `modules/org/git.nix`: example of layering repo-local git behavior on top of the shared identity model
@@ -29,5 +28,5 @@ This keeps shared library concerns reusable while allowing local repos to add or
 1. Rename or replace the example `org.*` namespace if you want a different downstream-private name.
 2. Update `aw1cks.identities.work` in `modules/org/meta.nix` with real values, or remove it if you only need the default identity.
 3. Add any internal CA certificates and point `org.ssl.extraCertificateFiles` at them.
-4. Uncomment and adapt the example entries in `hosts/_facts.nix` and `hosts/examples.nix`.
+4. Uncomment and adapt the example entries in `hosts/facts.nix` and `hosts/examples.nix`.
 5. Regenerate the top-level `flake.nix` with `nix run .#write-flake` after changing `modules/flake-file.nix`.

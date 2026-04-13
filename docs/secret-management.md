@@ -40,7 +40,7 @@ This repo already wires agenix into all three constructor paths:
 
 Repository tooling should be exposed through flake `apps` or `packages`, not as undocumented ad hoc scripts. This repo already follows that pattern for commands such as `nix run .#write-flake`, `nix run .#home-manager`, `nix run .#darwin`, and `nix run .#update-nvidia-version`.
 
-This document does not put secrets into `hosts/_facts.nix`. Facts remain safe shared metadata only.
+This document does not put secrets into `hosts/facts.nix`. Facts remain safe shared metadata only.
 
 ---
 
@@ -58,13 +58,13 @@ This document does not put secrets into `hosts/_facts.nix`. Facts remain safe sh
 
 This repo separates host metadata, host composition, and secrets.
 
-- `hosts/_facts.nix` contains only safe shared metadata such as `system`, `kind`, `roles`, `user`, `homeDirectory`, and `hostName`
+- `hosts/facts.nix` contains only safe shared metadata such as `system`, `kind`, `roles`, `user`, `homeDirectory`, and `hostName`
 - `hosts/<name>/configuration.nix` contains repo-local host composition
 - agenix wiring is enabled by the shared constructors, not by facts
 - `age.secrets.*` declarations belong in the relevant host or reusable module layer
-- encrypted secret material and recipient inventory should stay outside `hosts/_facts.nix`
+- encrypted secret material and recipient inventory should stay outside `hosts/facts.nix`
 
-Never put any of the following into `hosts/_facts.nix`:
+Never put any of the following into `hosts/facts.nix`:
 
 - secret values
 - private keys
@@ -390,7 +390,7 @@ Add a host to this repo first, then add secret recipients only where needed.
 
 Follow [`docs/adding-a-host.md`](./adding-a-host.md):
 
-- add host metadata to `hosts/_facts.nix`
+- add host metadata to `hosts/facts.nix`
 - add the host composition root under `hosts/<name>/configuration.nix`
 - keep facts and composition concerns separate
 
@@ -450,7 +450,7 @@ For standalone Home Manager, only do this if you actually want machine-readable 
 
 Record the host public key in whatever recipient inventory structure you adopt, then add it only to the secrets that host needs.
 
-Keep this inventory outside `hosts/_facts.nix`.
+Keep this inventory outside `hosts/facts.nix`.
 
 ### 5. Re-key the Affected Secrets
 
@@ -467,7 +467,7 @@ Declare `age.secrets.*` in the appropriate module layer:
 - reusable module when the secret contract is shared
 - host module when the secret is host-specific
 
-Do not place these declarations in `hosts/_facts.nix`.
+Do not place these declarations in `hosts/facts.nix`.
 
 ### 7. Deploy or Rebuild
 
@@ -510,7 +510,7 @@ This repo already includes agenix in the shared darwin constructor. Host SSH rec
 
 ### Standalone Home Manager
 
-This repo's standalone Home Manager hosts are keyed by configuration names such as `"alex@desktop"` and derive shared metadata from `hosts/_facts.nix`.
+This repo's standalone Home Manager hosts are keyed by configuration names such as `"alex@desktop"` and derive shared metadata from `hosts/facts.nix`.
 
 For this target, the least-privilege default is often:
 
@@ -641,7 +641,6 @@ One reasonable layout would be:
 ```text
 repo/
 ├── hosts/
-│   ├── _facts.nix
 │   ├── facts.nix
 │   └── <hostname>/configuration.nix
 ├── modules/

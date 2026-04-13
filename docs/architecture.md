@@ -31,7 +31,7 @@ The hidden `modules/_internal/flake-file-inputs/default.nix` file is the reusabl
 - `modules/shared/`: cross-target reusable modules
 - `modules/home/`, `modules/darwin/`, `modules/nixos/`: target-specific reusable modules and profiles
 - `modules/roles/defaults.nix`: role-to-profile mapping used by constructors
-- `hosts/_facts.nix`: normalized shared host metadata
+- `hosts/facts.nix`: normalized shared host metadata module
 - `hosts/<name>/configuration.nix`: repo-local host composition roots
 
 ## Shared Namespaces
@@ -42,7 +42,7 @@ The important parts are:
 
 - `aw1cks.modules.<target>.*`: atomic reusable modules
 - `aw1cks.profiles.<target>.*`: reusable bundles built from those modules
-- `aw1cks.hostFacts`: normalized host metadata imported from `hosts/_facts.nix`
+- `aw1cks.hostFacts`: normalized host metadata declared in `hosts/facts.nix`
 - `aw1cks.identities`: named identity registry
 - `aw1cks.identity.default` and `aw1cks.identity.selected`: default identity selection
 - `aw1cks.roles`: constructor-owned role mapping
@@ -72,7 +72,7 @@ That means shared identity data can provide usernames and home directories witho
 
 ## Host Facts
 
-`hosts/_facts.nix` is plain data exposed through `hosts/facts.nix` as `aw1cks.hostFacts`.
+`hosts/facts.nix` declares `aw1cks.hostFacts` directly as a module option value.
 
 Required fields per host:
 
@@ -132,7 +132,7 @@ Constructors do not interpret those labels ad hoc. They consult the central mapp
 
 The stable contract is:
 
-- hosts declare roles once in `hosts/_facts.nix`
+- hosts declare roles once in `hosts/facts.nix`
 - constructors expand those roles before host-local modules
 - host-local modules still override through normal module ordering
 
