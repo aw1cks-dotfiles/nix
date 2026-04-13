@@ -123,8 +123,14 @@ in
           inherit facts name;
           target = "home";
         };
-        resolvedUser = hostFacts.user or null;
-        resolvedHomeDirectory = hostFacts.homeDirectory or null;
+        identity = xlib.selectedIdentityFor {
+          inherit config hostFacts;
+        };
+        resolvedUser = hostFacts.user or identity.username;
+        resolvedHomeDirectory = xlib.resolvedHomeDirectoryFor {
+          inherit hostFacts identity system;
+          target = "home-manager";
+        };
       in
       inputs.home-manager.lib.homeManagerConfiguration {
         pkgs = inputs.nixpkgs.legacyPackages.${system};
@@ -159,11 +165,11 @@ in
                 }
                 {
                   assertion = resolvedUser != null;
-                  message = "configurations.home.${name}: facts user is required for standalone Home Manager hosts.";
+                  message = "configurations.home.${name}: resolved identity username is required for standalone Home Manager hosts.";
                 }
                 {
                   assertion = resolvedHomeDirectory != null;
-                  message = "configurations.home.${name}: facts homeDirectory is required for standalone Home Manager hosts.";
+                  message = "configurations.home.${name}: resolved identity homeDirectory is required for standalone Home Manager hosts.";
                 }
                 {
                   assertion =

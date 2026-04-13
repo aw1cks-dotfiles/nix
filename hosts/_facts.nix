@@ -8,8 +8,7 @@
       "interactive"
       "multimedia"
     ];
-    user = "alex";
-    homeDirectory = "/Users/alex";
+    identity = "personal";
     hostName = "mbp";
   };
 
@@ -22,8 +21,7 @@
       "interactive"
       "multimedia"
     ];
-    user = "alex";
-    homeDirectory = "/home/alex";
+    identity = "personal";
     tags = [ "nvidia" ];
   };
 }
