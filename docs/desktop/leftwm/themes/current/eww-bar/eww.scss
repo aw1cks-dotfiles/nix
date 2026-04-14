@@ -1,0 +1,68 @@
+* {
+  all: unset; //Unsets everything so you can style everything from scratch
+}
+
+//Global Styles
+.bar1, .bar2 {
+  color: #fff;
+  background: rgba(68, 14, 99, .25);
+  // text-shadow: 4px 4px #0f0f0f;
+  padding: 3px;
+}
+
+// Styles on classes (see eww.yuck for more information)
+
+.sidestuff slider {
+  all: unset;
+  font-size: large;
+  color: #ffffff;
+  text-shadow: 4px 4px #0f0f0f;
+}
+
+.metric scale trough highlight {
+  all: unset;
+  background-color: #D35D6E;
+  color: #000000;
+  border-radius: 10px;
+}
+.metric scale trough {
+  all: unset;
+  background-color: #4e4e4e;
+  border-radius: 50px;
+  min-height: 3px;
+  min-width: 50px;
+  margin-left: 10px;
+  margin-right: 20px;
+}
+.metric scale trough highlight {
+  all: unset;
+  background-color: #436399;
+  color: #000000;
+  border-radius: 10px;
+}
+.metric scale trough {
+  all: unset;
+  background-color: #4e4e4e;
+  border-radius: 50px;
+  min-height: 3px;
+  min-width: 50px;
+  margin-left: 10px;
+  margin-right: 20px;
+}
+.workspaces button:hover {
+  color: #7c8fcf;
+}
+.ws-button-mine {
+  color: #e3e3e3;
+  font-weight: bold;
+}
+.ws-button-visible {
+  color: #e3e3e3;
+}
+.ws-button-busy {
+  color: #a3a3a3;
+  //text-shadow: 4px 4px #d4d4d4;
+}
+.ws-button {
+  color: #757575;
+}
