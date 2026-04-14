@@ -191,7 +191,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 
 ### Stream A. Shared NixOS Foundation
 
-- [ ] Extend identity schema to carry public SSH authorized keys.
+- [x] Extend identity schema to carry public SSH authorized keys.
 - [ ] Add a common NixOS user realization module.
 - [ ] Add central shell policy selection for desktop vs server behavior.
 - [ ] Implement the initial server shell policy wiring for plain `bash`.
@@ -749,8 +749,12 @@ Expected outcomes:
 - real NixOS module vocabulary under `aw1cks.modules.nixos.*`
 - `aw1cks.profiles.nixos.desktop`
 - `aw1cks.profiles.nixos.server`
-- identity extension for public SSH keys
+- identity extension for public SSH keys (completed in `modules/schema/identity.nix` and reflected in the downstream template)
 - common NixOS user realization module
+
+Status note:
+
+- A1 is complete. Validation for this slice used in-repo evaluation paths only; the downstream template was treated as reference material rather than a ready-to-evaluate consumer.
 
 ### Stream B. Provisioning And Bootstrap
 
