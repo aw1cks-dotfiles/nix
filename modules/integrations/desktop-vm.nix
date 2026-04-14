@@ -1,0 +1,39 @@
+{ lib, config, ... }:
+{
+  perSystem =
+    { system, pkgs, ... }:
+    lib.mkIf pkgs.stdenv.isLinux {
+      packages.desktop-vm =
+        (config.flake.nixosConfigurations.desktop.extendModules {
+          modules = [
+            {
+              virtualisation.vmVariant = {
+                virtualisation = {
+                  memorySize = 8192;
+                  cores = 4;
+                  graphics = true;
+                };
+              };
+
+              services.displayManager.autoLogin.enable = false;
+
+              # VM proof is for Ly/Niri/session behavior, not bare-metal storage.
+              fileSystems."/" = lib.mkForce {
+                device = "tmpfs";
+                fsType = "tmpfs";
+                options = [ "mode=755" ];
+              };
+
+              fileSystems."/boot" = lib.mkForce {
+                device = "tmpfs";
+                fsType = "tmpfs";
+                options = [ "mode=755" ];
+              };
+
+              boot.loader.systemd-boot.enable = lib.mkForce false;
+              boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
+            }
+          ];
+        }).config.system.build.vm;
+    };
+}

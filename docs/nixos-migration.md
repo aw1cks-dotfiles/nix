@@ -212,11 +212,19 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 
 #### C0. VM Proving
 
-- [ ] Choose the repo representation for the `desktop` VM proving path.
+- [x] Choose the repo representation for the `desktop` VM proving path.
 - [ ] Bring up the initial `desktop` graphical stack in a VM-oriented path.
 - [ ] Validate preferred `ly + niri` session behavior in the VM path, or take the documented `greetd` fallback.
 - [ ] Validate terminal launch, browser launch, and basic desktop workflow in the VM path.
 - [ ] Record the bare-metal-only gaps that remain after VM proof, especially NVIDIA and host-specific hardware behavior.
+
+Representation decision:
+
+- use a repo-local `perSystem.packages.desktop-vm` target derived from `configurations.nixos.desktop`
+- keep `desktop` as the single canonical host composition root
+- layer VM-only concerns on top of that host through `extendModules`
+- do not introduce a temporary VM host in `hosts/facts.nix`
+- a launch app can be added later if the package alone proves too awkward, but the package target is the first-class proving surface
 
 #### C1. Base OS
 
