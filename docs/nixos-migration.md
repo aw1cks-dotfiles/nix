@@ -224,7 +224,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 - [x] Declare `configurations.nixos.desktop` in `hosts/desktop/configuration.nix` alongside the existing standalone Home Manager host during migration.
 - [x] Add `hosts/desktop/hardware-configuration.nix`.
 - [x] Add `hosts/desktop/disko.nix`.
-- [ ] Evaluate whether a close `nixos-hardware` profile exists for `desktop`.
+- [x] Evaluate whether a close `nixos-hardware` profile exists for `desktop`.
 - [ ] Add the initial `desktop` GPU/hardware path.
 - [ ] Add `ly` as the first planned display manager.
 - [ ] Add host-local `niri` session wiring.
@@ -638,6 +638,20 @@ Policy:
 - if not, the host should proceed with local hardware configuration and a minimal local NVIDIA baseline
 - `nixos-hardware` does not replace host-local ownership of `hardware-configuration.nix`, `disko`, session setup, or compositor choices
 
+Decision for `desktop`:
+
+- no sufficiently close board-specific `nixos-hardware` profile was found for the machine
+- current known hardware: Gigabyte Aorus X570 Xtreme motherboard, AMD Ryzen 9 5950X CPU, NVIDIA RTX 3090 GPU
+- use additive generic upstream modules instead of a board-specific profile
+- accepted initial additive set:
+  - `common-pc`
+  - `common-pc-ssd`
+  - `common-cpu-amd`
+  - `common-cpu-amd-pstate`
+  - `common-gpu-nvidia-nonprime`
+  - `common/gpu/nvidia/ampere`
+- host-local ownership remains responsible for `hardware-configuration.nix`, `disko`, session setup, compositor choices, and any NVIDIA details not covered by the generic modules
+
 ### Host-Local Ownership For `desktop`
 
 These concerns should remain under `hosts/desktop/`:
@@ -855,6 +869,10 @@ If yes:
 If no:
 
 - proceed with local hardware and minimal NVIDIA support
+
+Resolution:
+
+- no close board-specific upstream profile exists for `desktop`, but the gate is satisfied by importing the accepted generic AMD/NVIDIA/common PC modules additively
 
 ### Shell Policy Gate
 
