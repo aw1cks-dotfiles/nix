@@ -227,7 +227,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 - [x] Evaluate whether a close `nixos-hardware` profile exists for `desktop`.
 - [x] Add the initial `desktop` GPU/hardware path.
 - [x] Add `ly` as the first planned display manager.
-- [ ] Add host-local `niri` session wiring.
+- [x] Add host-local `niri` session wiring.
 - [ ] Validate successful graphical boot with `ly + niri`, or switch to the documented `greetd` fallback if the Ly gate fails.
 - [ ] Validate terminal launch, browser launch, and audio.
 
@@ -613,6 +613,14 @@ Rationale:
 - `desktop` is the only confirmed NixOS Wayland desktop host in scope
 - `desktop` profile should mean desktop-capable baseline, not a hardcoded compositor choice
 - the compositor abstraction can be promoted later if repeated by another host
+
+Current landing for `desktop`:
+
+- host-local module: `hosts/desktop/niri.nix`
+- enables `programs.niri`
+- enables polkit and XDG portal wiring needed for a usable Wayland session
+- adds `xwayland-satellite` for XWayland application support
+- routes portal file chooser requests to GTK to avoid requiring Nautilus in the initial host path
 
 ### Display Manager
 
