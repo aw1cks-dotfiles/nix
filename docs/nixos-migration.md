@@ -225,7 +225,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 - [x] Add `hosts/desktop/hardware-configuration.nix`.
 - [x] Add `hosts/desktop/disko.nix`.
 - [x] Evaluate whether a close `nixos-hardware` profile exists for `desktop`.
-- [ ] Add the initial `desktop` GPU/hardware path.
+- [x] Add the initial `desktop` GPU/hardware path.
 - [ ] Add `ly` as the first planned display manager.
 - [ ] Add host-local `niri` session wiring.
 - [ ] Validate successful graphical boot with `ly + niri`, or switch to the documented `greetd` fallback if the Ly gate fails.
@@ -651,6 +651,13 @@ Decision for `desktop`:
   - `common-gpu-nvidia-nonprime`
   - `common/gpu/nvidia/ampere`
 - host-local ownership remains responsible for `hardware-configuration.nix`, `disko`, session setup, compositor choices, and any NVIDIA details not covered by the generic modules
+
+Initial local NVIDIA baseline for `desktop`:
+
+- reusable module: `aw1cks.modules.nixos.nvidia`
+- imported additively by `hosts/desktop/configuration.nix`
+- enables NVIDIA video driver selection, Wayland-compatible modesetting, CUDA cache, 32-bit graphics support, VA-API/Vulkan packages, and basic NVIDIA tooling
+- keeps bus-ID/PRIME laptop policy out of scope because `desktop` is a discrete-GPU machine using the non-PRIME path
 
 ### Host-Local Ownership For `desktop`
 
