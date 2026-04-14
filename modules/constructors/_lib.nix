@@ -79,6 +79,7 @@ rec {
     }:
     {
       nixos = [
+        inputs.disko.nixosModules.disko
         inputs.agenix.nixosModules.default
         config.aw1cks.modules.shared.nixpkgs
       ];

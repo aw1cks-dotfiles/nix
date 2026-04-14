@@ -9,7 +9,7 @@
       imports = [
         inputs.dendritic-lib.flakeModules.default
         (inputs.import-tree ./modules)
-        (inputs.import-tree ./hosts)
+        ./hosts
       ];
     };
 
@@ -20,6 +20,10 @@
         home-manager.follows = "home-manager";
         nixpkgs.follows = "nixpkgs";
       };
+    };
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     dendritic-lib = {
       url = "github:aw1cks-dotfiles/nix";

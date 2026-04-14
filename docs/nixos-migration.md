@@ -221,9 +221,9 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 #### C1. Base OS
 
 - [x] Add `desktop` to `hosts/facts.nix` as a NixOS host.
-- [ ] Declare `configurations.nixos.desktop` in `hosts/desktop/configuration.nix` alongside the existing standalone Home Manager host during migration.
-- [ ] Add `hosts/desktop/hardware-configuration.nix`.
-- [ ] Add `hosts/desktop/disko.nix`.
+- [x] Declare `configurations.nixos.desktop` in `hosts/desktop/configuration.nix` alongside the existing standalone Home Manager host during migration.
+- [x] Add `hosts/desktop/hardware-configuration.nix`.
+- [x] Add `hosts/desktop/disko.nix`.
 - [ ] Evaluate whether a close `nixos-hardware` profile exists for `desktop`.
 - [ ] Add the initial `desktop` GPU/hardware path.
 - [ ] Add `ly` as the first planned display manager.

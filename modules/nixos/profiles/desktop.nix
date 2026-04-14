@@ -7,11 +7,12 @@ in
     # Keep the desktop bundle thin: shared NixOS runtime first, host-local graphics later.
     imports = [
       modules.nixos.boot
+      modules.nixos.efi
       modules.nixos.latest-kernel
       modules.nixos.network
       modules.nixos.pipewire
+      modules.nixos.systemd-boot
       modules.nixos.wayland
-      modules.nixos.lix
       modules.nixos.nix-settings
     ];
 

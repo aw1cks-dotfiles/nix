@@ -9,6 +9,11 @@
       };
     };
 
+    disko = {
+      url = lib.mkDefault "github:nix-community/disko";
+      inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
+    };
+
     home-manager = {
       url = lib.mkDefault "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
