@@ -192,9 +192,9 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 ### Stream A. Shared NixOS Foundation
 
 - [x] Extend identity schema to carry public SSH authorized keys.
-- [ ] Add a common NixOS user realization module.
-- [ ] Add central shell policy selection for desktop vs server behavior.
-- [ ] Implement the initial server shell policy wiring for plain `bash`.
+- [x] Add a common NixOS user realization module.
+- [x] Add central shell policy selection for desktop vs server behavior.
+- [x] Implement the initial server shell policy wiring for plain `bash`.
 - [ ] Populate `aw1cks.profiles.nixos.desktop` beyond its current placeholder bundle.
 - [ ] Populate `aw1cks.profiles.nixos.server` beyond its current minimal bundle.
 - [ ] Add reusable NixOS module atoms for boot, networking, security, audio, and user policy.
@@ -750,11 +750,14 @@ Expected outcomes:
 - `aw1cks.profiles.nixos.desktop`
 - `aw1cks.profiles.nixos.server`
 - identity extension for public SSH keys (completed in `modules/schema/identity.nix` and reflected in the downstream template)
-- common NixOS user realization module
+- common NixOS user realization module (completed in `modules/nixos/user/default.nix` and wired through the NixOS constructor)
+- central shell policy selection (completed in `modules/nixos/user/shell-policy.nix` with profile-owned defaults for desktop vs server)
 
 Status note:
 
 - A1 is complete. Validation for this slice used in-repo evaluation paths only; the downstream template was treated as reference material rather than a ready-to-evaluate consumer.
+- A2 is complete. The shared NixOS user module now owns primary-user creation, bash as the current baseline shell, baseline `wheel` access, and authorized keys from the selected identity.
+- A3 is complete. `aw1cks.user.shellPolicy` now selects the primary NixOS user shell centrally, with `server` defaulting to plain `bash` and `desktop` defaulting to `zsh`.
 
 ### Stream B. Provisioning And Bootstrap
 

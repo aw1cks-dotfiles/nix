@@ -124,6 +124,8 @@ They all:
 
 The shared helper file `modules/constructors/_lib.nix` is intentionally small. It centralizes repeated constructor policy such as facts lookup, role expansion, target assertions, baseline imports, and user/home resolution.
 
+The shared primary-user realization for NixOS lives in `modules/nixos/user/default.nix`. The NixOS constructor resolves identity, username, and home directory first, then passes those resolved values into that reusable module.
+
 ## Role Expansion
 
 Roles are labels in `hostFacts.roles`.
@@ -152,6 +154,7 @@ Unknown role names fail constructor assertions during evaluation.
 
 - hosts can provide an optional embedded `home` payload
 - when present, the constructor imports the Home Manager NixOS module through `aw1cks.modules.nixos-home-manager.default`
+- the shared primary-user module imports `aw1cks.modules.nixos.user-shell-policy`, and profiles can set `aw1cks.user.shellPolicy` to choose the resolved login shell centrally
 
 `configurations.darwin` is for nix-darwin systems.
 
