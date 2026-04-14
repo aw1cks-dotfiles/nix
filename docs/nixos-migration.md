@@ -213,7 +213,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 #### C0. VM Proving
 
 - [x] Choose the repo representation for the `desktop` VM proving path.
-- [ ] Bring up the initial `desktop` graphical stack in a VM-oriented path.
+- [x] Bring up the initial `desktop` graphical stack in a VM-oriented path.
 - [ ] Validate preferred `ly + niri` session behavior in the VM path, or take the documented `greetd` fallback.
 - [ ] Validate terminal launch, browser launch, and basic desktop workflow in the VM path.
 - [ ] Record the bare-metal-only gaps that remain after VM proof, especially NVIDIA and host-specific hardware behavior.
@@ -224,7 +224,15 @@ Representation decision:
 - keep `desktop` as the single canonical host composition root
 - layer VM-only concerns on top of that host through `extendModules`
 - do not introduce a temporary VM host in `hosts/facts.nix`
-- a launch app can be added later if the package alone proves too awkward, but the package target is the first-class proving surface
+- expose both a repo-local package and a launch app:
+  - `packages.desktop-vm`
+  - `apps.desktop-vm`
+
+Current VM proving surface:
+
+- `nix build .#desktop-vm` builds the VM runner derived from `desktop`
+- `nix run .#desktop-vm -- --help` resolves and dispatches to the generated QEMU launcher
+- the VM path intentionally proves the graphical stack shape without claiming bare-metal NVIDIA, disk, or hardware parity
 
 #### C1. Base OS
 
