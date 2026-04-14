@@ -197,7 +197,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 - [x] Implement the initial server shell policy wiring for plain `bash`.
 - [x] Populate `aw1cks.profiles.nixos.desktop` beyond its current placeholder bundle.
 - [x] Populate `aw1cks.profiles.nixos.server` beyond its current minimal bundle.
-- [ ] Add reusable NixOS module atoms for boot, networking, security, audio, and user policy.
+- [x] Add reusable NixOS module atoms for boot, networking, security, audio, and user policy.
 
 ### Stream B. Provisioning And Bootstrap
 
@@ -760,6 +760,7 @@ Status note:
 - A3 is complete. `aw1cks.user.shellPolicy` now selects the primary NixOS user shell centrally, with `server` defaulting to plain `bash` and `desktop` defaulting to `zsh`.
 - A4a is complete. `aw1cks.profiles.nixos.desktop` is now a real bundle with the shared NixOS runtime baseline plus the desktop shell-policy default, leaving graphics, audio, and display-manager concerns for later host-focused slices.
 - A4b is complete. `aw1cks.profiles.nixos.server` now imports a shared `aw1cks.modules.nixos.server-security` baseline that establishes the first reusable WAN-facing SSH posture: OpenSSH on `222`, `endlessh` on `22`, password login disabled, and root login disabled.
+- A4c is complete. The shared NixOS atom surface now includes boot, kernel selection, systemd-boot/EFI, network baseline, PipeWire audio, and Wayland environment modules, with conservative wiring into the desktop/server profiles.
 
 ### Stream B. Provisioning And Bootstrap
 
