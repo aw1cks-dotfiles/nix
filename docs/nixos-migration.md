@@ -226,7 +226,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 - [x] Add `hosts/desktop/disko.nix`.
 - [x] Evaluate whether a close `nixos-hardware` profile exists for `desktop`.
 - [x] Add the initial `desktop` GPU/hardware path.
-- [ ] Add `ly` as the first planned display manager.
+- [x] Add `ly` as the first planned display manager.
 - [ ] Add host-local `niri` session wiring.
 - [ ] Validate successful graphical boot with `ly + niri`, or switch to the documented `greetd` fallback if the Ly gate fails.
 - [ ] Validate terminal launch, browser launch, and audio.
@@ -625,6 +625,12 @@ Fallback path:
 - switch to `greetd` if Ly cannot provide reliable enough session behavior for `niri`
 
 The implementation should treat Ly as the intended default, not as a temporary placeholder, but it should keep a documented fallback path.
+
+Current landing for `desktop`:
+
+- reusable module: `aw1cks.modules.nixos.ly`
+- imported by `hosts/desktop/configuration.nix` as the first graphical login path
+- `greetd` remains the documented fallback only if Ly later fails the `niri` session-behavior gate
 
 ### GPU and Hardware Strategy
 
