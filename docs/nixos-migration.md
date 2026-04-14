@@ -233,6 +233,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 
 #### C2. `niri` / `dms`
 
+- [ ] Revisit whether to switch `desktop` from nixpkgs `programs.niri` to `niri-flake` for Nix-native compositor configuration after the graphical login path is stable.
 - [ ] Add `dankmaterialshell` (`dms`) integration.
 - [ ] Move launcher behavior into DMS.
 - [ ] Move notification behavior into DMS.
@@ -621,6 +622,10 @@ Current landing for `desktop`:
 - enables polkit and XDG portal wiring needed for a usable Wayland session
 - adds `xwayland-satellite` for XWayland application support
 - routes portal file chooser requests to GTK to avoid requiring Nautilus in the initial host path
+
+Deferred follow-up:
+
+- once the `ly`/`greetd` gate and basic graphical workflow are stable, revisit whether `desktop` should continue using nixpkgs `programs.niri` or switch to `niri-flake` for Nix-native compositor configuration
 
 ### Display Manager
 
