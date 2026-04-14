@@ -8,9 +8,9 @@ The authoritative implementation is `modules/checks.nix`.
 
 ### NixOS
 
-For each entry in `flake.nixosConfigurations`, the check builds that host's `config.system.build.toplevel`.
+For each entry in `flake.nixosConfigurations`, the check evaluates key resolved values and writes them into a tiny text derivation.
 
-This is the strongest validation path currently in the repo.
+That confirms constructor assembly, resolved host identity/user wiring, and selected shared defaults without building full system closures in CI.
 
 ### nix-darwin
 
@@ -37,6 +37,7 @@ Examples include:
 - invalid standalone Home Manager names
 - missing or malformed NVIDIA pin files
 - missing resolved usernames or home directories
+- NixOS host declarations that fail to resolve hostName, primary user creation, shell policy, or shared SSH defaults
 
 Those failures usually surface while evaluating the flake outputs, not only while building the final derivations.
 
@@ -45,6 +46,7 @@ Those failures usually surface while evaluating the flake outputs, not only whil
 `nix flake check` does not prove:
 
 - that a host can successfully switch on a real machine
+- that NixOS hosts build their full `config.system.build.toplevel` closure
 - that all repo-local Home Manager hosts build end to end
 - that darwin system activation succeeds
 - that secrets decrypt correctly at runtime
@@ -56,7 +58,7 @@ Use the narrowest useful validation first.
 
 - shared docs or non-evaluated text changes: static inspection is enough
 - constructor, schema, or reusable module changes: `nix flake check`
-- host-behavior changes: the relevant rebuild command or narrower host-specific build path
+- host-behavior changes: the relevant rebuild command or narrower host-specific build path, because `nix flake check` intentionally avoids full NixOS closures
 - reusable downstream contract changes: downstream validation with a local override when practical
 
 If a change affects generated flake output, update `modules/flake-file.nix` and regenerate with `nix run .#write-flake` before validating.
