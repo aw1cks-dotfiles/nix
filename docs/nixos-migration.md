@@ -203,7 +203,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 
 - [x] Add `disko` to the repo's flake inputs and integration surface.
 - [x] Add `nixos-anywhere` to the repo's supported provisioning workflow.
-- [ ] Expose a shared installer ISO artifact from the flake.
+- [x] Expose a shared installer ISO artifact from the flake.
 - [x] Define and implement the bootstrap SSH access path used by the installer ISO and `nixos-anywhere`.
 - [ ] Expose common provisioning flows through repo-local flake `apps` if the wrapper meaningfully improves the supported install path.
 - [ ] Validate that one shared installer ISO is sufficient for current planned hosts.
@@ -510,6 +510,11 @@ Repository boundary:
 - the installer ISO and any provisioning helpers are repo-local operational outputs
 - they should be exposed through flake outputs in this repo
 - they should not be treated as part of the reusable downstream contract unless a real consumer needs them
+
+Current repo-local output:
+
+- `packages.installer-iso` builds a shared minimal installer image that imports `flake.nixosModules.installer-bootstrap-ssh`
+- the current shared image seeds bootstrap root SSH access from `aw1cks.identity.selected.authorizedKeys` by setting `aw1cks.provisioning.bootstrapAuthorizedKeys` inside the installer build
 
 ### Supported Provisioning Paths
 
@@ -852,7 +857,8 @@ Status note:
 - B1 is complete. `disko` is already part of the repo's exported flake-input contract, is imported centrally through the NixOS constructor baseline, and is exercised by the repo-local `desktop` host via `hosts/desktop/disko.nix`.
 - B2 is complete. `nixos-anywhere` is now pinned as a repo-local bootstrap input and exposed through `nix run .#nixos-anywhere -- <args>` so installation commands use a reproducible repo-supported entrypoint instead of an unpinned upstream flake URL.
 - B3 is complete. The repo now exposes `nixosModules.installer-bootstrap-ssh`, a repo-local installer and kexec module that enables key-only root SSH access from explicit `aw1cks.provisioning.bootstrapAuthorizedKeys` without relying on the final host user module.
-- the next provisioning slice should therefore move on to exposing the shared installer ISO artifact that imports this bootstrap access module.
+- B4 is complete. The repo now exposes `packages.installer-iso`, a shared minimal installer image that imports `nixosModules.installer-bootstrap-ssh` and seeds bootstrap root access from the repo's selected operator identity.
+- the next provisioning slice should therefore move on to deciding whether a wrapper app materially improves the supported install path and whether this one shared ISO is sufficient for current planned hosts.
 
 ### Stream C. `desktop`
 
