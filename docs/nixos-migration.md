@@ -284,7 +284,7 @@ Current VM proving surface:
 ### Validation Gates
 
 - [x] Resolve the graphical login gate for `desktop` (`ly` preferred, `greetd` fallback if needed).
-- [ ] Resolve the `nixos-hardware` gate for `desktop`.
+- [x] Resolve the `nixos-hardware` gate for `desktop`.
 - [x] Resolve the initial server shell policy gate: plain `bash` first.
 - [x] Resolve whether one shared installer ISO remains sufficient.
 - [x] Add and validate an explicit shared installer ISO build path.
@@ -978,6 +978,11 @@ Status note:
 - workspace, media, and shell widgets
 - visual and workflow parity with current desktop intent
 
+Status note:
+
+- C2 is complete for the current migration target. `desktop` now has a host-local `niri + noctalia-shell` shell landing with launcher, notifications, shell widgets, and the required desktop workflow intent from `docs/desktop/` expressed in Wayland-native form.
+- remaining desktop follow-up work is refinement rather than milestone completion: true Mumble push-to-talk, any later TeamSpeak or Steam shortcut restoration if those applications re-enter the proven package surface, and any future decision to promote repeated compositor or shell behavior into reusable modules.
+
 ### Stream D. `dziewanna`
 
 #### D1. Host And Service Parity
@@ -1083,6 +1088,10 @@ Default answer:
 
 - validate after Stream A changes and again before final merge if the reusable contract changed materially
 
+Current status:
+
+- not yet re-run after the recent `desktop` shell work because those changes were kept repo-local to `hosts/desktop/`, its embedded Home Manager payload, and repo-local validation tooling rather than widening the reusable downstream contract
+
 ### `desktop` VM Shape Gate
 
 Question:
@@ -1129,3 +1138,17 @@ After this document is committed, it becomes the source of truth for the migrati
 - the shared NixOS layer exists
 - the host plans are encoded in this repo
 - no unresolved live behavior remains undocumented
+
+## Handoff Point
+
+The current natural handoff point is after completion of Stream C for `desktop`.
+
+The next logical implementation slice is:
+
+- start Stream D for `dziewanna`, beginning with `hosts/facts.nix` and a repo-local `hosts/dziewanna/configuration.nix` root that declares `configurations.nixos.dziewanna`
+
+Known remaining non-`desktop` project gates at handoff:
+
+- downstream reusable-contract validation before final merge if Stream A or flake-surface work changes again
+- final history rewrite pass to remove temporary migration scaffolding references
+- full `dziewanna` host and service parity stream
