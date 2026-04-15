@@ -50,6 +50,14 @@
         url = "github:nix-community/nixos-anywhere";
         inputs.nixpkgs.follows = "nixpkgs";
       };
+      nixos-images = {
+        url = "github:nix-community/nixos-images";
+        inputs.nixos-unstable.follows = "nixpkgs-unstable";
+      };
+      nix-vm-test = {
+        url = "github:Enzime/nix-vm-test/pr-105-latest";
+        inputs.nixpkgs.follows = "nixpkgs-unstable";
+      };
       flake-parts = {
         url = "github:hercules-ci/flake-parts";
         inputs.nixpkgs-lib.follows = "nixpkgs";

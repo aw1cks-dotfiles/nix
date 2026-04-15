@@ -573,6 +573,35 @@ It is not intended to prove:
 
 Use it as a fast preflight check, not as a substitute for eventual direct-boot or VPS-host validation.
 
+### Disposable SSH-Target Validation
+
+After the pure `--vm-test` preflight passes, the next stronger provisioning proof should target a disposable Linux VM over SSH.
+
+This disposable-target path is intended to prove:
+
+- `nix run .#install-host -- <hostname> <target-host>` works against a real SSH endpoint rather than only `system.build.installTest`
+- the repo's `--extra-files hosts/<hostname>` bootstrap material is accepted by `nixos-anywhere`
+- the normal remote control flow can reach kexec or later install phases without requiring real hardware first
+
+Current implementation shape:
+
+- `apps.install-host-kexec-test` builds a disposable Ubuntu-backed SSH target rehearsal using `nixos-anywhere`'s own `linux-kexec-test.nix`
+- the current rehearsal scope is intentionally limited to the `desktop` host and the `kexec` phase, matching the smallest realistic proof we want before risking disk changes in a disposable VM
+- `nix-vm-test` follows `nixpkgs-unstable` here because the forked test harness still assumes the older `python3Packages` alias behavior that breaks against this repo's stable 25.11 package set
+
+Current blocker:
+
+- the imported upstream `nix-vm-test` harness is still not runnable as-is on this repo's pinned dependency set because its generated command line uses `--start-scripts`, while the `nixos-test-driver` coming from the selected nixpkgs expects `--vm-start-scripts`
+- treat that as a dependency-interface mismatch in the imported test harness, not as evidence that the repo-local `install-host` wrapper shape is wrong
+
+It is still not intended to prove:
+
+- installer ISO boot behavior
+- provider-specific VPS networking and console recovery behavior
+- final bare-metal firmware or hardware quirks
+
+Use it as the smallest realistic rehearsal for the `dziewanna`-style reinstall path when no real target host is available.
+
 ## Host Strategy
 
 ## `desktop`
