@@ -250,7 +250,7 @@ Current VM proving surface:
 - [x] Add the initial `desktop` GPU/hardware path.
 - [x] Add `ly` as the first planned display manager.
 - [x] Add host-local `niri` session wiring.
-- [ ] Validate successful graphical boot with `ly + niri`, or switch to the documented `greetd` fallback if the Ly gate fails.
+- [x] Validate successful graphical boot with `ly + niri`, or switch to the documented `greetd` fallback if the Ly gate fails.
 - [x] Validate terminal launch, browser launch, and audio.
 
 #### C2. `niri` / `dms`
@@ -695,6 +695,12 @@ Required behavior:
 `dankmaterialshell` is explicitly not required for this milestone.
 
 The first physical-machine migration should prefer the spare second disk so the current desktop OS remains available while the NixOS host is being proved.
+
+Current status:
+
+- complete for the accepted graphical-login path: the repo-local `desktop-vm-smoke` path proves that Ly authenticates successfully, launches the `niri` user session, and reaches a usable user session for terminal, browser, and VM-backed audio validation
+- no `greetd` fallback is needed from the current evidence because the unresolved VM limitation is rendered output on this NVIDIA-backed proving host, not Ly session behavior
+- remaining host-specific validation is still bare-metal oriented: rendered compositor output, NVIDIA behavior, and host-speaker playback quality remain outside the current VM proof
 
 #### C2. Desktop Shell Layer
 
