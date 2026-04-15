@@ -525,6 +525,7 @@ Current repo-local output:
 - `packages.installer-iso` builds a shared minimal installer image that imports `flake.nixosModules.installer-bootstrap-ssh`
 - the current shared image seeds bootstrap root SSH access from `aw1cks.identity.selected.authorizedKeys` by setting `aw1cks.provisioning.bootstrapAuthorizedKeys` inside the installer build
 - `apps.install-host` wraps the common `nixos-anywhere` invocation shape by filling in `--flake "$repo_root#<hostname>"` and `--extra-files hosts/<hostname>` from the requested repo host
+- `apps.install-host-vm-test` wraps `nixos-anywhere --vm-test` for a repo host so provisioning can be preflighted without a real SSH target
 
 ### Supported Provisioning Paths
 
@@ -545,6 +546,31 @@ The design should support two primary installation paths.
 - do not assume the final NixOS primary user or authorized-keys wiring already exists on the preinstall system
 
 Custom kexec images are not required for the initial project shape.
+
+### VM-Backed Provisioning Validation
+
+Before a real target host is available, the smallest useful provisioning proof should use `nixos-anywhere --vm-test` through a repo-local wrapper.
+
+This VM-backed path is intended to prove:
+
+- the repo's `nixos-anywhere` wrapper arguments resolve the intended flake host
+- the host's `disko` layout and install closure can be exercised through `system.build.installTest`
+- the supported provisioning command shape remains runnable from this repo
+
+Current caveat:
+
+- the repo-local wrapper is in place as `nix run .#install-host-vm-test -- <hostname>`
+- on the currently pinned `disko` input, the underlying `system.build.installTest` path fails before the VM boots because `disko`'s test helper is currently tripping an upstream `qemu-common` argument bug (`function 'anonymous lambda' called without required argument 'pkgs'`)
+- treat that as an upstream validation blocker in the current pinned toolchain, not as evidence that the repo's provisioning wrapper shape is wrong
+
+It is not intended to prove:
+
+- installer ISO boot behavior
+- bootstrap SSH access to a live installer environment
+- provider-specific VPS or bare-metal quirks
+- the full remote kexec or SSH control path used by a real reinstall
+
+Use it as a fast preflight check, not as a substitute for eventual direct-boot or VPS-host validation.
 
 ## Host Strategy
 

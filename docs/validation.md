@@ -78,5 +78,7 @@ Provisioning-specific note:
 - for the shared installer ISO slice, the narrowest useful validation is `nix build .#installer-iso` because the primary deliverable is the flake artifact itself
 - for the current shared-ISO sufficiency slice, static inspection of the planned host set is enough because `desktop` is the only host that currently needs ISO boot, while VPS-style reinstalls such as `dziewanna` can continue to use the non-ISO `nixos-anywhere` plus kexec path
 - for the provisioning wrapper-app slice, the narrowest useful validation is `nix run .#install-host -- --help` or another argument error path that proves the wrapper resolves and prints its usage without attempting an install
+- for the VM-backed provisioning validation slice, prefer `nix run .#install-host-vm-test -- <hostname>` because it exercises the repo-local provisioning command shape against `system.build.installTest` without needing a real SSH target
+- if that VM-backed path currently fails inside the pinned `disko` toolchain before boot, record the upstream blocker explicitly and fall back to evaluating `system.build.diskoScript` plus `system.build.toplevel` until the pinned `installTest` path is usable again
 
 If a change affects generated flake output, update `modules/flake-file.nix` and regenerate with `nix run .#write-flake` before validating.
