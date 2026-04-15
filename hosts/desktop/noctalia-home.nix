@@ -52,4 +52,6 @@ in
     OnlyShowIn=niri;
     X-GNOME-Autostart-enabled=true
   '';
+
+  xdg.configFile."niri/config.kdl".source = ./niri/config.kdl;
 }
