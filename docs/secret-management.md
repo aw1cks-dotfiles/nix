@@ -481,6 +481,10 @@ nix run .#nixos-anywhere -- --flake ".#<hostname>" \
   root@<target-ip>
 ```
 
+For the direct-boot installer flow, the live installer environment should import `nixosModules.installer-bootstrap-ssh` so the same operator keys can reach the machine before installation starts.
+
+Set `aw1cks.provisioning.bootstrapAuthorizedKeys` explicitly for that installer environment rather than assuming the final host identity keys should also grant bootstrap root access.
+
 Treat `hosts/<hostname>/ssh_host_ed25519_key` as a private key throughout this step.
 
 - do not commit it

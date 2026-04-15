@@ -204,7 +204,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 - [x] Add `disko` to the repo's flake inputs and integration surface.
 - [x] Add `nixos-anywhere` to the repo's supported provisioning workflow.
 - [ ] Expose a shared installer ISO artifact from the flake.
-- [ ] Define and implement the bootstrap SSH access path used by the installer ISO and `nixos-anywhere`.
+- [x] Define and implement the bootstrap SSH access path used by the installer ISO and `nixos-anywhere`.
 - [ ] Expose common provisioning flows through repo-local flake `apps` if the wrapper meaningfully improves the supported install path.
 - [ ] Validate that one shared installer ISO is sufficient for current planned hosts.
 
@@ -477,6 +477,8 @@ Decision:
 - the shared installer ISO should expose a repo-defined bootstrap access path suitable for running `nixos-anywhere`
 - that bootstrap access path should install operator public keys deliberately, rather than assuming the final common user module already ran
 - the bootstrap access path is temporary installer behavior, not part of the durable host user model
+- current repo-local implementation: `flake.nixosModules.installer-bootstrap-ssh`
+- this module enables OpenSSH in the installer environment, permits key-only root login, and requires explicit `aw1cks.provisioning.bootstrapAuthorizedKeys` rather than assuming the final host identity contract
 
 Repository boundary:
 
@@ -489,6 +491,7 @@ Initial implementation shape:
 - the shared installer ISO should carry an explicit bootstrap SSH module or profile that authorizes the operator key(s) needed for install-time access
 - the direct-boot flow should rely on that installer access path
 - the existing-Linux reinstall flow should use whatever SSH entrypoint already exists on the source machine, without assuming the final NixOS user is present before installation
+- current repo-local module path: `flake.nixosModules.installer-bootstrap-ssh`
 
 ### Bootstrap Artifact
 
@@ -848,7 +851,8 @@ Status note:
 
 - B1 is complete. `disko` is already part of the repo's exported flake-input contract, is imported centrally through the NixOS constructor baseline, and is exercised by the repo-local `desktop` host via `hosts/desktop/disko.nix`.
 - B2 is complete. `nixos-anywhere` is now pinned as a repo-local bootstrap input and exposed through `nix run .#nixos-anywhere -- <args>` so installation commands use a reproducible repo-supported entrypoint instead of an unpinned upstream flake URL.
-- the next provisioning slice should therefore move on to the explicit bootstrap SSH access path used by `nixos-anywhere` and the future installer ISO.
+- B3 is complete. The repo now exposes `nixosModules.installer-bootstrap-ssh`, a repo-local installer and kexec module that enables key-only root SSH access from explicit `aw1cks.provisioning.bootstrapAuthorizedKeys` without relying on the final host user module.
+- the next provisioning slice should therefore move on to exposing the shared installer ISO artifact that imports this bootstrap access module.
 
 ### Stream C. `desktop`
 
