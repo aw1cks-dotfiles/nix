@@ -4,18 +4,25 @@ let
     settingsVersion = 0;
 
     bar = {
+      backgroundOpacity = 0.7;
+      contentPadding = 2;
       density = "compact";
+      displayMode = "always_visible";
+      marginHorizontal = 4;
+      marginVertical = 4;
       position = "top";
+      showCapsule = false;
+      widgetSpacing = 8;
       widgets = {
         left = [
           { id = "Launcher"; }
-        ];
-        center = [
           {
             id = "Workspace";
             hideUnoccupied = false;
             labelMode = "none";
           }
+        ];
+        center = [
           { id = "MediaMini"; }
         ];
         right = [
@@ -33,6 +40,35 @@ let
     };
 
     appLauncher.terminalCommand = "wezterm start --";
+
+    controlCenter = {
+      cards = [
+        {
+          enabled = true;
+          id = "shortcuts-card";
+        }
+        {
+          enabled = true;
+          id = "audio-card";
+        }
+        {
+          enabled = true;
+          id = "media-sysmon-card";
+        }
+      ];
+      position = "close_to_bar_button";
+      shortcuts = {
+        left = [
+          { id = "Network"; }
+          { id = "Bluetooth"; }
+        ];
+        right = [
+          { id = "Notifications"; }
+          { id = "PowerProfile"; }
+        ];
+      };
+    };
+
     dock.enabled = false;
 
     notifications = {
@@ -49,6 +85,11 @@ let
         normal = true;
       };
       sounds.enabled = false;
+    };
+
+    ui = {
+      panelsAttachedToBar = true;
+      settingsPanelMode = "attached";
     };
   };
 in
