@@ -560,8 +560,9 @@ This VM-backed path is intended to prove:
 Current caveat:
 
 - the repo-local wrapper is in place as `nix run .#install-host-vm-test -- <hostname>`
-- on the currently pinned `disko` input, the underlying `system.build.installTest` path fails before the VM boots because `disko`'s test helper is currently tripping an upstream `qemu-common` argument bug (`function 'anonymous lambda' called without required argument 'pkgs'`)
-- treat that as an upstream validation blocker in the current pinned toolchain, not as evidence that the repo's provisioning wrapper shape is wrong
+- the current `disko` default branch is temporarily incompatible with this repo's stable `nixpkgs` line for `system.build.installTest` because commit `ec90d55ff3bc330759d3bfbfc254985e08c96b1f` switched `disko` to the newer `nixos/lib/qemu-common.nix` interface (`{ lib, stdenv }`) while stable 25.11 still exposes the older `{ lib, pkgs }` form
+- to keep VM-backed provisioning validation working on the repo's current stable base, the repo pins `disko` to pre-regression commit `5ae05d98d2bebc0a9521c9fc89bd2e5cffa05926`
+- with that pin in place, `nix run .#install-host-vm-test -- desktop` now completes successfully and produces a `vm-test-run-disko-*` result path
 
 It is not intended to prove:
 
