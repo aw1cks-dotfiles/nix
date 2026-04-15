@@ -34,7 +34,22 @@ let
 
     appLauncher.terminalCommand = "wezterm start --";
     dock.enabled = false;
-    notifications.enabled = true;
+
+    notifications = {
+      enabled = true;
+      backgroundOpacity = 0.7;
+      clearDismissed = true;
+      criticalUrgencyDuration = 8;
+      location = "top_right";
+      lowUrgencyDuration = 8;
+      normalUrgencyDuration = 8;
+      saveToHistory = {
+        critical = true;
+        low = true;
+        normal = true;
+      };
+      sounds.enabled = false;
+    };
   };
 in
 {

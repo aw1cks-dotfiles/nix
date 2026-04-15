@@ -258,7 +258,7 @@ Current VM proving surface:
 - [x] Revisit whether to switch `desktop` from nixpkgs `programs.niri` to `niri-flake` for Nix-native compositor configuration after the graphical login path is stable.
 - [x] Add initial `noctalia-shell` integration.
 - [x] Move launcher behavior into `noctalia-shell`.
-- [ ] Move notification behavior into `noctalia-shell`.
+- [x] Move notification behavior into `noctalia-shell`.
 - [ ] Recreate required shell widgets and panel behavior.
 - [ ] Port the required desktop workflow intent from `docs/desktop/`.
 
@@ -720,6 +720,7 @@ Current status:
 - `desktop` also enables the host services that Noctalia expects for the current scope: NetworkManager was already part of the shared network baseline, and the host now explicitly enables Bluetooth, UPower, and `power-profiles-daemon`
 - the current startup path remains repo-local and host-local: under the nixpkgs `programs.niri` session, Noctalia is launched via an XDG autostart desktop entry instead of promoting a reusable desktop-shell abstraction yet
 - launcher trigger migration is now in place for the preserved `Super+D` workflow: `hosts/desktop/niri/config.kdl` binds `Mod+D` to `noctalia-shell ipc call launcher toggle`, replacing the old `rofi -show run` path with a Noctalia-native launcher entry point
+- notification behavior is now owned explicitly by Noctalia instead of an implicit daemon default: `hosts/desktop/noctalia-home.nix` configures top-right notifications with persistent history, muted notification sounds, and 8-second urgency timeouts matching the old `dunst` shape closely enough for the first Wayland landing
 - the repo-local desktop VM smoke test now also waits for a live `noctalia-shell` process after the `niri` user session comes up
 
 ### `niri` Placement
