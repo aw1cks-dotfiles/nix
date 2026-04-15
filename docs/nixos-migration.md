@@ -232,13 +232,13 @@ Current VM proving surface:
 
 - `nix build .#desktop-vm` builds the VM runner derived from `desktop`
 - `nix run .#desktop-vm -- --help` resolves and dispatches to the generated QEMU launcher
-- `nix run .#desktop-vm-smoke` runs an automated Ly-to-`niri` smoke test that confirms the resolved desktop user can launch `wezterm` and `zen-twilight` in the VM session
+- `nix run .#desktop-vm-smoke` runs an automated Ly-to-`niri` smoke test that confirms the resolved desktop user can launch `wezterm`, `zen-twilight`, and a VM-backed PipeWire default sink in the VM session
 - the VM path intentionally proves the graphical stack shape without claiming bare-metal NVIDIA, disk, or hardware parity
 - the VM variant enables OpenSSH with host-port forwarding on `localhost:2222` so Ly/session behavior can be inspected remotely while the local console is owned by Ly
 - the current repo-local proving result is that Ly successfully authenticates and launches the `niri` user session in the VM path, so the graphical login gate stays on `ly`
 - the same VM path does not currently prove compositor rendering on this host: with modern NVIDIA host drivers, QEMU virtio/virgl combinations either leave `niri` running without visible outputs or fail to present a usable framebuffer entirely
 - treat that rendering failure as a host/virtual-GPU limitation of the proving environment, not as evidence that `desktop` must switch from `ly` to `greetd`
-- terminal and browser launch are now covered by the repo-local smoke test; rendered compositor behavior and audio still need bare-metal validation or a nested compositor path on a host that can actually support the required virtio/virgl stack
+- terminal, browser, and a VM-backed PipeWire default sink are now covered by the repo-local smoke test; rendered compositor behavior and host-speaker playback still need bare-metal validation or a nested compositor path on a host that can actually support the required virtio/virgl stack
 
 #### C1. Base OS
 
@@ -251,7 +251,7 @@ Current VM proving surface:
 - [x] Add `ly` as the first planned display manager.
 - [x] Add host-local `niri` session wiring.
 - [ ] Validate successful graphical boot with `ly + niri`, or switch to the documented `greetd` fallback if the Ly gate fails.
-- [ ] Validate terminal launch, browser launch, and audio.
+- [x] Validate terminal launch, browser launch, and audio.
 
 #### C2. `niri` / `dms`
 
@@ -671,9 +671,9 @@ Required behavior:
 
 Current status:
 
-- complete for login/session and launch-path validation: the VM path now demonstrates that `ly` launches the `niri` user session, embedded Home Manager activation completes successfully, and the resolved desktop user can launch `wezterm` plus `zen-twilight` through a repo-local smoke test
+- complete for login/session and launch-path validation: the VM path now demonstrates that `ly` launches the `niri` user session, embedded Home Manager activation completes successfully, and the resolved desktop user can launch `wezterm`, `zen-twilight`, and a VM-backed PipeWire default sink through a repo-local smoke test
 - still not a complete rendered desktop proof on the current host: QEMU on this NVIDIA-backed machine can leave `niri` running without a usable visible output even when the session itself is healthy
-- remaining meaningful validation for this stream is now host-specific: rendered compositor behavior, audio, and NVIDIA still need bare-metal validation or a more compatible nested-compositor proving path
+- remaining meaningful validation for this stream is now host-specific: rendered compositor behavior, host-speaker playback, and NVIDIA still need bare-metal validation or a more compatible nested-compositor proving path
 
 #### C1. Base OS
 
