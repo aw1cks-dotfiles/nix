@@ -285,8 +285,8 @@ Current VM proving surface:
 - [ ] Resolve the graphical login gate for `desktop` (`ly` preferred, `greetd` fallback if needed).
 - [ ] Resolve the `nixos-hardware` gate for `desktop`.
 - [x] Resolve the initial server shell policy gate: plain `bash` first.
-- [ ] Resolve whether one shared installer ISO remains sufficient.
-- [ ] Add and validate an explicit shared installer ISO build path.
+- [x] Resolve whether one shared installer ISO remains sufficient.
+- [x] Add and validate an explicit shared installer ISO build path.
 - [ ] Validate downstream consumer evaluation after shared schema, constructor, or reusable-contract changes.
 - [x] Resolve the `desktop` VM proving-shape gate.
 - [ ] Complete the final history rewrite pass to remove temporary migration scaffolding references.
@@ -504,6 +504,15 @@ This should be suitable for:
 - serving as the stable bootstrap path for `nixos-anywhere`
 
 The default assumption is one shared artifact. Host-specific bootstrap artifacts should only be introduced if a host later proves to require one.
+
+Current sufficiency decision:
+
+- sufficient for the current planned host set in this repo
+- `desktop` is the only current planned host that needs direct-boot removable-media installation, and it is an `x86_64-linux` machine using ordinary EFI boot plus host-local `disko`
+- the shared minimal installer ISO already carries the explicit bootstrap SSH path needed for both direct-boot install and `nixos-anywhere`
+- `dziewanna` does not weaken this decision because its provisioning path is an existing-Linux or VPS reinstall flow via `nixos-anywhere` and kexec over the provider base OS, not an ISO-boot flow
+- there is no current planned host that forces a second installer architecture, board-specific installer payload, or alternate bootstrap access path
+- revisit this decision only when a new planned NixOS host proves a concrete need for a different architecture, storage prerequisite, or installer-time hardware dependency
 
 Repository boundary:
 
@@ -858,7 +867,8 @@ Status note:
 - B2 is complete. `nixos-anywhere` is now pinned as a repo-local bootstrap input and exposed through `nix run .#nixos-anywhere -- <args>` so installation commands use a reproducible repo-supported entrypoint instead of an unpinned upstream flake URL.
 - B3 is complete. The repo now exposes `nixosModules.installer-bootstrap-ssh`, a repo-local installer and kexec module that enables key-only root SSH access from explicit `aw1cks.provisioning.bootstrapAuthorizedKeys` without relying on the final host user module.
 - B4 is complete. The repo now exposes `packages.installer-iso`, a shared minimal installer image that imports `nixosModules.installer-bootstrap-ssh` and seeds bootstrap root access from the repo's selected operator identity.
-- the next provisioning slice should therefore move on to deciding whether a wrapper app materially improves the supported install path and whether this one shared ISO is sufficient for current planned hosts.
+- B5 is complete. One shared installer ISO is sufficient for the current planned hosts in this repo because `desktop` is the only host that needs ISO boot today, while `dziewanna` remains an existing-Linux or VPS reinstall target reached through `nixos-anywhere` and kexec over the provider base OS.
+- the next provisioning slice should therefore move on to whether a repo-local wrapper app materially improves the supported install path.
 
 ### Stream C. `desktop`
 
@@ -975,6 +985,11 @@ Only split into host-specific bootstrap artifacts if a real provisioning need em
 Validation requirement:
 
 - the shared installer ISO must have an explicit repo build path and validation step rather than relying only on host toplevel checks
+
+Resolution:
+
+- resolved in favor of one shared installer ISO for the current repo host set
+- justification: `desktop` is the only current host that needs removable-media installer boot, it is `x86_64-linux`, and it uses standard EFI boot; `dziewanna` is instead a VPS-style reinstall target that can continue to use the non-ISO `nixos-anywhere` plus kexec path over its provider base OS
 
 ### Downstream Contract Gate
 
