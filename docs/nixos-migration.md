@@ -260,7 +260,7 @@ Current VM proving surface:
 - [x] Move launcher behavior into `noctalia-shell`.
 - [x] Move notification behavior into `noctalia-shell`.
 - [x] Recreate required shell widgets and panel behavior.
-- [ ] Port the required desktop workflow intent from `docs/desktop/`.
+- [x] Port the required desktop workflow intent from `docs/desktop/`.
 
 ### Stream D. `dziewanna`
 
@@ -724,6 +724,8 @@ Current status:
 - shell widget and panel parity has now moved into Noctalia's declarative settings: the host-local bar layout keeps launcher plus workspaces on the left, media centered, and system metrics plus notification history, clock, and control center on the right, while the attached control-center cards surface the closest first-pass replacement for the old compact `eww` side widgets and status affordances
 - desktop voice-chat workflow has an initial compositor-safe landing as well: `hosts/desktop/niri/config.kdl` preserves the old `Super+Shift+KP_Enter` Mumble self-deafen toggle by calling `mumble rpc toggledeaf`, which works cleanly as a one-shot compositor bind under Wayland
 - true push-to-talk remains a follow-up item rather than a pure `niri` bind because Wayland background key capture is compositor-owned and `niri` keybinds are not a good press-and-release transport; the likely next step is a small external helper that listens for a chosen input event and calls Mumble `starttalking` / `stoptalking`
+- the remaining desktop workflow intent from `docs/desktop/` now has a host-local `niri` landing as well: `hosts/desktop/niri/config.kdl` restores the old Super-based workspace and window controls, app launch shortcuts for terminal, browser, music, and Mumble, media keypad controls, and desktop-control binds for close, fullscreen, and session exit
+- the Wayland-native replacements are explicit where the old X11 stack was tool-specific: `Mod+Print` now uses `niri`'s built-in screenshot UI instead of `flameshot gui`, while TeamSpeak and Steam launch shortcuts were left out because those applications are not currently part of the desktop package set proven by this repo
 - the repo-local desktop VM smoke test now also waits for a live `noctalia-shell` process after the `niri` user session comes up
 
 ### `niri` Placement
