@@ -50,6 +50,10 @@
         url = "github:nix-community/nixos-anywhere";
         inputs.nixpkgs.follows = "nixpkgs";
       };
+      noctalia = {
+        url = "github:noctalia-dev/noctalia-shell";
+        inputs.nixpkgs.follows = "nixpkgs-unstable";
+      };
       nixos-images = {
         url = "github:nix-community/nixos-images";
         inputs.nixos-unstable.follows = "nixpkgs-unstable";

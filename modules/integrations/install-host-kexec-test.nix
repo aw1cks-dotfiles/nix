@@ -1,9 +1,12 @@
 { lib, inputs, ... }:
 {
-  flake.checks.x86_64-linux.install-host-kexec-test =
+  perSystem =
+    {
+      system,
+      pkgs,
+      ...
+    }:
     let
-      system = "x86_64-linux";
-      pkgs = inputs.nixpkgs.legacyPackages.${system};
       patchedNixVmTest = {
         lib.${system} =
           import
@@ -20,25 +23,19 @@
               inherit system;
             };
       };
-    in
-    import (inputs.nixos-anywhere + "/tests/linux-kexec-test.nix") {
-      inherit pkgs;
-      nixos-anywhere = inputs.nixos-anywhere.packages.${system}.default;
-      nix-vm-test = patchedNixVmTest;
-      system-to-install = inputs.self.nixosConfigurations.desktop;
-      kexec-installer = "${
-        inputs.nixos-images.packages.${system}.kexec-installer-nixos-unstable-noninteractive
-      }/nixos-kexec-installer-noninteractive-${system}.tar.gz";
-      distribution = "ubuntu";
-      version = "24_04";
-    };
 
-  perSystem =
-    {
-      system,
-      pkgs,
-      ...
-    }:
+      installHostKexecTest = import (inputs.nixos-anywhere + "/tests/linux-kexec-test.nix") {
+        inherit pkgs;
+        nixos-anywhere = inputs.nixos-anywhere.packages.${system}.default;
+        nix-vm-test = patchedNixVmTest;
+        system-to-install = inputs.self.nixosConfigurations.desktop;
+        kexec-installer = "${
+          inputs.nixos-images.packages.${system}.kexec-installer-nixos-unstable-noninteractive
+        }/nixos-kexec-installer-noninteractive-${system}.tar.gz";
+        distribution = "ubuntu";
+        version = "24_04";
+      };
+    in
     lib.mkIf
       (
         pkgs.stdenv.hostPlatform.isLinux
@@ -48,7 +45,7 @@
         && inputs ? nixos-anywhere
       )
       {
-        packages.install-host-kexec-test = inputs.self.checks.${system}.install-host-kexec-test;
+        packages.install-host-kexec-test = installHostKexecTest;
 
         apps.install-host-kexec-test = {
           type = "app";

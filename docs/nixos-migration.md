@@ -253,12 +253,12 @@ Current VM proving surface:
 - [x] Validate successful graphical boot with `ly + niri`, or switch to the documented `greetd` fallback if the Ly gate fails.
 - [x] Validate terminal launch, browser launch, and audio.
 
-#### C2. `niri` / `dms`
+#### C2. `niri` / `noctalia-shell`
 
 - [x] Revisit whether to switch `desktop` from nixpkgs `programs.niri` to `niri-flake` for Nix-native compositor configuration after the graphical login path is stable.
-- [ ] Add `dankmaterialshell` (`dms`) integration.
-- [ ] Move launcher behavior into DMS.
-- [ ] Move notification behavior into DMS.
+- [x] Add initial `noctalia-shell` integration.
+- [ ] Move launcher behavior into `noctalia-shell`.
+- [ ] Move notification behavior into `noctalia-shell`.
 - [ ] Recreate required shell widgets and panel behavior.
 - [ ] Port the required desktop workflow intent from `docs/desktop/`.
 
@@ -296,7 +296,7 @@ Current VM proving surface:
 
 - Rebuild the current Home Manager host `alex@desktop` as a real NixOS desktop host named `desktop`.
 - Replace the current Arch Linux X11 desktop stack with a NixOS Wayland stack built around `niri`.
-- Replace the current `leftwm` and `eww` desktop stack with `niri`, then add `dankmaterialshell` (`dms`) after the base graphical session is stable.
+- Replace the current `leftwm` and `eww` desktop stack with `niri`, then layer `noctalia-shell` on top after the base graphical session is stable.
 - Bring the existing `dziewanna` server host into this repo as a first-class NixOS host.
 - Establish reusable NixOS modules and profiles in the current repo's idioms instead of relying on host-local ad hoc imports or the old experiment repo's structure.
 - Support reproducible provisioning with `disko` and `nixos-anywhere`.
@@ -306,7 +306,7 @@ Current VM proving surface:
 
 - Mechanically porting modules, files, or structure from `nixos-experiments`.
 - Preserving the old repo's assembly model, option namespaces, or host constructors.
-- Generalizing `niri` or `dms` into a reusable desktop-wide default before at least one real host proves the abstraction.
+- Generalizing `niri` or `noctalia-shell` into a reusable desktop-wide default before at least one real host proves the abstraction.
 - Solving long-term SSH key lifecycle improvements such as CA-backed auth during this migration. Public authorized keys are sufficient for now.
 
 ## Source Intent Inventory
@@ -692,7 +692,7 @@ Required behavior:
 - browser launches
 - audio works
 
-`dankmaterialshell` is explicitly not required for this milestone.
+`noctalia-shell` is explicitly not required for this milestone.
 
 The first physical-machine migration should prefer the spare second disk so the current desktop OS remains available while the NixOS host is being proved.
 
@@ -708,11 +708,18 @@ This milestone adds the new shell stack after the compositor/session base is sta
 
 Required behavior:
 
-- integrate `dankmaterialshell` (`dms`)
-- move launcher behavior into DMS
-- move notification behavior into DMS
+- integrate `noctalia-shell`
+- move launcher behavior into `noctalia-shell`
+- move notification behavior into `noctalia-shell`
 - add shell widgets and panel behavior
 - re-express the current desktop UX from `docs/desktop/` in Wayland-native form
+
+Current status:
+
+- complete for the first shell-layer landing: `desktop` now imports `inputs.noctalia.homeModules.default` through its embedded Home Manager payload, enables `programs.noctalia-shell`, and seeds an initial compact bar layout in `hosts/desktop/noctalia-home.nix`
+- `desktop` also enables the host services that Noctalia expects for the current scope: NetworkManager was already part of the shared network baseline, and the host now explicitly enables Bluetooth, UPower, and `power-profiles-daemon`
+- the current startup path remains repo-local and host-local: under the nixpkgs `programs.niri` session, Noctalia is launched via an XDG autostart desktop entry instead of promoting a reusable desktop-shell abstraction yet
+- the repo-local desktop VM smoke test now also waits for a live `noctalia-shell` process after the `niri` user session comes up
 
 ### `niri` Placement
 
@@ -737,7 +744,7 @@ Decision after revisit:
 - keep `desktop` on nixpkgs `programs.niri` for now
 - the current host-local `niri` module only needs the compositor package, session wiring, portal behavior, and XWayland support; that is already covered cleanly enough by nixpkgs plus the small host-local wrapper
 - switching to `niri-flake` now would widen the flake-input surface without unlocking a concrete repo need, because no host-local Nix-native `niri` settings or generated compositor config are being expressed yet
-- revisit `niri-flake` only when `desktop` starts declaring substantive host-local compositor configuration in Nix, such as keybinds, outputs, layout rules, DMS integration hooks, or other settings that benefit from the flake's config-generation surface
+- revisit `niri-flake` only when `desktop` starts declaring substantive host-local compositor configuration in Nix, such as keybinds, outputs, layout rules, Noctalia integration hooks, or other settings that benefit from the flake's config-generation surface
 
 ### Display Manager
 
@@ -798,7 +805,7 @@ These concerns should remain under `hosts/desktop/`:
 - `disko.nix`
 - any host-specific hardware imports
 - `niri` config and session behavior
-- later `dms` config and shell behavior
+- later `noctalia-shell` config and shell behavior
 
 ## `dziewanna`
 
@@ -957,10 +964,10 @@ Status note:
 - compositor session
 - audio and browser/terminal validation
 
-#### C2. `niri` / `dms`
+#### C2. `niri` / `noctalia-shell`
 
 - desktop shell migration
-- launcher and notifications under DMS
+- launcher and notifications under `noctalia-shell`
 - workspace, media, and shell widgets
 - visual and workflow parity with current desktop intent
 
@@ -1102,7 +1109,7 @@ The migration is complete when all of the following are true.
 - the repo contains a real reusable NixOS layer
 - the repo exposes a supported provisioning path using `disko` and `nixos-anywhere`
 - `desktop` is a real NixOS host in this repo and reaches a stable graphical-login-plus-`niri` base milestone, using `ly` unless the graphical login gate forces the documented `greetd` fallback
-- `desktop` later reaches a stable `niri + dms` desktop shell milestone
+- `desktop` later reaches a stable `niri + noctalia-shell` desktop shell milestone
 - `dziewanna` is a real NixOS host in this repo with preserved live network, SSH, Murmur, and ACME behavior
 - the project no longer needs `nixos-experiments` for planning or architectural guidance
 

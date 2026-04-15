@@ -51,6 +51,7 @@ Those failures usually surface while evaluating the flake outputs, not only whil
 - that darwin system activation succeeds
 - that secrets decrypt correctly at runtime
 - that downstream consumers still evaluate unless you test them
+- that the repo-local `desktop-vm-smoke` launch test succeeds; that VM-backed proof is intentionally kept outside `flake.checks` because its build closure is too large for routine CI coverage
 
 ## Recommended Workflow
 
@@ -65,7 +66,8 @@ Desktop-specific note:
 
 - `nix build .#desktop-vm` is the narrowest useful repo-local validation for the `desktop` VM proving path
 - the VM path is suitable for validating evaluation, VM assembly, Ly login wiring, embedded Home Manager activation, and remote inspection via the forwarded SSH port
-- `nix run .#desktop-vm-smoke` is the narrowest useful launch-workflow validation inside that VM path; it drives Ly login, waits for the `niri` user session, and confirms that the repo's terminal, browser, and VM-backed PipeWire audio path come up for the resolved desktop user environment
+- `nix run .#desktop-vm-smoke` is the narrowest useful launch-workflow validation inside that VM path; it drives Ly login, waits for the `niri` user session, confirms that `noctalia-shell` starts for the resolved desktop user environment, and then checks the repo's terminal, browser, and VM-backed PipeWire audio path
+- `desktop-vm-smoke` remains exposed as a repo-local package/app, but not as a `flake.checks.*` entry, so `nix flake check` only evaluates the VM smoke derivation through the package surface instead of building the full test in CI
 - it is not a complete proof of rendered `niri` behavior on every host GPU stack; on modern NVIDIA hosts, QEMU virtio/virgl rendering can fail even when Ly successfully launches the `niri` user session
 - treat rendered compositor behavior and host-speaker playback quality as follow-up validation that may need bare-metal confirmation on `desktop` or a nested compositor path on a more compatible host
 
