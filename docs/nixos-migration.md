@@ -255,7 +255,7 @@ Current VM proving surface:
 
 #### C2. `niri` / `dms`
 
-- [ ] Revisit whether to switch `desktop` from nixpkgs `programs.niri` to `niri-flake` for Nix-native compositor configuration after the graphical login path is stable.
+- [x] Revisit whether to switch `desktop` from nixpkgs `programs.niri` to `niri-flake` for Nix-native compositor configuration after the graphical login path is stable.
 - [ ] Add `dankmaterialshell` (`dms`) integration.
 - [ ] Move launcher behavior into DMS.
 - [ ] Move notification behavior into DMS.
@@ -732,9 +732,12 @@ Current landing for `desktop`:
 - adds `xwayland-satellite` for XWayland application support
 - routes portal file chooser requests to GTK to avoid requiring Nautilus in the initial host path
 
-Deferred follow-up:
+Decision after revisit:
 
-- once the `ly`/`greetd` gate and basic graphical workflow are stable, revisit whether `desktop` should continue using nixpkgs `programs.niri` or switch to `niri-flake` for Nix-native compositor configuration
+- keep `desktop` on nixpkgs `programs.niri` for now
+- the current host-local `niri` module only needs the compositor package, session wiring, portal behavior, and XWayland support; that is already covered cleanly enough by nixpkgs plus the small host-local wrapper
+- switching to `niri-flake` now would widen the flake-input surface without unlocking a concrete repo need, because no host-local Nix-native `niri` settings or generated compositor config are being expressed yet
+- revisit `niri-flake` only when `desktop` starts declaring substantive host-local compositor configuration in Nix, such as keybinds, outputs, layout rules, DMS integration hooks, or other settings that benefit from the flake's config-generation surface
 
 ### Display Manager
 

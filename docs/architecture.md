@@ -164,6 +164,8 @@ Current thin reusable NixOS bundles follow the same split used elsewhere in the 
 
 The current shared NixOS atom surface now includes reusable entries for boot, kernel selection, EFI/systemd-boot, network baseline, PipeWire audio, Wayland environment defaults, shared user realization, shell policy, and server security. Host roots should compose those atoms through profiles or direct imports rather than reintroducing ad hoc copies.
 
+Host-local compositor choices remain separate from that shared baseline. The current `desktop` host keeps its small `niri` wrapper under `hosts/desktop/niri.nix` and intentionally stays on nixpkgs `programs.niri` until the host has enough declarative compositor configuration to justify adding a dedicated upstream compositor flake input.
+
 Host-local storage ownership stays under `hosts/<name>/disko.nix`, with the shared `disko` input imported centrally by the NixOS constructor path so repo-local hosts can opt into disk layout definitions without widening the reusable module surface.
 
 Provisioning-specific bootstrap access stays repo-local rather than expanding the `aw1cks.*` reusable contract. The current installer bootstrap SSH path is exposed as `flake.nixosModules.installer-bootstrap-ssh`, which is intended for installer or kexec environments and not for final host imports.
