@@ -722,6 +722,8 @@ Current status:
 - launcher trigger migration is now in place for the preserved `Super+D` workflow: `hosts/desktop/niri/config.kdl` binds `Mod+D` to `noctalia-shell ipc call launcher toggle`, replacing the old `rofi -show run` path with a Noctalia-native launcher entry point
 - notification behavior is now owned explicitly by Noctalia instead of an implicit daemon default: `hosts/desktop/noctalia-home.nix` configures top-right notifications with persistent history, muted notification sounds, and 8-second urgency timeouts matching the old `dunst` shape closely enough for the first Wayland landing
 - shell widget and panel parity has now moved into Noctalia's declarative settings: the host-local bar layout keeps launcher plus workspaces on the left, media centered, and system metrics plus notification history, clock, and control center on the right, while the attached control-center cards surface the closest first-pass replacement for the old compact `eww` side widgets and status affordances
+- desktop voice-chat workflow has an initial compositor-safe landing as well: `hosts/desktop/niri/config.kdl` preserves the old `Super+Shift+KP_Enter` Mumble self-deafen toggle by calling `mumble rpc toggledeaf`, which works cleanly as a one-shot compositor bind under Wayland
+- true push-to-talk remains a follow-up item rather than a pure `niri` bind because Wayland background key capture is compositor-owned and `niri` keybinds are not a good press-and-release transport; the likely next step is a small external helper that listens for a chosen input event and calls Mumble `starttalking` / `stoptalking`
 - the repo-local desktop VM smoke test now also waits for a live `noctalia-shell` process after the `niri` user session comes up
 
 ### `niri` Placement
