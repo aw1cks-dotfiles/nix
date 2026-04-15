@@ -205,8 +205,8 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 - [x] Add `nixos-anywhere` to the repo's supported provisioning workflow.
 - [x] Expose a shared installer ISO artifact from the flake.
 - [x] Define and implement the bootstrap SSH access path used by the installer ISO and `nixos-anywhere`.
-- [ ] Expose common provisioning flows through repo-local flake `apps` if the wrapper meaningfully improves the supported install path.
-- [ ] Validate that one shared installer ISO is sufficient for current planned hosts.
+- [x] Expose common provisioning flows through repo-local flake `apps` if the wrapper meaningfully improves the supported install path.
+- [x] Validate that one shared installer ISO is sufficient for current planned hosts.
 
 ### Stream C. `desktop`
 
@@ -524,6 +524,7 @@ Current repo-local output:
 
 - `packages.installer-iso` builds a shared minimal installer image that imports `flake.nixosModules.installer-bootstrap-ssh`
 - the current shared image seeds bootstrap root SSH access from `aw1cks.identity.selected.authorizedKeys` by setting `aw1cks.provisioning.bootstrapAuthorizedKeys` inside the installer build
+- `apps.install-host` wraps the common `nixos-anywhere` invocation shape by filling in `--flake "$repo_root#<hostname>"` and `--extra-files hosts/<hostname>` from the requested repo host
 
 ### Supported Provisioning Paths
 
@@ -868,7 +869,8 @@ Status note:
 - B3 is complete. The repo now exposes `nixosModules.installer-bootstrap-ssh`, a repo-local installer and kexec module that enables key-only root SSH access from explicit `aw1cks.provisioning.bootstrapAuthorizedKeys` without relying on the final host user module.
 - B4 is complete. The repo now exposes `packages.installer-iso`, a shared minimal installer image that imports `nixosModules.installer-bootstrap-ssh` and seeds bootstrap root access from the repo's selected operator identity.
 - B5 is complete. One shared installer ISO is sufficient for the current planned hosts in this repo because `desktop` is the only host that needs ISO boot today, while `dziewanna` remains an existing-Linux or VPS reinstall target reached through `nixos-anywhere` and kexec over the provider base OS.
-- the next provisioning slice should therefore move on to whether a repo-local wrapper app materially improves the supported install path.
+- B6 is complete. The repo now exposes `nix run .#install-host -- <hostname> <target-host> [nixos-anywhere args...]`, which wraps the repeated repo-specific `nixos-anywhere` arguments and keeps the supported install surface discoverable.
+- the next provisioning slice should move beyond Stream B and return to the next unresolved host migration gate.
 
 ### Stream C. `desktop`
 
