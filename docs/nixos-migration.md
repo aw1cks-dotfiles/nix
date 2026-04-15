@@ -201,7 +201,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 
 ### Stream B. Provisioning And Bootstrap
 
-- [ ] Add `disko` to the repo's flake inputs and integration surface.
+- [x] Add `disko` to the repo's flake inputs and integration surface.
 - [ ] Add `nixos-anywhere` to the repo's supported provisioning workflow.
 - [ ] Expose a shared installer ISO artifact from the flake.
 - [ ] Define and implement the bootstrap SSH access path used by the installer ISO and `nixos-anywhere`.
@@ -598,6 +598,7 @@ Current status:
 
 - complete for login/session validation: the VM path now demonstrates that `ly` launches the `niri` user session and that embedded Home Manager activation completes successfully
 - not complete for rendered desktop workflow validation on the current host: SSH-based inspection showed `niri.service` active after Ly login, but the compositor could not render visible outputs in QEMU on this NVIDIA-backed host
+- provisioning is now the practical blocker for further `desktop` progress: the remaining meaningful validation for rendered compositor behavior, terminal/browser launch, audio, and NVIDIA must move to bare-metal install work, so the next implementation priority should shift to Stream B bootstrap/provisioning slices
 
 #### C1. Base OS
 
@@ -842,6 +843,11 @@ Expected outcomes:
 - `nixos-anywhere` install path
 - explicit bootstrap SSH access path for installer and reinstall flows
 - optional repo-local flake `apps` wrapping common provisioning workflows
+
+Status note:
+
+- B1 is complete. `disko` is already part of the repo's exported flake-input contract, is imported centrally through the NixOS constructor baseline, and is exercised by the repo-local `desktop` host via `hosts/desktop/disko.nix`.
+- the next provisioning slice should therefore move on to `nixos-anywhere` and bootstrap access rather than adding a second parallel `disko` integration path.
 
 ### Stream C. `desktop`
 
