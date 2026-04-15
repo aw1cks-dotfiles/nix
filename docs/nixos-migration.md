@@ -214,9 +214,9 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 
 - [x] Choose the repo representation for the `desktop` VM proving path.
 - [x] Bring up the initial `desktop` graphical stack in a VM-oriented path.
-- [ ] Validate preferred `ly + niri` session behavior in the VM path, or take the documented `greetd` fallback.
+- [x] Validate preferred `ly + niri` session behavior in the VM path, keeping `ly` and documenting the compositor rendering limits of the VM path.
 - [ ] Validate terminal launch, browser launch, and basic desktop workflow in the VM path.
-- [ ] Record the bare-metal-only gaps that remain after VM proof, especially NVIDIA and host-specific hardware behavior.
+- [x] Record the bare-metal-only gaps that remain after VM proof, especially NVIDIA and host-specific hardware behavior.
 
 Representation decision:
 
@@ -233,6 +233,11 @@ Current VM proving surface:
 - `nix build .#desktop-vm` builds the VM runner derived from `desktop`
 - `nix run .#desktop-vm -- --help` resolves and dispatches to the generated QEMU launcher
 - the VM path intentionally proves the graphical stack shape without claiming bare-metal NVIDIA, disk, or hardware parity
+- the VM variant enables OpenSSH with host-port forwarding on `localhost:2222` so Ly/session behavior can be inspected remotely while the local console is owned by Ly
+- the current repo-local proving result is that Ly successfully authenticates and launches the `niri` user session in the VM path, so the graphical login gate stays on `ly`
+- the same VM path does not currently prove compositor rendering on this host: with modern NVIDIA host drivers, QEMU virtio/virgl combinations either leave `niri` running without visible outputs or fail to present a usable framebuffer entirely
+- treat that rendering failure as a host/virtual-GPU limitation of the proving environment, not as evidence that `desktop` must switch from `ly` to `greetd`
+- remaining desktop-workflow proof for terminal, browser, audio, and full rendered compositor behavior must move to bare-metal validation or a nested compositor path on a host that can actually support the required virtio/virgl stack
 
 #### C1. Base OS
 
@@ -552,6 +557,7 @@ Purpose:
 Expected limits of the VM path:
 
 - it will not prove final NVIDIA behavior
+- on modern NVIDIA hosts, it may not prove rendered `niri` output at all even when Ly and the user session wiring are otherwise correct
 - it will not replace host-local `hardware-configuration.nix`
 - it will not replace the need for final bare-metal validation on the real `desktop` machine
 
@@ -587,6 +593,11 @@ Required behavior:
 - terminal launches
 - browser launches
 - remaining bare-metal-only gaps are documented explicitly
+
+Current status:
+
+- complete for login/session validation: the VM path now demonstrates that `ly` launches the `niri` user session and that embedded Home Manager activation completes successfully
+- not complete for rendered desktop workflow validation on the current host: SSH-based inspection showed `niri.service` active after Ly login, but the compositor could not render visible outputs in QEMU on this NVIDIA-backed host
 
 #### C1. Base OS
 
@@ -897,6 +908,12 @@ Completion rule:
 - the gate is considered resolved when `desktop` has one documented accepted graphical login path
 - `ly` remains the preferred outcome
 - `greetd` is an accepted final outcome only if the Ly path was tried and rejected for the stated session-behavior reason
+
+Resolution:
+
+- resolved in favor of `ly`
+- the VM proving path confirms that Ly authenticates successfully and launches the `niri` user session
+- the remaining VM limitation is compositor rendering on this host's NVIDIA-backed QEMU path, not Ly session behavior, so it does not justify a `greetd` fallback
 
 ### Hardware Module Gate
 
