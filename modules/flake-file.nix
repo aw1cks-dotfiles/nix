@@ -46,6 +46,10 @@
       # Keep only the repo bootstrap inputs here.
       # Reusable downstream contract inputs live in ./_internal/flake-file-inputs.
       nixpkgs.url = "github:NixOS/nixpkgs/release-25.11";
+      nixos-anywhere = {
+        url = "github:nix-community/nixos-anywhere";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
       flake-parts = {
         url = "github:hercules-ci/flake-parts";
         inputs.nixpkgs-lib.follows = "nixpkgs";

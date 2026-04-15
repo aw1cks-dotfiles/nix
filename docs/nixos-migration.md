@@ -202,7 +202,7 @@ Use this checklist as the top-level project tracker. Update it as work lands.
 ### Stream B. Provisioning And Bootstrap
 
 - [x] Add `disko` to the repo's flake inputs and integration surface.
-- [ ] Add `nixos-anywhere` to the repo's supported provisioning workflow.
+- [x] Add `nixos-anywhere` to the repo's supported provisioning workflow.
 - [ ] Expose a shared installer ISO artifact from the flake.
 - [ ] Define and implement the bootstrap SSH access path used by the installer ISO and `nixos-anywhere`.
 - [ ] Expose common provisioning flows through repo-local flake `apps` if the wrapper meaningfully improves the supported install path.
@@ -847,7 +847,8 @@ Expected outcomes:
 Status note:
 
 - B1 is complete. `disko` is already part of the repo's exported flake-input contract, is imported centrally through the NixOS constructor baseline, and is exercised by the repo-local `desktop` host via `hosts/desktop/disko.nix`.
-- the next provisioning slice should therefore move on to `nixos-anywhere` and bootstrap access rather than adding a second parallel `disko` integration path.
+- B2 is complete. `nixos-anywhere` is now pinned as a repo-local bootstrap input and exposed through `nix run .#nixos-anywhere -- <args>` so installation commands use a reproducible repo-supported entrypoint instead of an unpinned upstream flake URL.
+- the next provisioning slice should therefore move on to the explicit bootstrap SSH access path used by `nixos-anywhere` and the future installer ISO.
 
 ### Stream C. `desktop`
 
