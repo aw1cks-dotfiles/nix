@@ -84,6 +84,6 @@ Provisioning-specific note:
 - for the disposable SSH-target slice, the narrowest useful validation is a disposable Linux VM with SSH enabled and a temporary root key, then `nix run .#install-host -- <hostname> root@127.0.0.1 ...` against its forwarded port
 - for the current disposable SSH-target rehearsal, the narrowest useful validation is `nix run .#install-host-kexec-test`, which builds the repo-local Ubuntu-backed kexec test derived from `nixos-anywhere`'s own upstream test fixture
 - if the disposable SSH-target rehearsal fails inside `nix-vm-test` with `do not use python3Packages when building Python packages`, make `nix-vm-test` follow `nixpkgs-unstable`; the current fork still expects that older alias behavior
-- if that same rehearsal then fails with `nixos-test-driver: error: unrecognized arguments: --start-scripts`, the remaining blocker is an upstream interface mismatch between the imported `nix-vm-test` harness and the selected `nixos-test-driver` package
+- the repo-local kexec rehearsal patches the imported `nix-vm-test` source so its driver invocation uses the current `nixos-test-driver` argument shape: `--vm-names`, `--vm-start-scripts`, and explicit empty container lists from the pinned `nixpkgs-unstable` input
 
 If a change affects generated flake output, update `modules/flake-file.nix` and regenerate with `nix run .#write-flake` before validating.

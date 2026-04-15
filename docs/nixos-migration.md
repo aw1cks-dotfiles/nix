@@ -589,10 +589,10 @@ Current implementation shape:
 - the current rehearsal scope is intentionally limited to the `desktop` host and the `kexec` phase, matching the smallest realistic proof we want before risking disk changes in a disposable VM
 - `nix-vm-test` follows `nixpkgs-unstable` here because the forked test harness still assumes the older `python3Packages` alias behavior that breaks against this repo's stable 25.11 package set
 
-Current blocker:
+Current implementation note:
 
-- the imported upstream `nix-vm-test` harness is still not runnable as-is on this repo's pinned dependency set because its generated command line uses `--start-scripts`, while the `nixos-test-driver` coming from the selected nixpkgs expects `--vm-start-scripts`
-- treat that as a dependency-interface mismatch in the imported test harness, not as evidence that the repo-local `install-host` wrapper shape is wrong
+- the repo-local `install-host-kexec-test` path now patches the imported `nix-vm-test` source so its generated driver command uses the current `nixos-test-driver` argument shape: `--vm-names`, `--vm-start-scripts`, and explicit empty container lists from the pinned `nixpkgs-unstable` input
+- this keeps the rehearsal runnable on the repo's current dependency set without changing the supported `install-host` wrapper contract
 
 It is still not intended to prove:
 
