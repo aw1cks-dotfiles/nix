@@ -266,10 +266,10 @@ Current VM proving surface:
 
 #### D1. Host And Service Parity
 
-- [ ] Add `dziewanna` to `hosts/facts.nix` as a NixOS host.
-- [ ] Add `hosts/dziewanna/configuration.nix` declaring `configurations.nixos.dziewanna`.
-- [ ] Add `hosts/dziewanna/hardware-configuration.nix`.
-- [ ] Add `hosts/dziewanna/disko.nix`.
+- [x] Add `dziewanna` to `hosts/facts.nix` as a NixOS host.
+- [x] Add `hosts/dziewanna/configuration.nix` declaring `configurations.nixos.dziewanna`.
+- [x] Add `hosts/dziewanna/hardware-configuration.nix`.
+- [x] Add `hosts/dziewanna/disko.nix`.
 - [ ] Recreate the static public-IP NetworkManager configuration in host-local rewritten form.
 - [ ] Preserve the WAN-facing SSH posture: OpenSSH on `222`, `endlessh` on `22`, password login disabled, root login disabled.
 - [ ] Port Murmur service behavior.
@@ -994,6 +994,12 @@ Status note:
 - SSH posture
 - Murmur and ACME
 
+Status note:
+
+- D1a is complete. `hosts/facts.nix` now declares `dziewanna` as an `x86_64-linux` NixOS host with the shared `server` role, and `hosts/dziewanna/configuration.nix` now provides the initial repo-local `configurations.nixos.dziewanna` composition root with `system.stateVersion = "25.05"`.
+- D1b is complete. `hosts/dziewanna/hardware-configuration.nix` now carries the initial QEMU guest baseline from current repo idioms, and `hosts/dziewanna/disko.nix` now provides the first host-local BIOS `grub` plus XFS root layout so the new host evaluates as a bootable NixOS system.
+- Static networking and service parity remain host-local follow-up slices under `hosts/dziewanna/`.
+
 #### D2. Refinement
 
 - tighten reusable server modules only after live parity exists
@@ -1145,7 +1151,7 @@ The current natural handoff point is after completion of Stream C for `desktop`.
 
 The next logical implementation slice is:
 
-- start Stream D for `dziewanna`, beginning with `hosts/facts.nix` and a repo-local `hosts/dziewanna/configuration.nix` root that declares `configurations.nixos.dziewanna`
+- continue Stream D for `dziewanna` by recreating the static public-IP NetworkManager configuration in host-local rewritten form
 
 Known remaining non-`desktop` project gates at handoff:
 
