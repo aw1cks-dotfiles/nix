@@ -75,6 +75,7 @@ Provisioning-specific note:
 
 - for the current `disko` integration slice, the narrowest useful validation is evaluation of a real host's resolved `disko` config plus the generated `system.build.diskoScript` derivation path
 - that confirms the shared `disko` input is present in the flake contract, imported by the NixOS constructor baseline, and consumable by repo-local hosts such as `desktop`
+- for low-memory VPS reinstall targets such as `dziewanna`, also evaluate the resolved `zramSwap` config and any host-local `boot.kernel.sysctl` reclaim tuning that the bootstrap or kexec path depends on; if the real install needed manual zram intervention once, treat that as host parity that must be encoded in the repo rather than left as operator memory
 - full installer-ISO or `nixos-anywhere` validation is not required for this slice because those workflows are tracked as later Stream B items
 - for the `nixos-anywhere` workflow slice, the narrowest useful validation is `nix run .#nixos-anywhere -- --help` so the pinned repo-local app resolves and dispatches to the expected CLI without attempting a real install
 - for the bootstrap SSH slice, the narrowest useful validation is extending a real repo host with `flake.nixosModules.installer-bootstrap-ssh` and evaluating the resolved root authorized keys plus OpenSSH settings

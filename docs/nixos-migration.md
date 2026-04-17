@@ -997,12 +997,12 @@ Status note:
 Status note:
 
 - D1a is complete. `hosts/facts.nix` now declares `dziewanna` as an `x86_64-linux` NixOS host with the shared `server` role, and `hosts/dziewanna/configuration.nix` now provides the initial repo-local `configurations.nixos.dziewanna` composition root with `system.stateVersion = "25.05"`.
-- D1b is complete. `hosts/dziewanna/hardware-configuration.nix` now carries the initial QEMU guest baseline from current repo idioms, and `hosts/dziewanna/disko.nix` now provides the first host-local BIOS `grub` plus XFS root layout so the new host evaluates as a bootable NixOS system.
+- D1b is complete. `hosts/dziewanna/hardware-configuration.nix` now carries the initial QEMU guest baseline from current repo idioms, and `hosts/dziewanna/disko.nix` now provides the host-local BIOS `grub` plus XFS root layout together with the low-memory bootstrap prerequisites: a dedicated zram writeback partition, `zramSwap.enable = true`, and the reclaimed swappiness/sysctl tuning that the real kexec path needed on this 1 vCPU / sub-1 GiB VPS.
 - D1c is complete. `hosts/dziewanna/network.nix` now rewrites the live static public-IP NetworkManager profile into the current repo's host-local shape, preserving the host domain, explicit resolvers, `/etc/hosts` entries for the public IPv4 and IPv6 addresses, and the manual WAN profile with the existing MAC, MTU, gateways, and route data.
 - D1d is complete without new host-local wiring. The shared `server` role already imports `aw1cks.modules.nixos.server-security`, so `dziewanna` now resolves to the required WAN-facing SSH posture through the reusable baseline: OpenSSH on `222`, `endlessh` on `22`, password login disabled, and root login disabled.
 - D1e is complete. `hosts/dziewanna/murmur.nix` now ports the live Murmur service behavior with the existing welcome text, certificate requirement, message limits, listener settings, and firewall openings, while also wiring the service to the `mumble.awicks.io` ACME certificate path it already expects.
 - D1f is complete. `hosts/dziewanna/acme.nix` now holds the host-local ACME contract explicitly, preserving Let's Encrypt terms acceptance, the existing contact email, the HTTP challenge listener on `:80`, and the `mumble.awicks.io` certificate reload wiring for `murmur.service`.
-- Final live service-parity validation remains a host-local follow-up slice under `hosts/dziewanna/`.
+- Final live service-parity validation remains a host-local follow-up slice under `hosts/dziewanna/`, but it should now treat the zram-backed bootstrap path as part of the parity contract rather than an operator-only workaround.
 
 #### D2. Refinement
 
