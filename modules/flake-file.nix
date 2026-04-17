@@ -8,6 +8,8 @@
   flake.flakeModules = {
     downstream-flake-file = ./_internal/flake-file-inputs;
     default = {
+      # Keep repo-local flake-file wiring out of the reusable downstream module surface.
+      disabledModules = [ ./flake-file.nix ];
       imports = [
         (inputs.import-tree ./.)
         ./_internal/flake-file-inputs
