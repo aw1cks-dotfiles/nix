@@ -46,16 +46,6 @@ Before substantial work, classify the task into one of these lanes:
 - Do not override reasoning ad hoc in prompts unless the user explicitly asks
 - To increase reasoning quality, escalate to the correct agent instead of staying in a cheaper lane
 
-## Repo-Specific Escalation Triggers
-
-- Escalate to `deep-review` for changes to `modules/constructors/*`
-- Escalate to `deep-review` for changes to `modules/schema/*`
-- Escalate to `deep-review` for changes to `modules/_internal/*`
-- Escalate to `deep-review` for changes to `modules/flake-file.nix`
-- Escalate to `deep-review` for changes to `hosts/_facts.nix`
-- Escalate to `deep-review` when a change may affect downstream consumers or public flake contracts
-- Escalate to `premium-review` only for destructive operational workflows, sensitive security decisions, or high-risk shared contract judgment with limited human correction
-
 ## Execution Discipline
 
 - Briefly state the chosen lane before substantial work

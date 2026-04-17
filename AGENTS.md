@@ -83,3 +83,14 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - Use `just update` when inputs changed.
 - When changing shared exports or configuration contracts, mention whether downstream consumer validation was performed.
 - Mention clearly if a change was validated only by static inspection and not by a switch/build.
+
+## OpenCode Escalation
+
+- Treat the bundled OpenCode `agent-routing-policy` skill as repo-agnostic; keep repo-specific escalation guidance here instead of in the shared OpenCode rules.
+- Escalate to `deep-review` for changes to `modules/constructors/*`.
+- Escalate to `deep-review` for changes to `modules/schema/*`.
+- Escalate to `deep-review` for changes to `modules/_internal/*`.
+- Escalate to `deep-review` for changes to `modules/flake-file.nix`.
+- Escalate to `deep-review` for changes to `hosts/_facts.nix`.
+- Escalate to `deep-review` when a change may affect downstream consumers or public flake contracts.
+- Escalate to `premium-review` only for destructive operational workflows, sensitive security decisions, or high-risk shared contract judgment with limited human correction.
