@@ -274,7 +274,7 @@ Current VM proving surface:
 - [x] Preserve the WAN-facing SSH posture: OpenSSH on `222`, `endlessh` on `22`, password login disabled, root login disabled.
 - [x] Port Murmur service behavior.
 - [x] Port ACME configuration and certificate wiring.
-- [ ] Validate that live service parity is preserved.
+- [x] Validate that live service parity is preserved.
 
 #### D2. Refinement
 
@@ -1005,7 +1005,8 @@ Status note:
 - D1d is complete without new host-local wiring. The shared `server` role already imports `aw1cks.modules.nixos.server-security`, so `dziewanna` now resolves to the required WAN-facing SSH posture through the reusable baseline: OpenSSH on `222`, `endlessh` on `22`, password login disabled, and root login disabled.
 - D1e is complete. `hosts/dziewanna/murmur.nix` now ports the live Murmur service behavior with the existing welcome text, certificate requirement, message limits, listener settings, and firewall openings, while also wiring the service to the `mumble.awicks.io` ACME certificate path it already expects.
 - D1f is complete. `hosts/dziewanna/acme.nix` now holds the host-local ACME contract explicitly, preserving Let's Encrypt terms acceptance, the existing contact email, the HTTP challenge listener on `:80`, and the `mumble.awicks.io` certificate reload wiring for `murmur.service`.
-- Final live service-parity validation remains a host-local follow-up slice under `hosts/dziewanna/`, but it should now treat the zram-backed bootstrap path as part of the parity contract rather than an operator-only workaround.
+- D1g is complete for the migration checklist's parity gate. Repo-local validation now includes a full `nix build .#nixosConfigurations.dziewanna.config.system.build.toplevel` plus targeted `nix eval` checks for the preserved WAN and service contract: OpenSSH port `222`, `endlessh-go` disabled (matching the preserved `endlessh` service), static NetworkManager WAN IPv4/IPv6 addresses, `services.murmur.enable = true`, ACME reload wiring to `murmur.service`, and the expected firewall openings.
+- Remaining risk is deployment-side rather than repo-shape: this slice validates declared parity in the built host configuration, but it does not yet prove runtime parity on the live machine after switch (certificate issuance/renewal behavior, Murmur reachability over WAN, and end-to-end SSH posture from the public internet).
 
 #### D2. Refinement
 
@@ -1158,7 +1159,7 @@ The current natural handoff point is after completion of Stream C for `desktop`.
 
 The next logical implementation slice is:
 
-- continue Stream D for `dziewanna` by validating live service parity
+- continue Stream D2 for `dziewanna` by promoting genuinely repeated server behavior into reusable modules only where reuse is real
 
 Known remaining non-`desktop` project gates at handoff:
 
