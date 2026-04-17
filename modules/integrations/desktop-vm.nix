@@ -2,7 +2,7 @@
 {
   perSystem =
     { system, pkgs, ... }:
-    lib.mkIf pkgs.stdenv.isLinux (
+    lib.mkIf (pkgs.stdenv.isLinux && config.configurations.nixos ? desktop) (
       let
         desktop = config.flake.nixosConfigurations.desktop;
 

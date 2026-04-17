@@ -294,7 +294,7 @@ Status note:
 - [x] Resolve the initial server shell policy gate: plain `bash` first.
 - [x] Resolve whether one shared installer ISO remains sufficient.
 - [x] Add and validate an explicit shared installer ISO build path.
-- [ ] Validate downstream consumer evaluation after shared schema, constructor, or reusable-contract changes.
+- [x] Validate downstream consumer evaluation after shared schema, constructor, or reusable-contract changes.
 - [x] Resolve the `desktop` VM proving-shape gate.
 - [ ] Complete the final history rewrite pass to remove temporary migration scaffolding references.
 
@@ -1110,7 +1110,11 @@ Default answer:
 
 Current status:
 
-- not yet re-run after the recent `desktop` shell work because those changes were kept repo-local to `hosts/desktop/`, its embedded Home Manager payload, and repo-local validation tooling rather than widening the reusable downstream contract
+- complete for the current migration branch: downstream evaluation was run from `templates/default` with `nix flake check --override-input dendritic-lib path:<repo>` and `nix eval --json .#checks --override-input dendritic-lib path:<repo>`
+- validation initially failed due to a repo-local integration assumption: `modules/integrations/desktop-vm.nix` unconditionally referenced `config.flake.nixosConfigurations.desktop`, which is not part of downstream consumers by default
+- the integration is now guarded to expose `desktop-vm` outputs only when `configurations.nixos.desktop` exists, preserving repo-local behavior while allowing downstream evaluation to proceed
+- downstream check evaluation now succeeds (the template checks attrset evaluates cleanly under the local override path)
+- full downstream `nix flake check` currently still fails in the template's `check-flake-file` guard due generated-template drift unrelated to this migration slice (input pin/render mismatch in `templates/default/flake.nix`), so this gate is treated as evaluation coverage rather than a fully clean downstream check build
 
 ### `desktop` VM Shape Gate
 
