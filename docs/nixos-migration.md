@@ -272,7 +272,7 @@ Current VM proving surface:
 - [x] Add `hosts/dziewanna/disko.nix`.
 - [x] Recreate the static public-IP NetworkManager configuration in host-local rewritten form.
 - [x] Preserve the WAN-facing SSH posture: OpenSSH on `222`, `endlessh` on `22`, password login disabled, root login disabled.
-- [ ] Port Murmur service behavior.
+- [x] Port Murmur service behavior.
 - [ ] Port ACME configuration and certificate wiring.
 - [ ] Validate that live service parity is preserved.
 
@@ -1000,7 +1000,8 @@ Status note:
 - D1b is complete. `hosts/dziewanna/hardware-configuration.nix` now carries the initial QEMU guest baseline from current repo idioms, and `hosts/dziewanna/disko.nix` now provides the first host-local BIOS `grub` plus XFS root layout so the new host evaluates as a bootable NixOS system.
 - D1c is complete. `hosts/dziewanna/network.nix` now rewrites the live static public-IP NetworkManager profile into the current repo's host-local shape, preserving the host domain, explicit resolvers, `/etc/hosts` entries for the public IPv4 and IPv6 addresses, and the manual WAN profile with the existing MAC, MTU, gateways, and route data.
 - D1d is complete without new host-local wiring. The shared `server` role already imports `aw1cks.modules.nixos.server-security`, so `dziewanna` now resolves to the required WAN-facing SSH posture through the reusable baseline: OpenSSH on `222`, `endlessh` on `22`, password login disabled, and root login disabled.
-- Murmur, ACME, and final live service parity remain host-local follow-up slices under `hosts/dziewanna/`.
+- D1e is complete. `hosts/dziewanna/murmur.nix` now ports the live Murmur service behavior with the existing welcome text, certificate requirement, message limits, listener settings, and firewall openings, while also wiring the service to the `mumble.awicks.io` ACME certificate path it already expects.
+- Final ACME and live service-parity validation remain host-local follow-up slices under `hosts/dziewanna/`.
 
 #### D2. Refinement
 
@@ -1153,7 +1154,7 @@ The current natural handoff point is after completion of Stream C for `desktop`.
 
 The next logical implementation slice is:
 
-- continue Stream D for `dziewanna` by porting Murmur service behavior
+- continue Stream D for `dziewanna` by porting ACME configuration and certificate wiring
 
 Known remaining non-`desktop` project gates at handoff:
 

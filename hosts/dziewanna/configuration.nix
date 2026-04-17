@@ -6,6 +6,7 @@
         ./hardware-configuration.nix
         ./disko.nix
         ./network.nix
+        ./murmur.nix
       ];
 
       system.stateVersion = "25.05";
