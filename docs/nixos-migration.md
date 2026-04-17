@@ -278,8 +278,14 @@ Current VM proving surface:
 
 #### D2. Refinement
 
-- [ ] Promote repeated server behavior into reusable NixOS modules only after parity exists.
-- [ ] Reduce host-local one-offs only where the reuse case is real.
+- [x] Promote repeated server behavior into reusable NixOS modules only after parity exists.
+- [x] Reduce host-local one-offs only where the reuse case is real.
+
+Status note:
+
+- D2 is complete for the current migration scope as an explicit no-op promotion decision. After D1 parity validation, the repo was re-audited for genuinely repeated server behavior and the only cross-host server baseline already promoted remains `aw1cks.modules.nixos.server-security` via `aw1cks.profiles.nixos.server`.
+- The remaining `dziewanna` logic is still host-specific rather than reusable contract material: static public-IP NetworkManager profile data, Murmur service intent, and the host's ACME certificate wiring.
+- No further extraction was done in this slice because introducing new shared module surface without a second real consumer would increase abstraction weight without reducing duplication.
 
 ### Validation Gates
 
@@ -1159,7 +1165,7 @@ The current natural handoff point is after completion of Stream C for `desktop`.
 
 The next logical implementation slice is:
 
-- continue Stream D2 for `dziewanna` by promoting genuinely repeated server behavior into reusable modules only where reuse is real
+- validate the downstream reusable contract gate (`docs/downstream-template.md` path) now that the major shared migration streams are complete
 
 Known remaining non-`desktop` project gates at handoff:
 
