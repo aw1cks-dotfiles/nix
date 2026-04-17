@@ -6,6 +6,7 @@
         ./hardware-configuration.nix
         ./disko.nix
         ./network.nix
+        ./acme.nix
         ./murmur.nix
       ];
 

@@ -273,7 +273,7 @@ Current VM proving surface:
 - [x] Recreate the static public-IP NetworkManager configuration in host-local rewritten form.
 - [x] Preserve the WAN-facing SSH posture: OpenSSH on `222`, `endlessh` on `22`, password login disabled, root login disabled.
 - [x] Port Murmur service behavior.
-- [ ] Port ACME configuration and certificate wiring.
+- [x] Port ACME configuration and certificate wiring.
 - [ ] Validate that live service parity is preserved.
 
 #### D2. Refinement
@@ -1001,7 +1001,8 @@ Status note:
 - D1c is complete. `hosts/dziewanna/network.nix` now rewrites the live static public-IP NetworkManager profile into the current repo's host-local shape, preserving the host domain, explicit resolvers, `/etc/hosts` entries for the public IPv4 and IPv6 addresses, and the manual WAN profile with the existing MAC, MTU, gateways, and route data.
 - D1d is complete without new host-local wiring. The shared `server` role already imports `aw1cks.modules.nixos.server-security`, so `dziewanna` now resolves to the required WAN-facing SSH posture through the reusable baseline: OpenSSH on `222`, `endlessh` on `22`, password login disabled, and root login disabled.
 - D1e is complete. `hosts/dziewanna/murmur.nix` now ports the live Murmur service behavior with the existing welcome text, certificate requirement, message limits, listener settings, and firewall openings, while also wiring the service to the `mumble.awicks.io` ACME certificate path it already expects.
-- Final ACME and live service-parity validation remain host-local follow-up slices under `hosts/dziewanna/`.
+- D1f is complete. `hosts/dziewanna/acme.nix` now holds the host-local ACME contract explicitly, preserving Let's Encrypt terms acceptance, the existing contact email, the HTTP challenge listener on `:80`, and the `mumble.awicks.io` certificate reload wiring for `murmur.service`.
+- Final live service-parity validation remains a host-local follow-up slice under `hosts/dziewanna/`.
 
 #### D2. Refinement
 
@@ -1154,7 +1155,7 @@ The current natural handoff point is after completion of Stream C for `desktop`.
 
 The next logical implementation slice is:
 
-- continue Stream D for `dziewanna` by porting ACME configuration and certificate wiring
+- continue Stream D for `dziewanna` by validating live service parity
 
 Known remaining non-`desktop` project gates at handoff:
 
