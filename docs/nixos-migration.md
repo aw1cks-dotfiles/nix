@@ -525,7 +525,7 @@ Current repo-local output:
 
 - `packages.installer-iso` builds a shared minimal installer image that imports `flake.nixosModules.installer-bootstrap-ssh`
 - the current shared image seeds bootstrap root SSH access from `aw1cks.identity.selected.authorizedKeys` by setting `aw1cks.provisioning.bootstrapAuthorizedKeys` inside the installer build
-- `apps.install-host` wraps the common `nixos-anywhere` invocation shape by filling in `--flake "$repo_root#<hostname>"` and `--extra-files hosts/<hostname>` from the requested repo host
+- `apps.install-host` wraps the common `nixos-anywhere` invocation shape by filling in `--flake "$repo_root#<hostname>"` and `--extra-files hosts/<hostname>` from the requested repo host, and it now runs `hosts/<hostname>/bootstrap-pre-kexec.sh` over SSH first when that host supplies a pre-kexec preparation hook
 - `apps.install-host-vm-test` wraps `nixos-anywhere --vm-test` for a repo host so provisioning can be preflighted without a real SSH target
 
 ### Supported Provisioning Paths
@@ -544,6 +544,7 @@ The design should support two primary installation paths.
 - install from an existing Linux system such as the current Arch Linux on `desktop`
 - use the existing machine's current SSH entrypoint for `nixos-anywhere`
 - allow the tool to handle the normal bootstrap flow where appropriate
+- allow host-local pre-kexec preparation when a constrained source OS needs extra setup before the `nixos-anywhere` kexec handoff
 - do not assume the final NixOS primary user or authorized-keys wiring already exists on the preinstall system
 
 Custom kexec images are not required for the initial project shape.
@@ -582,6 +583,7 @@ This disposable-target path is intended to prove:
 
 - `nix run .#install-host -- <hostname> <target-host>` works against a real SSH endpoint rather than only `system.build.installTest`
 - the repo's `--extra-files hosts/<hostname>` bootstrap material is accepted by `nixos-anywhere`
+- host-local pre-kexec hooks can patch target-specific bootstrap gaps before `nixos-anywhere` switches into the installer kernel
 - the normal remote control flow can reach kexec or later install phases without requiring real hardware first
 
 Current implementation shape:
@@ -594,6 +596,7 @@ Current implementation note:
 
 - the repo-local `install-host-kexec-test` path now patches the imported `nix-vm-test` source so its generated driver command uses the current `nixos-test-driver` argument shape: `--vm-names`, `--vm-start-scripts`, and explicit empty container lists from the pinned `nixpkgs-unstable` input
 - this keeps the rehearsal runnable on the repo's current dependency set without changing the supported `install-host` wrapper contract
+- low-memory reinstall targets can now encode a host-local `bootstrap-pre-kexec.sh` hook for the source OS; `dziewanna` uses that repo-local hook to enable temporary zram swap before the Ubuntu-to-NixOS kexec transition
 
 It is still not intended to prove:
 

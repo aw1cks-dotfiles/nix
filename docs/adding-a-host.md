@@ -9,6 +9,8 @@ Add hosts in two places:
 
 That means sibling files such as `hosts/<name>/hardware-configuration.nix` or `hosts/<name>/disko.nix` are safe to keep next to `configuration.nix`; they stay private unless that host root imports them.
 
+Repo-local provisioning helpers can live there too. For example, `hosts/<name>/bootstrap-pre-kexec.sh` is available to the `install-host` wrapper for source-OS preparation before `nixos-anywhere` kexecs into the installer.
+
 ## 1. Add Facts
 
 Create a normalized entry in `hosts/facts.nix` under `aw1cks.hostFacts`.

@@ -108,7 +108,7 @@ Keep these out of facts:
 - NVIDIA pin files
 - secrets and `age.secrets.*` wiring
 
-`hosts/default.nix` is the explicit repo-local host loader. It imports `hosts/facts.nix` and each `hosts/<name>/configuration.nix`, while host-local support files such as `hardware-configuration.nix`, `disko.nix`, `network.nix`, or session modules stay private to that host root unless the host imports them deliberately.
+`hosts/default.nix` is the explicit repo-local host loader. It imports `hosts/facts.nix` and each `hosts/<name>/configuration.nix`, while host-local support files such as `hardware-configuration.nix`, `disko.nix`, `network.nix`, session modules, or repo-local provisioning helpers like `bootstrap-pre-kexec.sh` stay private to that host unless the relevant host root or provisioning wrapper consumes them deliberately.
 
 ## Constructors
 
