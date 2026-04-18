@@ -13,6 +13,7 @@ in
       modules.nixos.pipewire
       modules.nixos.systemd-boot
       modules.nixos.wayland
+      modules.nixos.fonts
       modules.nixos.nix-settings
     ];
 
