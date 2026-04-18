@@ -4,10 +4,11 @@ let
 in
 {
   aw1cks.profiles.nixos.server = {
-    # Minimal shared NixOS runtime for headless and service-oriented hosts.
+    # Thin shared server bundle: runtime baseline plus the first WAN-facing SSH posture.
     imports = [
       modules.nixos.lix
       modules.nixos.nix-settings
+      modules.nixos.server-security
     ];
 
     aw1cks.user.shellPolicy = lib.mkDefault "bash";
