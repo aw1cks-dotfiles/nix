@@ -4,11 +4,27 @@
     let
       system = "x86_64-linux";
       pkgs = inputs.nixpkgs.legacyPackages.${system};
+      patchedNixVmTest = {
+        lib.${system} =
+          import
+            (
+              pkgs.applyPatches {
+                name = "nix-vm-test-vm-start-scripts";
+                src = inputs.nix-vm-test;
+                patches = [ ./patches/nix-vm-test-vm-start-scripts.patch ];
+              }
+              + "/lib.nix"
+            )
+            {
+              nixpkgs = inputs.nixpkgs-unstable.outPath;
+              inherit system;
+            };
+      };
     in
     import (inputs.nixos-anywhere + "/tests/linux-kexec-test.nix") {
       inherit pkgs;
       nixos-anywhere = inputs.nixos-anywhere.packages.${system}.default;
-      nix-vm-test = inputs.nix-vm-test;
+      nix-vm-test = patchedNixVmTest;
       system-to-install = inputs.self.nixosConfigurations.desktop;
       kexec-installer = "${
         inputs.nixos-images.packages.${system}.kexec-installer-nixos-unstable-noninteractive
