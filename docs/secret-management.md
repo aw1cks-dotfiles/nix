@@ -487,6 +487,14 @@ nix run .#nixos-anywhere -- --flake ".#<hostname>" \
   root@<target-ip>
 ```
 
+Before touching a real target, you can preflight the host's install closure and disko layout with:
+
+```bash
+nix run .#install-host-vm-test -- <hostname>
+```
+
+If the pinned `disko` toolchain is currently blocking `system.build.installTest`, fall back to checking the host's `system.build.diskoScript` and `system.build.toplevel` evaluation paths until that upstream VM-test issue is fixed.
+
 For the direct-boot installer flow, the live installer environment should import `nixosModules.installer-bootstrap-ssh` so the same operator keys can reach the machine before installation starts.
 
 Set `aw1cks.provisioning.bootstrapAuthorizedKeys` explicitly for that installer environment rather than assuming the final host identity keys should also grant bootstrap root access.
