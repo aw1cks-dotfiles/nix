@@ -26,5 +26,16 @@
       identity = "personal";
       tags = [ "nvidia" ];
     };
+
+    desktop = {
+      system = "x86_64-linux";
+      kind = "nixos";
+      roles = [
+        "desktop"
+      ];
+      identity = "personal";
+      hostName = "desktop";
+      tags = [ "nvidia" ];
+    };
   };
 }
