@@ -73,7 +73,7 @@
       };
     in
     {
-      imports = [ inputs.lazyvim-nix.homeManagerModules.default ];
+      imports = [ (import ../../../_internal/lazyvim/lazyvim-nix-module.nix { inherit inputs; }) ];
 
       options.modules.lazyvim = {
         enable = lib.mkOption {
