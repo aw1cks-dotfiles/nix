@@ -37,9 +37,6 @@ let
     in
     builtins.listToAttrs (map parseEnvFile envFiles);
 
-  lucidglyphFontconfigLocalConf = lib.concatMapStringsSep "\n\n" (
-    file: builtins.readFile "${lucidglyphBase}/fontconfig/${file}"
-  ) lucidglyphFontconfigFiles;
 in
 {
   options.aw1cks.fonts = {
@@ -67,9 +64,9 @@ in
         type = lib.types.attrsOf lib.types.str;
         default = lucidglyphEnvironment;
       };
-      fontconfigLocalConf = lib.mkOption {
-        type = lib.types.lines;
-        default = lucidglyphFontconfigLocalConf;
+      fontconfigFiles = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = lucidglyphFontconfigFiles;
       };
     };
 
