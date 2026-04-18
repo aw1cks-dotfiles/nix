@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ config, inputs, ... }:
 {
   configurations.nixos.desktop = {
     module = {
@@ -9,6 +9,7 @@
         inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
         inputs.nixos-hardware.nixosModules.common-gpu-nvidia-nonprime
         (inputs.nixos-hardware + "/common/gpu/nvidia/ampere")
+        config.aw1cks.modules.nixos.nvidia
         ./hardware-configuration.nix
         ./disko.nix
       ];
