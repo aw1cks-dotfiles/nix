@@ -32,10 +32,14 @@
       kind = "nixos";
       roles = [
         "desktop"
+        "developer"
+        "interactive"
+        "multimedia"
       ];
       identity = "personal";
       hostName = "desktop";
       tags = [ "nvidia" ];
     };
+
   };
 }
