@@ -9,7 +9,6 @@ in
       modules.nixos.boot
       modules.nixos.latest-kernel
       modules.nixos.network
-      modules.nixos.lix
       modules.nixos.nix-settings
       modules.nixos.server-security
     ];

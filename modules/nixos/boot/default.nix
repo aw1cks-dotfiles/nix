@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 {
   aw1cks.modules.nixos.boot = {
     boot = {
