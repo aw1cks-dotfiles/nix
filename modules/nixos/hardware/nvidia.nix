@@ -1,7 +1,12 @@
 { ... }:
 {
   aw1cks.modules.nixos.nvidia =
-    { pkgs, ... }:
+    {
+      lib,
+      pkgs,
+      config,
+      ...
+    }:
     {
       nix.settings = {
         substituters = [ "https://cuda-maintainers.cachix.org" ];
@@ -25,6 +30,7 @@
       };
 
       hardware.nvidia = {
+        package = lib.mkDefault config.boot.kernelPackages.nvidiaPackages.production;
         nvidiaSettings = true;
         powerManagement = {
           enable = true;

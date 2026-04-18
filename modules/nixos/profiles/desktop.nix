@@ -8,7 +8,7 @@ in
     imports = [
       modules.nixos.boot
       modules.nixos.efi
-      modules.nixos.latest-kernel
+      modules.nixos.latest-kernel-unstable
       modules.nixos.network
       modules.nixos.nix-settings
       modules.nixos.pipewire
