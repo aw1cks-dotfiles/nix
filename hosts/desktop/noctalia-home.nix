@@ -98,6 +98,31 @@
   };
 
   programs.niri.settings = {
+    outputs = {
+      "ASUSTek COMPUTER INC VG27A K9LMQS060339" = {
+        mode = {
+          width = 2560;
+          height = 1440;
+          refresh = 164.999;
+        };
+        focus-at-startup = true;
+        position = {
+          x = 2560;
+          y = 0;
+        };
+      };
+      "ViewSonic Corporation VA2719-2K UZJ192522589" = {
+        mode = {
+          width = 2560;
+          height = 1440;
+          refresh = 59.951;
+        };
+        position = {
+          x = 0;
+          y = 0;
+        };
+      };
+    };
     binds = {
       "Mod+Shift+Slash".action.show-hotkey-overlay = { };
 
