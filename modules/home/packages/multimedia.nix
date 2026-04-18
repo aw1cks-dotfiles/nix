@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 {
   aw1cks.modules.home.multimedia-apps =
     { pkgs, ... }:
@@ -13,6 +13,7 @@
         ]
         ++ lib.optionals pkgs.stdenv.isLinux [
           playerctl
+          pwvucontrol
         ];
 
       programs = {
