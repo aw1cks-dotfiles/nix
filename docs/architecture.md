@@ -156,6 +156,8 @@ Unknown role names fail constructor assertions during evaluation.
 - when present, the constructor imports the Home Manager NixOS module through `aw1cks.modules.nixos-home-manager.default`
 - the shared primary-user module imports `aw1cks.modules.nixos.user-shell-policy`, and profiles can set `aw1cks.user.shellPolicy` to choose the resolved login shell centrally
 
+Current thin reusable NixOS bundles follow the same split used elsewhere in the repo: profiles stay small and import reusable atoms. For example, `aw1cks.profiles.nixos.server` now imports a shared `aw1cks.modules.nixos.server-security` baseline rather than carrying SSH policy inline.
+
 `configurations.darwin` is for nix-darwin systems.
 
 - hosts can provide an optional embedded `home` payload
