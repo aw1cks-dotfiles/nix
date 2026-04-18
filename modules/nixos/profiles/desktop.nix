@@ -10,12 +10,13 @@ in
       modules.nixos.efi
       modules.nixos.latest-kernel-unstable
       modules.nixos.network
+      modules.nixos.nix-settings
       modules.nixos.pipewire
+      modules.nixos.resolved
       modules.nixos.systemd-boot
+      modules.nixos.vpn-client
       modules.nixos.wayland
       modules.nixos.fonts
-      modules.nixos.nix-settings
-      modules.nixos.vpn-client
     ];
 
     # Desktops will likely need to run non-Nix binaries (e.g. UV python runtime)
