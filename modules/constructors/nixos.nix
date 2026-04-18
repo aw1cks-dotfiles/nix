@@ -149,7 +149,7 @@ in
               }
               ++ xlib.baseModulesFor {
                 inherit inputs config;
-                target = "nixosEmbedded";
+                target = "homeEmbedded";
               }
               ++ [ home ];
           };
