@@ -64,6 +64,16 @@
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
     };
 
+    apple-fonts = {
+      url = lib.mkDefault "github:Lyndeno/apple-fonts.nix";
+      inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
+    };
+
+    lucidglyph = {
+      url = lib.mkDefault "github:maximilionus/lucidglyph";
+      flake = false;
+    };
+
     zen-browser = {
       url = lib.mkDefault "github:0xc000022070/zen-browser-flake";
       inputs = {

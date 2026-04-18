@@ -16,6 +16,7 @@ in
       modules.nixos.systemd-boot
       modules.nixos.vpn-client
       modules.nixos.wayland
+      modules.nixos.fonts
     ];
 
     # Desktops will likely need to run non-Nix binaries (e.g. UV python runtime)
