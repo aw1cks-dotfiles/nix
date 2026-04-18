@@ -5,6 +5,10 @@ Add hosts in two places:
 - `hosts/facts.nix` for shared metadata
 - `hosts/<name>/configuration.nix` for repo-local composition
 
+`hosts/default.nix` is the explicit host loader. It imports `hosts/facts.nix` and each `hosts/<name>/configuration.nix`, but it does not recurse into host-local support files.
+
+That means sibling files such as `hosts/<name>/hardware-configuration.nix` or `hosts/<name>/disko.nix` are safe to keep next to `configuration.nix`; they stay private unless that host root imports them.
+
 ## 1. Add Facts
 
 Create a normalized entry in `hosts/facts.nix` under `aw1cks.hostFacts`.
@@ -107,6 +111,7 @@ These belong in the host composition root instead of facts:
 - embedded `home` payloads
 - NVIDIA enablement and `nvidia.pinFile`
 - host-specific module imports
+- host-local `disko.nix` and `hardware-configuration.nix` imports
 - other constructor-specific toggles
 
 Do not manually re-import role-derived profiles in host files unless you intentionally want extra imports beyond the constructor-owned defaults.
