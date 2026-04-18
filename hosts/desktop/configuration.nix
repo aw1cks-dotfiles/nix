@@ -52,21 +52,20 @@ in
 
     home = {
       imports = [ sharedHomeModule ];
-
+      modules.lazyvim.enable = true;
       home.stateVersion = "25.05";
     };
   };
 
+  # LEGACY: old Arch install with home-manager.
+  # Superceded by NixOS config.
   configurations.home."alex@desktop" = {
     nvidia = {
       enable = true;
       pinFile = ./nvidia.json;
     };
     module = {
-      imports = [ sharedHomeModule ];
-
       modules.lazyvim.enable = true;
-
       home.stateVersion = "25.05";
     };
   };
