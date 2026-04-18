@@ -34,10 +34,12 @@ in
       # the same substitute coverage instead of rebuilding tool packages locally.
       extra-substituters = [
         "https://cache.numtide.com"
+        "https://noctalia.cachix.org"
         "https://wezterm.cachix.org"
       ];
       extra-trusted-public-keys = [
         "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+        "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
         "wezterm.cachix.org-1:kAbhjYUC9qvblTE+s7S+kl5XM1zVa4skO+E/1IDWdH0="
       ];
 

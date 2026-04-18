@@ -14,6 +14,7 @@
         ./hardware-configuration.nix
         ./disko.nix
         ./niri.nix
+        ./noctalia.nix
       ];
 
       boot.loader.grub.devices = [ ];
@@ -22,6 +23,10 @@
     };
 
     home = {
+      imports = [
+        inputs.noctalia.homeModules.default
+        ./noctalia-home.nix
+      ];
       home.stateVersion = "25.05";
     };
   };

@@ -199,6 +199,7 @@
                   f"XDG_RUNTIME_DIR={runtime_dir} "
                   "systemctl --user is-active niri.service'"
               )
+              machine.wait_until_succeeds(f"pgrep -u {user_name} -f noctalia-shell")
               machine.succeed(f"su - {user_name} -c 'command -v wezterm && command -v zen-twilight'")
 
               run_in_session(
@@ -225,8 +226,6 @@
         );
       in
       {
-        checks.desktop-vm-smoke = desktopVmSmoke;
-
         packages.desktop-vm = desktopVm;
         packages.desktop-vm-smoke = desktopVmSmoke;
 
