@@ -1,6 +1,6 @@
 { config, inputs, ... }:
 {
-  aw1cks.modules.home.fonts =
+  aw1cks.modules.home.fonts-theme =
     {
       osConfig ? null,
       pkgs,
