@@ -26,6 +26,11 @@
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
     };
 
+    niri = {
+      url = lib.mkDefault "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
+    };
+
     mermaid-rs-renderer = {
       url = lib.mkDefault "github:1jehuang/mermaid-rs-renderer";
       flake = false;
