@@ -18,14 +18,32 @@ let
       ${system}.${name} = value;
     };
 
-  nixosChecks = lib.mapAttrsToList (name: nixos: {
-    ${nixos.config.nixpkgs.hostPlatform.system} =
-      (mkPerSystemCheck {
-        system = nixos.config.nixpkgs.hostPlatform.system;
-        name = "nixos-${name}";
-        value = nixos.config.system.build.toplevel;
-      }).${nixos.config.nixpkgs.hostPlatform.system};
-  }) config.flake.nixosConfigurations;
+  nixosChecks = lib.mapAttrsToList (
+    name: nixos:
+    let
+      system = nixos.config.nixpkgs.hostPlatform.system;
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      users = nixos.config.users.users or { };
+      primaryUsers = builtins.attrNames (lib.filterAttrs (_: user: user.isNormalUser or false) users);
+      shellPolicy = lib.attrByPath [ "aw1cks" "user" "shellPolicy" ] "" nixos.config;
+      sshPorts = builtins.concatStringsSep "," (
+        map toString (nixos.config.services.openssh.ports or [ ])
+      );
+    in
+    mkPerSystemCheck {
+      inherit system;
+      name = "nixos-${name}-eval";
+      value = pkgs.writeText "nixos-${name}-eval" ''
+        hostName=${nixos.config.networking.hostName}
+        system=${system}
+        primaryUsers=${builtins.concatStringsSep "," primaryUsers}
+        shellPolicy=${shellPolicy}
+        mutableUsers=${if nixos.config.users.mutableUsers then "true" else "false"}
+        opensshEnabled=${if nixos.config.services.openssh.enable then "true" else "false"}
+        opensshPorts=${sshPorts}
+      '';
+    }
+  ) config.flake.nixosConfigurations;
 
   darwinChecks = lib.mapAttrsToList (
     name: darwin:
