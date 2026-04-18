@@ -476,7 +476,7 @@ Do not place these declarations in `hosts/facts.nix`.
 Install with the pre-generated host key injected as sensitive bootstrap material:
 
 ```bash
-nixos-anywhere --flake ".#<hostname>" \
+nix run .#nixos-anywhere -- --flake ".#<hostname>" \
   --extra-files hosts/<hostname> \
   root@<target-ip>
 ```
