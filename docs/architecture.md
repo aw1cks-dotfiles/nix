@@ -55,7 +55,7 @@ The current identity model is `aw1cks.identities`, not older `aw1cks.user.*` ter
 
 `modules/schema/identity.nix` defines:
 
-- `aw1cks.identities.<name>` entries with `fullName`, `email`, `username`, and optional `homeDirectory`
+- `aw1cks.identities.<name>` entries with `fullName`, `email`, `username`, optional `homeDirectory`, and `authorizedKeys`
 - `aw1cks.identity.default` as the default selected identity name
 - `aw1cks.identity.selected` as the resolved default identity entry
 

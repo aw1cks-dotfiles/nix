@@ -24,6 +24,12 @@ let
           default = null;
           description = "Optional home directory override for this identity.";
         };
+
+        authorizedKeys = lib.mkOption {
+          type = lib.types.listOf lib.types.singleLineStr;
+          default = [ ];
+          description = "Public SSH authorized keys for this identity.";
+        };
       };
     }
   );
@@ -54,6 +60,11 @@ in
       fullName = lib.mkDefault "Alex Wicks";
       email = lib.mkDefault "alex@awicks.io";
       username = lib.mkDefault "alex";
+      authorizedKeys = lib.mkDefault [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPwVACwmbdrPk3nYPxBxuhKnUvOy4eWn2CFgTG3iCXEK alex@desktop"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINGYXIhWcC1V+NetYoa+UPGKX/FcsZQLwxsp3KseIj+/ alex@mbp14"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJrYpgDNA0hK9t6DcrbKpshpEV5XFIoSpxG0hMF+Xk1t phone"
+      ];
     };
 
     identity.selected =
