@@ -28,7 +28,7 @@
           settings = {
             PasswordAuthentication = false;
             KbdInteractiveAuthentication = false;
-            PermitRootLogin = lib.mkDefault "prohibit-password";
+            PermitRootLogin = lib.mkForce "prohibit-password";
           };
         };
 
