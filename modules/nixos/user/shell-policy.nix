@@ -26,7 +26,7 @@
       };
 
       config = {
-        users.users.${resolvedUser}.shell = lib.mkDefault shellPackage;
+        users.users.${resolvedUser}.shell = lib.mkOverride 900 shellPackage;
         programs.zsh.enable = lib.mkIf (config.aw1cks.user.shellPolicy == "zsh") (lib.mkDefault true);
       };
     };
