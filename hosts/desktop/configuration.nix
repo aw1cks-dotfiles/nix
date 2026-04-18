@@ -10,6 +10,7 @@
         inputs.nixos-hardware.nixosModules.common-gpu-nvidia-nonprime
         (inputs.nixos-hardware + "/common/gpu/nvidia/ampere")
         config.aw1cks.modules.nixos.nvidia
+        config.aw1cks.modules.nixos.ly
         ./hardware-configuration.nix
         ./disko.nix
       ];
