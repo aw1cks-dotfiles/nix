@@ -108,7 +108,7 @@ Keep these out of facts:
 - NVIDIA pin files
 - secrets and `age.secrets.*` wiring
 
-`hosts/default.nix` is the explicit repo-local host loader. It imports `hosts/facts.nix` and each `hosts/<name>/configuration.nix`, while host-local support files such as `hardware-configuration.nix`, `disko.nix`, `network.nix`, or session modules stay private to that host root unless the host imports them deliberately.
+`hosts/default.nix` is the explicit repo-local host loader. It imports `hosts/facts.nix` and each `hosts/<name>/configuration.nix`, while host-local support files such as `hardware-configuration.nix`, `disko.nix`, `network.nix`, session modules, or repo-local provisioning helpers like `bootstrap-pre-kexec.sh` stay private to that host unless the relevant host root or provisioning wrapper consumes them deliberately.
 
 ## Constructors
 
@@ -171,6 +171,7 @@ Because `aw1cks.modules.*` and `aw1cks.profiles.*` are exported as deferred modu
 The current shared NixOS atom surface now includes reusable entries for boot, kernel selection, EFI/systemd-boot, network baseline, PipeWire audio, Wayland environment defaults, shared user realization, shell policy, and server security. Host roots should compose those atoms through profiles or direct imports rather than reintroducing ad hoc copies.
 
 Host-local compositor and shell choices remain separate from that shared baseline. The current `desktop` host keeps its small `niri` wrapper under `hosts/desktop/niri.nix`, layers `noctalia-shell` through a host-local embedded Home Manager import in `hosts/desktop/noctalia-home.nix`, and intentionally keeps both concerns repo-local instead of promoting a reusable desktop-shell abstraction yet.
+
 Host-local storage ownership stays under `hosts/<name>/disko.nix`, with the shared `disko` input imported centrally by the NixOS constructor path so repo-local hosts can opt into disk layout definitions without widening the reusable module surface.
 
 Provisioning-specific bootstrap access stays repo-local rather than expanding the `aw1cks.*` reusable contract. The current installer bootstrap SSH path is exposed as `flake.nixosModules.installer-bootstrap-ssh`, which is intended for installer or kexec environments and not for final host imports.
