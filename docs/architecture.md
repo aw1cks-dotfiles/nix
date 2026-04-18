@@ -128,6 +128,10 @@ They all:
 
 The shared helper file `modules/constructors/_lib.nix` is intentionally small. It centralizes repeated constructor policy such as facts lookup, role expansion, target assertions, baseline imports, and user/home resolution.
 
+Constructors also own package-set creation. The shared helper now builds a configured `pkgs` instance per target so NixOS, nix-darwin, and standalone Home Manager all see the same baseline behavior for `allowUnfree`, NVIDIA license acceptance, `pkgs.unstable`, and `pkgs.llm-agents`. The old shared `modules/shared/nixpkgs.nix` path no longer injects overlays or `nixpkgs.config`; it remains only as a compatibility marker module for existing imports.
+
+For NixOS specifically, the constructor uses `inputs.nixpkgs.nixosModules.readOnlyPkgs` and provides `nixpkgs.pkgs` directly. That keeps the configured package set authoritative in one place and avoids mixing constructor-owned `pkgs` with module-side `nixpkgs.config`.
+
 The shared primary-user realization for NixOS lives in `modules/nixos/user/default.nix`. The NixOS constructor resolves identity, username, and home directory first, then passes those resolved values into that reusable module.
 
 ## Role Expansion
@@ -161,6 +165,8 @@ Unknown role names fail constructor assertions during evaluation.
 - the shared primary-user module imports `aw1cks.modules.nixos.user-shell-policy`, and profiles can set `aw1cks.user.shellPolicy` to choose the resolved login shell centrally
 
 Current thin reusable NixOS bundles follow the same split used elsewhere in the repo: profiles stay small and import reusable atoms. For example, `aw1cks.profiles.nixos.server` now imports a shared `aw1cks.modules.nixos.server-security` baseline rather than carrying SSH policy inline.
+
+Because `aw1cks.modules.*` and `aw1cks.profiles.*` are exported as deferred modules, any config that depends on `pkgs` must live inside a real module function such as `{ pkgs, ... }: { ... }` so it is evaluated in the target module system rather than in the outer flake-module context.
 
 The current shared NixOS atom surface now includes reusable entries for boot, kernel selection, EFI/systemd-boot, network baseline, PipeWire audio, Wayland environment defaults, shared user realization, shell policy, and server security. Host roots should compose those atoms through profiles or direct imports rather than reintroducing ad hoc copies.
 

@@ -62,6 +62,13 @@ Use the narrowest useful validation first.
 - host-behavior changes: the relevant rebuild command or narrower host-specific build path, because `nix flake check` intentionally avoids full NixOS closures
 - reusable downstream contract changes: downstream validation with a local override when practical
 
+Constructor-owned package-set note:
+
+- constructor changes now include shared `pkgs` wiring for `allowUnfree`, NVIDIA license acceptance, `pkgs.unstable`, and `pkgs.llm-agents`
+- for NixOS constructor changes, the narrowest meaningful validation is the affected host's `config.system.build.toplevel` build, not only `nix flake check`
+- for standalone Home Manager constructor changes, the narrowest meaningful validation is the relevant `homeConfigurations.<name>.activationPackage`
+- for nix-darwin constructor changes, evaluation can be checked from Linux, but a full darwin build still requires a darwin builder or host
+
 Desktop-specific note:
 
 - `nix build .#desktop-vm` is the narrowest useful repo-local validation for the `desktop` VM proving path

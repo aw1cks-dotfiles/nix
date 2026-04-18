@@ -145,7 +145,11 @@ in
         };
       in
       inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = inputs.nixpkgs.legacyPackages.${resolvedSystem};
+        pkgs = xlib.configuredPkgsFor {
+          inherit inputs;
+          system = resolvedSystem;
+          enableLix = !(config.submoduleSupport.externalPackageInstall or false);
+        };
         inherit
           (xlib.constructorArgsFor {
             inherit hostFacts;

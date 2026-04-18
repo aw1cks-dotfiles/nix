@@ -71,6 +71,30 @@ rec {
         specialArgs = { inherit hostFacts; };
       };
 
+  configuredPkgsFor =
+    {
+      inputs,
+      system,
+      enableLix ? true,
+    }:
+    import inputs.nixpkgs {
+      inherit system;
+      config = {
+        allowUnfree = true;
+        allowUnfreePredicate = _: true;
+        nvidia.acceptLicense = true;
+      };
+      overlays = (if enableLix then [ inputs.lix-module.overlays.default ] else [ ]) ++ [
+        (_final: _prev: {
+          unstable = import inputs.nixpkgs-unstable {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        })
+        inputs.llm-agents.overlays.default
+      ];
+    };
+
   baseModulesFor =
     {
       inputs,

@@ -75,6 +75,10 @@ in
     in
     inputs.nix-darwin.lib.darwinSystem {
       system = resolvedSystem;
+      pkgs = xlib.configuredPkgsFor {
+        inherit inputs;
+        system = resolvedSystem;
+      };
       inherit
         (xlib.constructorArgsFor {
           inherit hostFacts;
