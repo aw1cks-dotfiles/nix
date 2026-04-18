@@ -75,7 +75,7 @@ in
           };
     in
     lib.nixosSystem {
-      system = resolvedSystem;
+      system = null;
       specialArgs =
         (xlib.constructorArgsFor {
           inherit hostFacts;
@@ -112,6 +112,13 @@ in
               ];
           }
         ))
+        inputs.nixpkgs.nixosModules.readOnlyPkgs
+        {
+          nixpkgs.pkgs = xlib.configuredPkgsFor {
+            inherit inputs;
+            system = resolvedSystem;
+          };
+        }
       ]
       ++ xlib.roleModulesFor {
         mappings = roleMappings;
@@ -125,7 +132,6 @@ in
         config.aw1cks.modules.nixos.user
         module
         {
-          nixpkgs.hostPlatform = lib.mkDefault hostFacts.system;
           networking.hostName = lib.mkDefault (hostFacts.hostName or name);
         }
       ]

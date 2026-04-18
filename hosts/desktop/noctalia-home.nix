@@ -3,6 +3,22 @@
   programs.noctalia-shell = {
     enable = true;
     systemd.enable = true;
+    plugins = {
+      sources = [
+        {
+          enabled = true;
+          name = "Official Noctalia Plugins";
+          url = "https://github.com/noctalia-dev/noctalia-plugins";
+        }
+      ];
+      states = {
+        "network-manager-vpn" = {
+          enabled = true;
+          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+        };
+      };
+      version = 1;
+    };
     settings = {
       settingsVersion = 0;
 
@@ -37,6 +53,7 @@
               formatVertical = "HH mm";
               useMonospacedFont = true;
             }
+            { id = "VPN"; }
             { id = "ControlCenter"; }
           ];
         };

@@ -81,14 +81,13 @@
           # calibre
           ibm-plex
           syncplay
+          zoom-us
         ]
         ++ lib.optionals pkgs.stdenv.isLinux [
           appleColorEmoji
+          omnissa-horizon-client
           wl-clipboard
           xclip
-        ]
-        ++ lib.optionals pkgs.stdenv.isDarwin [
-          zoom-us
         ];
 
       fonts.fontconfig.enable = true;
