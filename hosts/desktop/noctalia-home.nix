@@ -42,7 +42,7 @@
         };
       };
 
-      appLauncher.terminalCommand = "wezterm start --";
+      appLauncher.terminalCommand = "env SHLVL=0 wezterm";
 
       controlCenter = {
         cards = [
@@ -98,6 +98,28 @@
   };
 
   programs.niri.settings = {
+    layout = {
+      preset-column-widths = [
+        {
+          proportion = 0.5;
+        }
+        {
+          proportion = 1.0;
+        }
+      ];
+
+      default-column-width = {
+        proportion = 0.5;
+      };
+    };
+
+    input = {
+      focus-follows-mouse = {
+        enable = true;
+        max-scroll-amount = "0%";
+      };
+    };
+
     outputs = {
       "ASUSTek COMPUTER INC VG27A K9LMQS060339" = {
         mode = {
@@ -133,20 +155,41 @@
         "launcher"
         "toggle"
       ];
-      "Mod+Return".action.spawn = [ "wezterm" ];
-      "Mod+Shift+Return".action.spawn = [ "wezterm" ];
+      "Mod+Return".action.spawn = [
+        "env"
+        "SHLVL=0"
+        "wezterm"
+      ];
+      "Mod+Shift+Return".action.spawn = [
+        "env"
+        "SHLVL=0"
+        "wezterm"
+      ];
       "Mod+F12".action.spawn = [ "zen-twilight" ];
       "Mod+F11".action.spawn = [ "ytmdesktop" ];
-      "Mod+BracketRight".action.spawn = [ "mumble" ];
+      "Mod+M".action.spawn = [ "mumble" ];
       "Mod+Print".action.screenshot = { };
 
-      "Mod+Left".action.focus-workspace-up = { };
-      "Mod+Right".action.focus-workspace-down = { };
-      "Mod+Up".action.focus-window-up = { };
-      "Mod+Down".action.focus-window-down = { };
+      "Mod+H".action.focus-column-left = { };
+      "Mod+L".action.focus-column-right = { };
+      "Mod+J".action.focus-window-down = { };
+      "Mod+K".action.focus-window-up = { };
 
-      "Mod+Shift+Up".action.move-window-up = { };
-      "Mod+Shift+Down".action.move-window-down = { };
+      "Mod+Ctrl+H".action.move-column-left = { };
+      "Mod+Ctrl+L".action.move-column-right = { };
+      "Mod+Ctrl+J".action.move-window-down = { };
+      "Mod+Ctrl+K".action.move-window-up = { };
+
+      "Mod+BracketLeft".action.consume-or-expel-window-left = { };
+      "Mod+BracketRight".action.consume-or-expel-window-right = { };
+
+      "Mod+Minus".action.set-column-width = "-10%";
+      "Mod+Equal".action.set-column-width = "+10%";
+      "Mod+Shift+Minus".action.set-window-height = "-10%";
+      "Mod+Shift+Equal".action.set-window-height = "+10%";
+
+      "Mod+F".action.switch-preset-column-width = { };
+      "Mod+Shift+F".action.fullscreen-window = { };
 
       "Mod+1".action.focus-workspace = 1;
       "Mod+2".action.focus-workspace = 2;
@@ -170,7 +213,9 @@
       "Mod+Shift+9".action.move-column-to-workspace = 9;
       "Mod+Shift+0".action.move-column-to-workspace = 10;
 
-      "Mod+F".action.fullscreen-window = { };
+      "Mod+V".action.toggle-window-floating = { };
+      "Mod+Shift+V".action.switch-focus-between-floating-and-tiling = { };
+
       "Mod+Shift+Q" = {
         repeat = false;
         action.close-window = { };
