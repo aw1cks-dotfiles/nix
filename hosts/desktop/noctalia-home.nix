@@ -1,5 +1,78 @@
-{ ... }:
+{ pkgs, ... }:
+let
+  mumblePttHelper = pkgs.writeShellScriptBin "mumble-ptt-helper" ''
+        set -euo pipefail
+
+        exec ${pkgs.python3}/bin/python3 - <<'PY'
+    import signal
+    import struct
+    import subprocess
+
+    EVENT_DEVICE = "/dev/input/by-id/usb-Logitech_USB_Receiver-if02-event-mouse"
+    EVENT_TYPE_KEY = 1
+    PTT_KEY_CODE = 276
+
+    talking = False
+
+
+    def rpc(command: str) -> None:
+        subprocess.run(
+            ["${pkgs.mumble}/bin/mumble", "rpc", command],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+
+    def stop_talking(*_args) -> None:
+        global talking
+        if talking:
+            rpc("stoptalking")
+            talking = False
+
+
+    signal.signal(signal.SIGINT, stop_talking)
+    signal.signal(signal.SIGTERM, stop_talking)
+
+    event_size = struct.calcsize("llHHI")
+
+    with open(EVENT_DEVICE, "rb", buffering=0) as input_events:
+        while True:
+            event = input_events.read(event_size)
+            if len(event) != event_size:
+                continue
+
+            _, _, event_type, code, value = struct.unpack("llHHI", event)
+            if event_type != EVENT_TYPE_KEY or code != PTT_KEY_CODE:
+                continue
+
+            if value == 1 and not talking:
+                rpc("starttalking")
+                talking = True
+            elif value == 0:
+                stop_talking()
+    PY
+  '';
+in
 {
+  home.packages = [ mumblePttHelper ];
+
+  systemd.user.services.mumble-ptt-helper = {
+    Unit = {
+      Description = "Hardcoded Mumble push-to-talk helper";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${mumblePttHelper}/bin/mumble-ptt-helper";
+      Restart = "always";
+      RestartSec = 1;
+    };
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
+
   programs.noctalia-shell = {
     enable = true;
     systemd.enable = true;
