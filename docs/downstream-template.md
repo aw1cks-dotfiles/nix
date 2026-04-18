@@ -4,6 +4,8 @@ This repo ships `templates.default` as a starter downstream flake that layers pr
 
 The authoritative template files live under `templates/default/`.
 
+The template is reference material, not a turnkey downstream repo. Several example host facts and host declarations stay commented out until a real downstream consumer fills them in.
+
 ## Purpose
 
 Use the template when you want a downstream repo to:
@@ -38,6 +40,8 @@ This keeps shared library concerns reusable while giving the downstream repo roo
 
 The template extends `aw1cks.identities` with a downstream-specific identity example in `templates/default/modules/org/meta.nix`.
 
+That example now also shows where to place public SSH authorized keys for the shared identity contract used by NixOS hosts.
+
 Hosts can then select that identity through `hostFacts.identity`, or the downstream repo can change `aw1cks.identity.default` if that should become the default everywhere.
 
 ## What The Template Includes
@@ -51,6 +55,8 @@ Hosts can then select that identity through `hostFacts.identity`, or the downstr
 ## What It Does Not Include
 
 The template does not ship a canonical downstream secrets inventory.
+
+It also does not ship a ready-to-evaluate example host by default; consumers are expected to uncomment or replace the example host data before using it as a real flake.
 
 If a downstream repo adds one, keep it separate from facts and composition roots. See [`docs/secret-management.md`](./secret-management.md) for boundary guidance.
 

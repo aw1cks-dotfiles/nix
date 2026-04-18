@@ -34,6 +34,9 @@
       email = "your.name@example.internal";
       username = "your.name";
       homeDirectory = "/home/your.name";
+      authorizedKeys = [
+        "ssh-ed25519 AAAA... your.name@laptop"
+      ];
     };
 
     # Uncomment this if most of the repo should use the work identity by default.

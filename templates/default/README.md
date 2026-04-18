@@ -2,6 +2,8 @@
 
 This template is a minimal downstream flake that consumes `dendritic-lib` as a shared base and layers repo-local configuration on top.
 
+It is intentionally reference-oriented rather than ready to evaluate unchanged: the example host facts and host declarations remain commented out until a downstream repo supplies real values.
+
 ## Layout
 
 - `modules/flake-file.nix`: downstream flake-file source of truth
