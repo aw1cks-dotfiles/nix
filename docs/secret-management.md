@@ -479,6 +479,8 @@ Install with the pre-generated host key injected as sensitive bootstrap material
 nix run .#install-host -- <hostname> root@<target-ip>
 ```
 
+If `hosts/<hostname>/bootstrap-pre-kexec.sh` exists, the repo-local wrapper runs that script over SSH on the preinstall OS before invoking `nixos-anywhere`. This is intended for source-OS preparation such as temporary zram setup on low-memory VPS reinstalls; keep that hook free of durable secrets and treat it as repo-local operational bootstrap logic.
+
 Equivalent expanded form:
 
 ```bash

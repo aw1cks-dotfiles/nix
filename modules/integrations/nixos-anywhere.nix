@@ -10,8 +10,12 @@
           runtimeInputs = [
             nixosAnywhere
             pkgs.git
+            pkgs.openssh
+            pkgs.sshpass
           ];
           text = ''
+            set -euo pipefail
+
             if [ "$#" -lt 2 ]; then
               echo "usage: install-host <hostname> <target-host> [nixos-anywhere args...]" >&2
               exit 1
@@ -23,10 +27,62 @@
 
             repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
             host_dir="$repo_root/hosts/$host_name"
+            bootstrap_script="$host_dir/bootstrap-pre-kexec.sh"
 
             if [ ! -d "$host_dir" ]; then
               echo "host directory not found: $host_dir" >&2
               exit 1
+            fi
+
+            nixos_anywhere_args=("$@")
+            use_sshpass=0
+            ssh_args=()
+
+            for ((arg_index = 0; arg_index < ''${#nixos_anywhere_args[@]}; arg_index++)); do
+              arg="''${nixos_anywhere_args[$arg_index]}"
+              case "$arg" in
+                -i)
+                  arg_index=$((arg_index + 1))
+                  if [ "$arg_index" -ge "''${#nixos_anywhere_args[@]}" ]; then
+                    echo "install-host: -i requires a value" >&2
+                    exit 1
+                  fi
+                  ssh_args+=("-i" "''${nixos_anywhere_args[$arg_index]}")
+                  ;;
+                -p|--ssh-port)
+                  arg_index=$((arg_index + 1))
+                  if [ "$arg_index" -ge "''${#nixos_anywhere_args[@]}" ]; then
+                    echo "install-host: $arg requires a value" >&2
+                    exit 1
+                  fi
+                  ssh_args+=("-p" "''${nixos_anywhere_args[$arg_index]}")
+                  ;;
+                --ssh-option)
+                  arg_index=$((arg_index + 1))
+                  if [ "$arg_index" -ge "''${#nixos_anywhere_args[@]}" ]; then
+                    echo "install-host: --ssh-option requires a value" >&2
+                    exit 1
+                  fi
+                  ssh_args+=("-o" "''${nixos_anywhere_args[$arg_index]}")
+                  ;;
+                --env-password)
+                  use_sshpass=1
+                  ;;
+              esac
+            done
+
+            if [ -f "$bootstrap_script" ]; then
+              echo "install-host: running host-local bootstrap pre-kexec hook $bootstrap_script" >&2
+
+              ssh_command=(ssh)
+              if [ "$use_sshpass" -eq 1 ]; then
+                ssh_command=(sshpass -e ssh)
+              fi
+
+              "''${ssh_command[@]}" \
+                "''${ssh_args[@]}" \
+                "$target_host" \
+                sh -s < "$bootstrap_script"
             fi
 
             exec nixos-anywhere \
