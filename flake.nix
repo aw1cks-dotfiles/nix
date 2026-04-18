@@ -21,6 +21,10 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
+    apple-fonts = {
+      url = "github:Lyndeno/apple-fonts.nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     disko = {
       url = "github:nix-community/disko/5ae05d98d2bebc0a9521c9fc89bd2e5cffa05926";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -53,6 +57,10 @@
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    lucidglyph = {
+      url = "github:maximilionus/lucidglyph";
+      flake = false;
     };
     mermaid-rs-renderer = {
       url = "github:1jehuang/mermaid-rs-renderer";
