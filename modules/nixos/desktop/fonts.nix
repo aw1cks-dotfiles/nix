@@ -30,6 +30,7 @@
     in
     {
       environment.variables = config.aw1cks.fonts.lucidglyph.environment;
+      programs.dconf.enable = true;
 
       fonts = {
         packages = [

@@ -38,6 +38,29 @@
       ]
       ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && isStandaloneHome) [ appleEmoji ];
 
+      # GTK can override fontconfig AA/hinting through desktop interface settings,
+      # so pin these to the Lucidglyph-friendly values as well.
+      dconf.settings."org/gnome/desktop/interface" = {
+        font-antialiasing = "grayscale";
+        font-hinting = "slight";
+      };
+
+      gtk = {
+        enable = true;
+        gtk3.extraConfig = {
+          gtk-xft-antialias = 1;
+          gtk-xft-hinting = 1;
+          gtk-xft-hintstyle = "hintslight";
+          gtk-xft-rgba = "none";
+        };
+        gtk4.extraConfig = {
+          gtk-xft-antialias = 1;
+          gtk-xft-hinting = 1;
+          gtk-xft-hintstyle = "hintslight";
+          gtk-xft-rgba = "none";
+        };
+      };
+
       fonts.fontconfig = {
         enable = true;
         configFile = lucidglyphConfigFiles;
