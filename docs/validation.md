@@ -65,8 +65,9 @@ Desktop-specific note:
 
 - `nix build .#desktop-vm` is the narrowest useful repo-local validation for the `desktop` VM proving path
 - the VM path is suitable for validating evaluation, VM assembly, Ly login wiring, embedded Home Manager activation, and remote inspection via the forwarded SSH port
+- `nix run .#desktop-vm-smoke` is the narrowest useful launch-workflow validation inside that VM path; it drives Ly login, waits for the `niri` user session, and confirms that the repo's terminal and browser commands launch from the resolved desktop user environment
 - it is not a complete proof of rendered `niri` behavior on every host GPU stack; on modern NVIDIA hosts, QEMU virtio/virgl rendering can fail even when Ly successfully launches the `niri` user session
-- treat rendered compositor behavior, terminal launch, browser launch, and audio as follow-up validation that may need bare-metal confirmation on `desktop` or a nested compositor path on a more compatible host
+- treat rendered compositor behavior and audio as follow-up validation that may need bare-metal confirmation on `desktop` or a nested compositor path on a more compatible host
 
 Provisioning-specific note:
 
