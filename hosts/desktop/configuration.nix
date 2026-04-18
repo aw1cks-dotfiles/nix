@@ -58,6 +58,8 @@ in
       systemd.services.home-manager-alex.after = [ "systemd-user-sessions.service" ];
       systemd.services.home-manager-alex.wants = [ "systemd-user-sessions.service" ];
 
+      time.timeZone = "Europe/London";
+
       system.stateVersion = "25.05";
     };
 
