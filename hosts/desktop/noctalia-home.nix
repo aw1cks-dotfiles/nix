@@ -62,6 +62,7 @@ in
       Description = "Hardcoded Mumble push-to-talk helper";
       After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
+      StartLimitIntervalSec = 0;
     };
     Service = {
       ExecStart = "${mumblePttHelper}/bin/mumble-ptt-helper";

@@ -1,4 +1,9 @@
-{ config, inputs, ... }:
+{
+  lib,
+  config,
+  inputs,
+  ...
+}:
 let
   sharedHomeModule = {
     imports = [
@@ -41,6 +46,8 @@ in
       };
 
       security.sudo.wheelNeedsPassword = false;
+
+      users.users.alex.extraGroups = lib.mkAfter [ "input" ];
 
       # Run the embedded Home Manager activation after the user manager exists
       # so user units like Noctalia autostart are actually reloaded.
