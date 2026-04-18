@@ -80,7 +80,11 @@
               memorySize = 8192;
               cores = 4;
               graphics = true;
-              qemu.options = [ "-vga virtio" ];
+              qemu.options = [
+                "-vga virtio"
+                "-device virtio-sound-pci,audiodev=desktopvm"
+                "-audiodev wav,id=desktopvm,path=/tmp/desktop-vm-audio.wav"
+              ];
               forwardPorts = [
                 {
                   from = "host";
@@ -97,7 +101,11 @@
             memorySize = 8192;
             cores = 4;
             graphics = true;
-            qemu.options = [ "-vga virtio" ];
+            qemu.options = [
+              "-vga virtio"
+              "-device virtio-sound-pci,audiodev=desktopvm"
+              "-audiodev wav,id=desktopvm,path=/tmp/desktop-vm-audio.wav"
+            ];
           };
         };
 
@@ -191,7 +199,6 @@
                   f"XDG_RUNTIME_DIR={runtime_dir} "
                   "systemctl --user is-active niri.service'"
               )
-
               machine.succeed(f"su - {user_name} -c 'command -v wezterm && command -v zen-twilight'")
 
               run_in_session(
@@ -204,6 +211,15 @@
               machine.wait_until_succeeds(
                   f"pgrep -u {user_name} -f zen-twilight || pgrep -u {user_name} -x zen || pgrep -u {user_name} -x firefox"
               )
+
+              run_in_session('wpctl status >/tmp/desktop-vm-audio.log 2>&1')
+              machine.wait_until_succeeds("test -s /tmp/desktop-vm-audio.log")
+              machine.wait_until_succeeds(
+                  f"su - {user_name} -c 'env "
+                  f"XDG_RUNTIME_DIR={runtime_dir} "
+                  "wpctl inspect @DEFAULT_AUDIO_SINK@ >/tmp/desktop-vm-default-sink.log 2>&1'"
+              )
+              machine.wait_until_succeeds("test -s /tmp/desktop-vm-default-sink.log")
             '';
           }
         );
