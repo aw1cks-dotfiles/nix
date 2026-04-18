@@ -1,6 +1,15 @@
-{ lib, ... }:
+{ config, lib, ... }:
+let
+  inherit (config.aw1cks) modules;
+in
 {
   aw1cks.profiles.nixos.desktop = {
+    # Keep the desktop bundle thin: shared NixOS runtime first, host-local graphics later.
+    imports = [
+      modules.nixos.lix
+      modules.nixos.nix-settings
+    ];
+
     # Desktop hosts can opt into a richer shell baseline than servers.
     aw1cks.user.shellPolicy = lib.mkDefault "zsh";
   };
