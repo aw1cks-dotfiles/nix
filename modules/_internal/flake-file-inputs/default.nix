@@ -41,6 +41,10 @@
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
     };
 
+    nixos-hardware = {
+      url = lib.mkDefault "github:NixOS/nixos-hardware";
+    };
+
     nixpkgs-unstable = {
       url = lib.mkDefault "github:NixOS/nixpkgs/nixpkgs-unstable";
     };
