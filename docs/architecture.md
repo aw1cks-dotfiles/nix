@@ -166,6 +166,8 @@ The current shared NixOS atom surface now includes reusable entries for boot, ke
 
 Host-local storage ownership stays under `hosts/<name>/disko.nix`, with the shared `disko` input imported centrally by the NixOS constructor path so repo-local hosts can opt into disk layout definitions without widening the reusable module surface.
 
+Provisioning-specific bootstrap access stays repo-local rather than expanding the `aw1cks.*` reusable contract. The current installer bootstrap SSH path is exposed as `flake.nixosModules.installer-bootstrap-ssh`, which is intended for installer or kexec environments and not for final host imports.
+
 `configurations.darwin` is for nix-darwin systems.
 
 - hosts can provide an optional embedded `home` payload
