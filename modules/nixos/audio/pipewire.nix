@@ -10,6 +10,27 @@
       jack.enable = true;
       pulse.enable = true;
       wireplumber.enable = true;
+      wireplumber.extraConfig."10-usb-dac" = {
+        "monitor.alsa.properties" = {
+          "alsa.use-acp" = true;
+        };
+
+        "monitor.alsa.rules" = [
+          {
+            matches = [
+              {
+                "device.name" = "~alsa_card.usb-.*";
+              }
+            ];
+            actions = {
+              "update-props" = {
+                "api.acp.auto-profile" = true;
+                "api.acp.auto-port" = true;
+              };
+            };
+          }
+        ];
+      };
     };
   };
 }

@@ -2,23 +2,11 @@
 { inputs, lib, ... }:
 {
   aw1cks.modules.home.gui-apps =
-    { pkgs, ... }:
+    {
+      pkgs,
+      ...
+    }:
     let
-      appleColorEmoji = pkgs.stdenvNoCC.mkDerivation {
-        pname = "apple-color-emoji-linux";
-        version = "macos-26-20260219-2aa12422";
-
-        src = pkgs.fetchurl {
-          url = "https://github.com/samuelngs/apple-emoji-ttf/releases/download/macos-26-20260219-2aa12422/AppleColorEmoji-Linux.ttf";
-          hash = "sha256-U1oEOvBHBtJEcQWeZHRb/IDWYXraLuo0NdxWINwPUxg=";
-        };
-
-        dontUnpack = true;
-
-        installPhase = ''
-          install -Dm644 "$src" "$out/share/fonts/truetype/AppleColorEmoji-Linux.ttf"
-        '';
-      };
       weztermPlatform =
         if pkgs.stdenv.isDarwin then
           "darwin"
@@ -46,7 +34,7 @@
           },
           window = {
             background_opacity = ${if pkgs.stdenv.isDarwin then "0.75" else "0.85"},
-            decorations = "${if pkgs.stdenv.isLinux then "RESIZE" else "TITLE | RESIZE"}",
+            decorations = "${if pkgs.stdenv.isLinux then "NONE" else "TITLE | RESIZE"}",
             initial_cols = ${
               if pkgs.stdenv.isDarwin then
                 "120"
@@ -81,17 +69,13 @@
           # calibre
           ibm-plex
           syncplay
+          zoom-us
         ]
         ++ lib.optionals pkgs.stdenv.isLinux [
-          appleColorEmoji
+          omnissa-horizon-client
           wl-clipboard
           xclip
-        ]
-        ++ lib.optionals pkgs.stdenv.isDarwin [
-          zoom-us
         ];
-
-      fonts.fontconfig.enable = true;
 
       programs = {
         formiko.enable = pkgs.stdenv.isLinux;
