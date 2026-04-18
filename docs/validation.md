@@ -65,6 +65,7 @@ Use the narrowest useful validation first.
 Desktop-specific note:
 
 - `nix build .#desktop-vm` is the narrowest useful repo-local validation for the `desktop` VM proving path
+- `desktop-vm` and `desktop-vm-smoke` are repo-local outputs and are only exposed when the evaluating flake defines `configurations.nixos.desktop`; downstream consumers validating with `--override-input dendritic-lib path:...` should not expect those outputs to exist
 - the VM path is suitable for validating evaluation, VM assembly, Ly login wiring, embedded Home Manager activation, and remote inspection via the forwarded SSH port
 - `nix run .#desktop-vm-smoke` is the narrowest useful launch-workflow validation inside that VM path; it drives Ly login, waits for the `niri` user session, confirms that `noctalia-shell` starts for the resolved desktop user environment, and then checks the repo's terminal, browser, and VM-backed PipeWire audio path
 - `desktop-vm-smoke` remains exposed as a repo-local package/app, but not as a `flake.checks.*` entry, so `nix flake check` only evaluates the VM smoke derivation through the package surface instead of building the full test in CI
