@@ -41,5 +41,14 @@
       tags = [ "nvidia" ];
     };
 
+    dziewanna = {
+      system = "x86_64-linux";
+      kind = "nixos";
+      roles = [
+        "server"
+      ];
+      identity = "personal";
+      hostName = "dziewanna";
+    };
   };
 }
