@@ -158,6 +158,8 @@ Unknown role names fail constructor assertions during evaluation.
 
 Current thin reusable NixOS bundles follow the same split used elsewhere in the repo: profiles stay small and import reusable atoms. For example, `aw1cks.profiles.nixos.server` now imports a shared `aw1cks.modules.nixos.server-security` baseline rather than carrying SSH policy inline.
 
+The current shared NixOS atom surface now includes reusable entries for boot, kernel selection, EFI/systemd-boot, network baseline, PipeWire audio, Wayland environment defaults, shared user realization, shell policy, and server security. Host roots should compose those atoms through profiles or direct imports rather than reintroducing ad hoc copies.
+
 `configurations.darwin` is for nix-darwin systems.
 
 - hosts can provide an optional embedded `home` payload
