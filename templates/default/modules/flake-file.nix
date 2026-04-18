@@ -12,7 +12,7 @@
         imports = [
           inputs.dendritic-lib.flakeModules.default
           (inputs.import-tree ./modules)
-          (inputs.import-tree ./hosts)
+          ./hosts
         ];
       }
     '';

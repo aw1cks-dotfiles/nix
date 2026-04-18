@@ -31,8 +31,10 @@ The hidden `modules/_internal/flake-file-inputs/default.nix` file is the reusabl
 - `modules/shared/`: cross-target reusable modules
 - `modules/home/`, `modules/darwin/`, `modules/nixos/`: target-specific reusable modules and profiles
 - `modules/roles/defaults.nix`: role-to-profile mapping used by constructors
+- `hosts/default.nix`: explicit host loader for repo-local host roots
 - `hosts/facts.nix`: normalized shared host metadata module
 - `hosts/<name>/configuration.nix`: repo-local host composition roots
+- `hosts/<name>/*.nix`: host-private support files imported by that host root when needed
 
 ## Shared Namespaces
 
@@ -106,6 +108,8 @@ Keep these out of facts:
 - NVIDIA pin files
 - secrets and `age.secrets.*` wiring
 
+`hosts/default.nix` is the explicit repo-local host loader. It imports `hosts/facts.nix` and each `hosts/<name>/configuration.nix`, while host-local support files such as `hardware-configuration.nix`, `disko.nix`, `network.nix`, or session modules stay private to that host root unless the host imports them deliberately.
+
 ## Constructors
 
 The three host constructors are:
@@ -159,6 +163,8 @@ Unknown role names fail constructor assertions during evaluation.
 Current thin reusable NixOS bundles follow the same split used elsewhere in the repo: profiles stay small and import reusable atoms. For example, `aw1cks.profiles.nixos.server` now imports a shared `aw1cks.modules.nixos.server-security` baseline rather than carrying SSH policy inline.
 
 The current shared NixOS atom surface now includes reusable entries for boot, kernel selection, EFI/systemd-boot, network baseline, PipeWire audio, Wayland environment defaults, shared user realization, shell policy, and server security. Host roots should compose those atoms through profiles or direct imports rather than reintroducing ad hoc copies.
+
+Host-local storage ownership stays under `hosts/<name>/disko.nix`, with the shared `disko` input imported centrally by the NixOS constructor path so repo-local hosts can opt into disk layout definitions without widening the reusable module surface.
 
 `configurations.darwin` is for nix-darwin systems.
 

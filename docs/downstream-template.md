@@ -32,6 +32,7 @@ The template demonstrates a simple split:
 - `aw1cks.*` stays the shared upstream namespace
 - a downstream-local namespace such as `org.*` holds private modules, profiles, and options
 - `hosts/facts.nix` provides downstream host metadata
+- `hosts/default.nix` is the explicit downstream host loader
 - host configuration roots import downstream profiles and local modules as needed
 
 This keeps shared library concerns reusable while giving the downstream repo room for private certificates, private git settings, internal package sources, and site-specific policies.
@@ -47,6 +48,7 @@ Hosts can then select that identity through `hostFacts.identity`, or the downstr
 ## What The Template Includes
 
 - a downstream `flake-file` source in `templates/default/modules/flake-file.nix`
+- an explicit host loader in `templates/default/hosts/default.nix`
 - example host facts in `templates/default/hosts/facts.nix`
 - example host declarations in `templates/default/hosts/examples.nix`
 - an example private namespace in `templates/default/modules/org/`

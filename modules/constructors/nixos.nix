@@ -128,9 +128,10 @@ in
           nixpkgs.hostPlatform = lib.mkDefault hostFacts.system;
           networking.hostName = lib.mkDefault (hostFacts.hostName or name);
         }
-        (lib.mkIf (home != null && resolvedUser != null && resolvedHomeDirectory != null) {
-          imports = [ config.aw1cks.modules.nixos-home-manager.default ];
-
+      ]
+      ++ lib.optionals (home != null && resolvedUser != null && resolvedHomeDirectory != null) [
+        config.aw1cks.modules.nixos-home-manager.default
+        {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.${resolvedUser} = xlib.mkHomeUserModule {
@@ -146,7 +147,7 @@ in
               }
               ++ [ home ];
           };
-        })
+        }
       ];
     }
   ) config.configurations.nixos;
