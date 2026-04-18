@@ -46,7 +46,7 @@
           },
           window = {
             background_opacity = ${if pkgs.stdenv.isDarwin then "0.75" else "0.85"},
-            decorations = "${if pkgs.stdenv.isLinux then "RESIZE" else "TITLE | RESIZE"}",
+            decorations = "${if pkgs.stdenv.isLinux then "NONE" else "TITLE | RESIZE"}",
             initial_cols = ${
               if pkgs.stdenv.isDarwin then
                 "120"
