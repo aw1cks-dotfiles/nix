@@ -4,6 +4,7 @@ let
         set -euo pipefail
 
         exec ${pkgs.python3}/bin/python3 - <<'PY'
+    import os
     import signal
     import struct
     import subprocess
@@ -16,11 +17,14 @@ let
 
 
     def rpc(command: str) -> None:
+        env = os.environ.copy()
+        env["QT_QPA_PLATFORM"] = "offscreen"
         subprocess.run(
             ["${pkgs.mumble}/bin/mumble", "rpc", command],
             check=False,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            env=env,
         )
 
 

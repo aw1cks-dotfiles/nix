@@ -47,6 +47,10 @@ in
 
       security.sudo.wheelNeedsPassword = false;
 
+      services.udev.extraRules = ''
+        ACTION=="add|change", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="409e", TAG+="uaccess"
+      '';
+
       users.users.alex.extraGroups = lib.mkAfter [ "input" ];
 
       # Run the embedded Home Manager activation after the user manager exists

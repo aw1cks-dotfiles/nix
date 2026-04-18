@@ -14,7 +14,7 @@
         isNormalUser = true;
         description = identity.fullName;
         home = lib.mkDefault resolvedHomeDirectory;
-        extraGroups = lib.mkDefault [ "wheel" ];
+        extraGroups = [ "wheel" ];
         openssh.authorizedKeys.keys = lib.mkDefault identity.authorizedKeys;
       };
     };
