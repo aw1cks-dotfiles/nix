@@ -36,7 +36,9 @@
           net-snmp
           nmap
           rclone
+          rsync
           s5cmd
+          sshfs
           step-cli
 
           # db

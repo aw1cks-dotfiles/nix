@@ -262,6 +262,11 @@ Current VM proving surface:
 - [x] Recreate required shell widgets and panel behavior.
 - [x] Port the required desktop workflow intent from `docs/desktop/`.
 
+Status note:
+
+- Bare-metal follow-up on the real `desktop` host found that the embedded Home Manager profile was being realized correctly, but early user services in the `niri` session were starting before systemd's user environment had imported the compositor session variables.
+- The current host-local fix is a `niri` startup hook that imports `DISPLAY`, `WAYLAND_DISPLAY`, `XDG_CURRENT_DESKTOP`, `XDG_SESSION_TYPE`, `NIRI_SOCKET`, and `DBUS_SESSION_BUS_ADDRESS` into the user manager and DBus activation environment so `noctalia-shell` and portal helpers start with the correct Wayland session context on bare metal.
+
 ### Stream D. `dziewanna`
 
 #### D1. Host And Service Parity

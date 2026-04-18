@@ -3,13 +3,17 @@
   aw1cks.modules.home.multimedia-apps =
     { pkgs, ... }:
     {
-      home.packages = with pkgs; [
-        mumble
-        playerctl
-        qbittorrent
-        syncplay
-        ytmdesktop
-      ];
+      home.packages =
+        with pkgs;
+        [
+          mumble
+          qbittorrent
+          syncplay
+          ytmdesktop
+        ]
+        ++ lib.optionals pkgs.stdenv.isLinux [
+          playerctl
+        ];
 
       programs = {
         mpv = {
