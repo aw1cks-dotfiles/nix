@@ -13,6 +13,7 @@
         config.aw1cks.modules.nixos.ly
         ./hardware-configuration.nix
         ./disko.nix
+        ./niri.nix
       ];
 
       boot.loader.grub.devices = [ ];
