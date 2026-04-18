@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   inherit (config.aw1cks) modules;
 in
@@ -9,5 +9,7 @@ in
       modules.nixos.lix
       modules.nixos.nix-settings
     ];
+
+    aw1cks.user.shellPolicy = lib.mkDefault "bash";
   };
 }

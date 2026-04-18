@@ -76,13 +76,18 @@ in
     in
     lib.nixosSystem {
       system = resolvedSystem;
-      inherit
+      specialArgs =
         (xlib.constructorArgsFor {
           inherit hostFacts;
           target = "nixos";
-        })
-        specialArgs
-        ;
+        }).specialArgs
+        // {
+          inherit
+            identity
+            resolvedUser
+            resolvedHomeDirectory
+            ;
+        };
       modules = [
         (xlib.mkAssertionModule (
           xlib.targetAssertions {
@@ -117,14 +122,12 @@ in
         target = "nixos";
       }
       ++ [
+        config.aw1cks.modules.nixos.user
         module
         {
           nixpkgs.hostPlatform = lib.mkDefault hostFacts.system;
           networking.hostName = lib.mkDefault (hostFacts.hostName or name);
         }
-        (lib.mkIf (resolvedUser != null) {
-          users.users.${resolvedUser}.home = lib.mkDefault resolvedHomeDirectory;
-        })
         (lib.mkIf (home != null && resolvedUser != null && resolvedHomeDirectory != null) {
           imports = [ config.aw1cks.modules.nixos-home-manager.default ];
 

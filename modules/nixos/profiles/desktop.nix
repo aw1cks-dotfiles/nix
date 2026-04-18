@@ -1,7 +1,7 @@
-{ ... }:
+{ lib, ... }:
 {
-  # Placeholder bundle for future desktop-specific NixOS modules.
   aw1cks.profiles.nixos.desktop = {
-    imports = [ ];
+    # Desktop hosts can opt into a richer shell baseline than servers.
+    aw1cks.user.shellPolicy = lib.mkDefault "zsh";
   };
 }
