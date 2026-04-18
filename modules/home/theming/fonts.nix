@@ -8,6 +8,18 @@
     }:
     let
       isStandaloneHome = osConfig == null;
+      lucidglyphBase = "${inputs.lucidglyph}/src/modules/fontconfig";
+      lucidglyphConfigFiles = builtins.listToAttrs (
+        map (file: {
+          name = "lucidglyph-${file}";
+          value = {
+            enable = true;
+            priority = builtins.fromJSON (builtins.substring 0 2 file);
+            source = "${lucidglyphBase}/${file}";
+          };
+        }) config.aw1cks.fonts.lucidglyph.fontconfigFiles
+      );
+
       appleEmoji = pkgs.stdenvNoCC.mkDerivation {
         pname = "apple-color-emoji-linux";
         version = config.aw1cks.fonts.appleEmoji.version;
@@ -28,10 +40,7 @@
 
       fonts.fontconfig = {
         enable = true;
-        configFile."lucidglyph-rules" = {
-          priority = 10;
-          text = config.aw1cks.fonts.lucidglyph.fontconfigLocalConf;
-        };
+        configFile = lucidglyphConfigFiles;
         defaultFonts.emoji = [ config.aw1cks.fonts.appleEmoji.family ];
         defaultFonts.serif = config.aw1cks.fonts.defaults.serif;
         defaultFonts.sansSerif = config.aw1cks.fonts.defaults.sansSerif;
