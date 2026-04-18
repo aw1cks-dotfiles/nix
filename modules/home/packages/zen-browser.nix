@@ -63,6 +63,7 @@
       config = lib.mkIf cfg.enable {
         home.activation = lib.optionalAttrs cfg.defaultAsSystemBrowser {
           applyZenBrowserDefaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            $DRY_RUN_CMD mkdir -p "$HOME/.config"
             if [ -L "$HOME/.config/mimeapps.list" ]; then
               $DRY_RUN_CMD rm -f "$HOME/.config/mimeapps.list"
             fi
