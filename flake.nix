@@ -106,7 +106,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     wezterm = {
-      url = "github:wezterm/wezterm?dir=nix";
+      url = "github:aw1cks-forks/wezterm/fix/nixpkgs-xorg-deprecation?dir=nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     zen-browser = {
