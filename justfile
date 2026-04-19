@@ -1,15 +1,23 @@
+# TODO: confirm if we really need this.
+# it should only be required during bootstrap,
+# but at that point we're unlikely to have `just` anyway,
+# since it's probably provided by nix.
+set export
+NIX_CONFIG := "experimental-features = nix-command flakes"
+
 is_wsl := path_exists("/proc/sys/fs/binfmt_misc/WSLInterop")
 is_nixos := path_exists("/run/current-system/nixos-version")
 
-rebuild_command := if os() == "macos" {
-  "nix run .#nh -- darwin switch"
+nh_app := "nix run .#nh -- "
+nh := if os() == "macos" {
+  nh_app + "darwin"
 } else if os() == "linux" {
   if is_wsl == "true" {
     error("WSL is not supported yet")
   } else if is_nixos == "true" {
-    "nix run .#nh -- os switch"
+    nh_app + "os"
   } else {
-    "nix run .#nh -- home switch"
+    nh_app + "home"
   }
 } else {
   error("Unsupported OS: " + os())
@@ -19,7 +27,7 @@ default:
   @just --list --unsorted
 
 rebuild target=".":
-  {{rebuild_command}} {{target}}
+  {{nh}} switch {{target}}
 
 fix-nix-daemon:
   @set -e; \

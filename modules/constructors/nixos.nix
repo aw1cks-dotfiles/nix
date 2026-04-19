@@ -134,6 +134,9 @@ in
         {
           networking.hostName = lib.mkDefault (hostFacts.hostName or name);
         }
+        (lib.mkIf (resolvedUser != null) {
+          nix.settings.trusted-users = lib.mkAfter [ resolvedUser ];
+        })
       ]
       ++ lib.optionals (home != null && resolvedUser != null && resolvedHomeDirectory != null) [
         config.aw1cks.modules.nixos-home-manager.default
