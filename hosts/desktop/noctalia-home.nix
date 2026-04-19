@@ -6,7 +6,64 @@ let
   '';
 in
 {
-  home.packages = [ mumblePttHelper ];
+  home.packages = with pkgs; [
+    apple-cursor
+    adwaita-icon-theme
+    adw-gtk3
+    libsForQt5.qt5ct
+    morewaita-icon-theme
+    mumblePttHelper
+    qt6Packages.qt6ct
+  ];
+
+  home.pointerCursor = {
+    name = "macOS-White";
+    package = pkgs.apple-cursor;
+    size = 24;
+    gtk.enable = true;
+    x11.enable = true;
+  };
+
+  stylix.targets.gtk.enable = false;
+
+  gtk = {
+    enable = true;
+    iconTheme = {
+      name = "MoreWaita";
+      package = pkgs.morewaita-icon-theme;
+    };
+    theme = {
+      name = "adw-gtk3-dark";
+      package = pkgs.adw-gtk3;
+    };
+  };
+
+  dconf.settings."org/gnome/desktop/interface" = {
+    color-scheme = "prefer-dark";
+    cursor-size = 24;
+    cursor-theme = "macOS-White";
+    gtk-theme = "adw-gtk3-dark";
+    icon-theme = "MoreWaita";
+  };
+
+  qt = {
+    enable = true;
+    platformTheme.name = "gtk3";
+    style = {
+      name = "adwaita-dark";
+      package = pkgs.adwaita-qt;
+    };
+  };
+
+  xdg.configFile."qt5ct/qt5ct.conf".text = ''
+    [Appearance]
+    color_scheme_path=$HOME/.config/qt5ct/colors/noctalia.conf
+  '';
+
+  xdg.configFile."qt6ct/qt6ct.conf".text = ''
+    [Appearance]
+    color_scheme_path=$HOME/.config/qt6ct/colors/noctalia.conf
+  '';
 
   systemd.user.services.mumble-ptt-helper = {
     Unit = {
@@ -90,7 +147,7 @@ in
         };
       };
 
-      appLauncher.terminalCommand = "env SHLVL=0 wezterm";
+      appLauncher.terminalCommand = "wezterm";
 
       controlCenter = {
         cards = [
@@ -154,6 +211,59 @@ in
   };
 
   programs.niri.settings = {
+    # HACK: make sure these settings get propagated,
+    # and workaround some portal startup issues.
+    # Not sure why this is required; may be a Ly issue?
+    spawn-at-startup = [
+      {
+        argv = [
+          "${pkgs.dbus}/bin/dbus-update-activation-environment"
+          "--systemd"
+          "DISPLAY"
+          "WAYLAND_DISPLAY"
+          "XDG_CURRENT_DESKTOP"
+          "XDG_SESSION_TYPE"
+          "NIRI_SOCKET"
+        ];
+      }
+      {
+        argv = [
+          "${pkgs.systemd}/bin/systemctl"
+          "--user"
+          "import-environment"
+          "DISPLAY"
+          "WAYLAND_DISPLAY"
+          "XDG_CURRENT_DESKTOP"
+          "XDG_SESSION_TYPE"
+          "NIRI_SOCKET"
+        ];
+      }
+      {
+        argv = [
+          "${pkgs.systemd}/bin/systemctl"
+          "--user"
+          "restart"
+          "xdg-desktop-portal-gtk.service"
+          "xdg-desktop-portal-gnome.service"
+          "xdg-desktop-portal.service"
+        ];
+      }
+    ];
+
+    cursor = {
+      size = 24;
+      theme = "macOS-White";
+    };
+
+    hotkey-overlay = {
+      skip-at-startup = true;
+    };
+
+    environment = {
+      QT_QPA_PLATFORMTHEME = "gtk3";
+      SHLVL = "0";
+    };
+
     layout = {
       focus-ring = {
         width = 2;
@@ -224,16 +334,8 @@ in
         "launcher"
         "toggle"
       ];
-      "Mod+Return".action.spawn = [
-        "env"
-        "SHLVL=0"
-        "wezterm"
-      ];
-      "Mod+Shift+Return".action.spawn = [
-        "env"
-        "SHLVL=0"
-        "wezterm"
-      ];
+      "Mod+Return".action.spawn = [ "wezterm" ];
+      "Mod+Shift+Return".action.spawn = [ "wezterm" ];
       "Mod+F12".action.spawn = [ "zen-twilight" ];
       "Mod+F11".action.spawn = [ "ytmdesktop" ];
       "Mod+M".action.spawn = [ "mumble" ];
