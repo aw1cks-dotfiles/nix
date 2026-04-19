@@ -52,7 +52,8 @@ in
       bar = {
         backgroundOpacity = 0.7;
         contentPadding = 2;
-        density = "compact";
+        density = "default";
+        fontScale = 1.5;
         displayMode = "always_visible";
         marginHorizontal = 4;
         marginVertical = 4;
@@ -69,7 +70,10 @@ in
             }
           ];
           center = [
-            { id = "MediaMini"; }
+            {
+              id = "MediaMini";
+              maximumWidth = 500;
+            }
           ];
           right = [
             { id = "SystemMonitor"; }
@@ -116,7 +120,15 @@ in
         };
       };
 
+      colorSchemes.predefinedScheme = "Oxocarbon";
+
       dock.enabled = false;
+
+      wallpaper = {
+        directory = "/home/alex/Pictures/Wallpapers";
+        setWallpaperOnAllMonitors = true;
+        linkLightAndDarkWallpapers = true;
+      };
 
       notifications = {
         enabled = true;
@@ -192,6 +204,15 @@ in
     binds = {
       "Mod+Shift+Slash".action.show-hotkey-overlay = { };
 
+      "Mod+Escape" = {
+        allow-inhibiting = false;
+        action.spawn = [
+          "sh"
+          "-lc"
+          "niri msg action toggle-keyboard-shortcuts-inhibit && ${pkgs.libnotify}/bin/notify-send 'Niri shortcuts' 'Keyboard shortcut inhibiting toggled'"
+        ];
+      };
+
       "Mod+D".action.spawn = [
         "noctalia-shell"
         "ipc"
@@ -213,6 +234,8 @@ in
       "Mod+F11".action.spawn = [ "ytmdesktop" ];
       "Mod+M".action.spawn = [ "mumble" ];
       "Mod+Print".action.screenshot = { };
+
+      "Mod+W".action.toggle-column-tabbed-display = { };
 
       "Mod+H".action.focus-column-left = { };
       "Mod+L".action.focus-column-right = { };
