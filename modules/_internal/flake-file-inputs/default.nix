@@ -88,7 +88,8 @@
     };
 
     wezterm = {
-      url = lib.mkDefault "github:wezterm/wezterm?dir=nix";
+      # see https://github.com/wezterm/wezterm/pull/7726
+      url = lib.mkDefault "github:aw1cks-forks/wezterm/fix/nixpkgs-xorg-deprecation?dir=nix";
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
     };
 
