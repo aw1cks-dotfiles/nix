@@ -35,6 +35,10 @@ in
 
       niri-flake.cache.enable = true;
 
+      home-manager.extraSpecialArgs.inputs = inputs;
+
+      programs.niri.package = inputs.niri.packages.x86_64-linux.niri-unstable;
+
       services.openssh = {
         enable = true;
         openFirewall = true;
