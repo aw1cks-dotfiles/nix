@@ -72,6 +72,7 @@
           zoom-us
         ]
         ++ lib.optionals pkgs.stdenv.isLinux [
+          nautilus
           omnissa-horizon-client
           wl-clipboard
           xclip
