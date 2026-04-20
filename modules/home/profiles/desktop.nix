@@ -8,8 +8,9 @@ in
     imports = [
       modules.home.fonts-theme
       modules.home.gui-apps
-      modules.home.zen-browser
       modules.home.stylix-theme
+      modules.home.wezterm
+      modules.home.zen-browser
     ];
   };
 }
