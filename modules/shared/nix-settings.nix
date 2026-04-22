@@ -13,6 +13,7 @@ let
     # about here so downstream home-manager / nixos / darwin consumers all get
     # the same substitute coverage instead of rebuilding tool packages locally.
     extra-substituters = [
+      "https://attic.xuyh0120.win/lantian" # nix-cachyos-kernel (xddxdd's Hydra CI)
       "https://cache.numtide.com"
       "https://cuda-maintainers.cachix.org"
       "https://niri.cachix.org"
@@ -20,6 +21,7 @@ let
       "https://wezterm.cachix.org"
     ];
     extra-trusted-public-keys = [
+      "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc=" # nix-cachyos-kernel
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
       "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
       "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="

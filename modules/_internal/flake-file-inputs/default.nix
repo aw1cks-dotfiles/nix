@@ -69,6 +69,26 @@
       inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
     };
 
+    nix-cachyos-kernel = {
+      # Prebuilt CachyOS kernels (Clang+ThinLTO+BORE+CachyOS sauce) for NixOS.
+      # Successor to the now-archived chaotic-nyx (archived 2025-12-08).
+      # The "release" branch is bumped only after the maintainer's NixOS
+      # build matrix passes, including nvidia-open and ZFS configs.
+      #
+      # IMPORTANT: do NOT override the upstream nixpkgs follow. The repo
+      # ships its own pinned nixpkgs to keep patch sets matched to the
+      # kernel version; mismatched nixpkgs => build failures.
+      #
+      # Binary cache: https://attic.xuyh0120.win/lantian (xddxdd's Hydra CI).
+      # Key added to modules/shared/nix-settings.nix. The `pinned` overlay was
+      # previously needed for cache hits but since 2026-03-01 the flake pins its
+      # own kernel source independent of nixpkgs, so the `default` overlay is
+      # equally safe. We continue using legacyPackages directly (equivalent to
+      # `default` overlay) in the cachyos-kernel module.
+      url = lib.mkDefault "github:xddxdd/nix-cachyos-kernel/release";
+      flake = true;
+    };
+
     lucidglyph = {
       url = lib.mkDefault "github:maximilionus/lucidglyph";
       flake = false;

@@ -4,11 +4,17 @@ let
 in
 {
   aw1cks.profiles.nixos.desktop = {
-    # Keep the desktop bundle thin: shared NixOS runtime first, host-local graphics later.
+    # Keep the desktop bundle thin: shared NixOS runtime + sensible
+    # baseline kernel. Hosts wanting the high-perf stack also import
+    # `aw1cks.profiles.nixos.desktop-perf` directly (sibling profile).
+    #
+    # Profile-imports-profile nesting is intentionally avoided here
+    # because nested deferredModule indirection causes option-decl
+    # duplication for atomic modules that declare options.
     imports = [
       modules.nixos.boot
       modules.nixos.efi
-      modules.nixos.latest-kernel-unstable
+      modules.nixos.latest-kernel
       modules.nixos.network
       modules.nixos.nix-settings
       modules.nixos.pipewire
