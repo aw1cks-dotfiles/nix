@@ -16,7 +16,6 @@ in
   configurations.nixos.desktop = {
     module = {
       imports = [
-        config.aw1cks.profiles.nixos.desktop
         config.aw1cks.profiles.nixos.desktop-perf
         inputs.nixos-hardware.nixosModules.common-pc
         inputs.nixos-hardware.nixosModules.common-pc-ssd

@@ -90,6 +90,13 @@ rec {
             inherit system;
             config.allowUnfree = true;
           };
+          # containerd 2.2.3+ and nerdctl 2.2.2+ are required by the shared
+          # nerdctl module for EROFS snapshotter support. nixpkgs stable lags
+          # significantly behind unstable for both; promote from unstable.
+          containerd = _final.unstable.containerd;
+          nerdctl = _final.unstable.nerdctl;
+          # buildkit 0.25+ is required for nerdctl build with containerd worker.
+          buildkit = _final.unstable.buildkit;
         })
         inputs.llm-agents.overlays.default
       ];
