@@ -13,6 +13,7 @@ in
     # duplication for atomic modules that declare options.
     imports = [
       modules.nixos.boot
+      modules.nixos.nerdctl
       modules.nixos.efi
       modules.nixos.latest-kernel
       modules.nixos.network
