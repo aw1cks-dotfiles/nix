@@ -41,6 +41,13 @@ fix-nix-daemon:
   sudo launchctl kickstart -k system/org.nixos.nix-daemon; \
   if nix store ping --store daemon >/dev/null 2>&1; then echo "nix-daemon recovered"; else echo "launchd did not recover nix-daemon; a reboot is likely required"; exit 1; fi
 
+# Pre-seed /etc/nix/conf.d with the shared binary cache list.
+# Run this once on a fresh machine before the first `just rebuild` so that
+# substituters are trusted when the kernel (and other cached packages) are
+# first evaluated.  Requires root; will restart nix-daemon automatically.
+bootstrap-cache:
+  sudo nix run .#bootstrap-cache
+
 update:
   nix flake update
 
