@@ -2,7 +2,12 @@
 
 {
   aw1cks.modules.nixos.nerdctl =
-    { lib, config, pkgs, ... }:
+    {
+      lib,
+      config,
+      pkgs,
+      ...
+    }:
     let
       nerdctlBin = "${pkgs.nerdctl}/bin/nerdctl";
       containerdSock = "unix:///run/containerd/containerd.sock";
@@ -146,7 +151,9 @@
         cniVersion = "1.0.0";
         name = "bridge";
         nerdctlID = "17f29b073143d8cd97b5bbe492bdeffec1c5fee55cc1fe2112c8b9335f8b6121";
-        nerdctlLabels = { "nerdctl/default-network" = "true"; };
+        nerdctlLabels = {
+          "nerdctl/default-network" = "true";
+        };
         plugins = [
           {
             type = "bridge";
@@ -156,11 +163,23 @@
             hairpinMode = true;
             ipam = {
               type = "host-local";
-              ranges = [ [ { subnet = "172.20.0.0/16"; gateway = "172.20.0.1"; } ] ];
+              ranges = [
+                [
+                  {
+                    subnet = "172.20.0.0/16";
+                    gateway = "172.20.0.1";
+                  }
+                ]
+              ];
               routes = [ { dst = "0.0.0.0/0"; } ];
             };
           }
-          { type = "portmap"; capabilities = { portMappings = true; }; }
+          {
+            type = "portmap";
+            capabilities = {
+              portMappings = true;
+            };
+          }
         ];
       };
 
@@ -187,7 +206,10 @@
           commands = [
             {
               command = nerdctlBin;
-              options = [ "NOPASSWD" "SETENV" ];
+              options = [
+                "NOPASSWD"
+                "SETENV"
+              ];
             }
           ];
         }

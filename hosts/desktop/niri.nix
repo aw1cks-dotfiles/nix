@@ -21,7 +21,6 @@
     };
   };
 
-
   xdg.portal = {
     enable = true;
     extraPortals = [
