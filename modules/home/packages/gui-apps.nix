@@ -21,6 +21,7 @@
           zoom-us
         ]
         ++ lib.optionals pkgs.stdenv.isLinux [
+          gedit
           nautilus
           omnissa-horizon-client
           wl-clipboard
@@ -28,7 +29,6 @@
         ];
 
       programs = {
-        formiko.enable = pkgs.stdenv.isLinux;
         obsidian = {
           enable = true;
           # not available on hm-25.11 yet
