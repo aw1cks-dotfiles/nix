@@ -97,6 +97,11 @@ rec {
           nerdctl = _final.unstable.nerdctl;
           # buildkit 0.25+ is required for nerdctl build with containerd worker.
           buildkit = _final.unstable.buildkit;
+          # Replace Omnissa Horizon with our local packages.
+          # Classic client: adds librsvg + xkeyboard-config, regenerates loaders.cache.
+          # Next client: .NET/Avalonia rewrite, no GTK3/XKB issues.
+          omnissa-horizon-client = _prev.callPackage ../../packages/omnissa-horizon-client/package.nix { };
+          omnissa-horizon-client-next = _prev.callPackage ../../packages/omnissa-horizon-client/next.nix { };
         })
         inputs.llm-agents.overlays.default
       ];
