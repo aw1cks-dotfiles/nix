@@ -20,7 +20,7 @@
   };
 
   home-manager = {
-    url = lib.mkDefault "github:nix-community/home-manager/release-25.11";
+    url = lib.mkDefault "github:nix-community/home-manager/release-26.05";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 
@@ -45,7 +45,7 @@
   };
 
   nix-darwin = {
-    url = lib.mkDefault "github:nix-darwin/nix-darwin/nix-darwin-25.11";
+    url = lib.mkDefault "github:nix-darwin/nix-darwin/nix-darwin-26.05";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 
@@ -58,7 +58,7 @@
   };
 
   stylix = {
-    url = lib.mkDefault "github:nix-community/stylix/release-25.11";
+    url = lib.mkDefault "github:nix-community/stylix/release-26.05";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 

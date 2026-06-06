@@ -222,8 +222,8 @@
         ];
 
         xdg.configFile = lib.mkIf cfg.opencode.enable {
-          # Home Manager release-25.11 does not expose `programs.opencode.skills` yet,
-          # so install the skills tree into XDG config until that option lands there.
+          # Keep the skills tree as an installed directory so local skill files stay
+          # available even if the Home Manager option schema changes.
           "opencode/skills" = {
             source = cfg.opencode.skillsSource;
             recursive = true;
