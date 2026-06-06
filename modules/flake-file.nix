@@ -31,14 +31,6 @@
     description = "Starter downstream flake using dendritic-lib";
   };
 
-  perSystem = {
-    apps = {
-      write-inputs.meta.description = "Regenerate flake inputs from the flake-file source";
-      write-lock.meta.description = "Regenerate the flake lockfile from the flake-file source";
-      write-flake.meta.description = "Regenerate the generated flake.nix from the flake-file source";
-    };
-  };
-
   flake-file = {
     description = lib.mkDefault "Dendritic Nix library — reusable NixOS, home-manager, and nix-darwin modules";
     outputs = lib.mkDefault ''

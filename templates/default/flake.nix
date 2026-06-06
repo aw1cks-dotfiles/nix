@@ -120,7 +120,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     wezterm = {
-      url = "github:aw1cks-forks/wezterm/fix/nixpkgs-xorg-deprecation?dir=nix";
+      url = "github:aw1cks-forks/fix/nix-rust-overlay-update?dir=nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     zen-browser = {

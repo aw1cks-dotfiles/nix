@@ -111,8 +111,10 @@
   };
 
   wezterm = {
-    # see https://github.com/wezterm/wezterm/pull/7726
-    url = lib.mkDefault "github:aw1cks-forks/wezterm/fix/nixpkgs-xorg-deprecation?dir=nix";
+    # see:
+    # https://github.com/wezterm/wezterm/pull/7463
+    # https://github.com/wezterm/wezterm/pull/7726
+    url = lib.mkDefault "github:aw1cks-forks/wezterm/fix/nix-rust-overlay-update?dir=nix";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
   };
 
