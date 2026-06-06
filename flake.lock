@@ -669,7 +669,7 @@
         "narHash": "sha256-brF2m/L2rpWN/KshLSceMEjIDY9DFBWla5F4axKR8i8=",
         "rev": "1396012a030fee90bfeeec508f9cd771ca1f655c",
         "type": "tarball",
-        "url": "https://git.lix.systems/api/v1/repos/lix-project/lix/archive/1396012a030fee90bfeeec508f9cd771ca1f655c.tar.gz?rev=1396012a030fee90bfeeec508f9cd771ca1f655c"
+        "url": "https://git.lix.systems/api/v1/repos/lix-project/lix/archive/1396012a030fee90bfeeec508f9cd771ca1f655c.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -692,12 +692,12 @@
         "narHash": "sha256-y9kC3ff89btXS8RD6pAtM50g0qtsim1I8HXBtgSqdbI=",
         "rev": "5e56f5a973e24292b125dca9e9d506b0a91d6903",
         "type": "tarball",
-        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz?rev=5e56f5a973e24292b125dca9e9d506b0a91d6903"
+        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz"
       },
       "original": {
         "rev": "5e56f5a973e24292b125dca9e9d506b0a91d6903",
         "type": "tarball",
-        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz?rev=5e56f5a973e24292b125dca9e9d506b0a91d6903"
+        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz"
       }
     },
     "llm-agents": {
@@ -1257,11 +1257,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1764470739,
-        "narHash": "sha256-sa9f81B1dWO16QtgDTWHX8DQbiHKzHndpaunY5EQtwE=",
+        "lastModified": 1777519017,
+        "narHash": "sha256-TXilQ8MwFFtZs7HSogSI/LJzAS63nicE8iF63iB93WM=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "3bfa664055e1a09c6aedab5533c5fc8d6ca5741a",
+        "rev": "09b556f18dacc39e97a46e0a1cba47af7b3af1d8",
         "type": "github"
       },
       "original": {
@@ -1713,11 +1713,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780567926,
-        "narHash": "sha256-LVaiAnBwgr2YotaIlrcwCgmbwHsE2ccegRztLjur/d4=",
+        "lastModified": 1780779947,
+        "narHash": "sha256-arzemFzhfyQsH/oEFActojNHYPbGyUgz0SjZyNtLOJU=",
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
-        "rev": "eea9ae34eb9011aee9b8ce8ee2bc2dd111ee8285",
+        "rev": "1f63037ce09ed6f29b00e2b24d691a0741be1f1b",
         "type": "github"
       },
       "original": {
