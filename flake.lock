@@ -622,16 +622,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1775877453,
-        "narHash": "sha256-TIYCBQEAccDf5d9Fau8N7dX1yNRDWc4fx4pgdpAS0Ds=",
-        "owner": "aw1cks-forks",
+        "lastModified": 1780596270,
+        "narHash": "sha256-2nu8r7PjYRkn+gWMptZnmE1JE9L3eMBizXEXkY5KIBc=",
+        "owner": "pfassina",
         "repo": "lazyvim-nix",
-        "rev": "51d3933ff75aead27a36e3b52ad24ed54e15613b",
+        "rev": "5397d6bbeae7405eb4efb350e655f98af050fbc6",
         "type": "github"
       },
       "original": {
-        "owner": "aw1cks-forks",
-        "ref": "fix/ts_parser_metadata_from_nvim_treesitter",
+        "owner": "pfassina",
         "repo": "lazyvim-nix",
         "type": "github"
       }
@@ -683,12 +682,12 @@
         "narHash": "sha256-y9kC3ff89btXS8RD6pAtM50g0qtsim1I8HXBtgSqdbI=",
         "rev": "5e56f5a973e24292b125dca9e9d506b0a91d6903",
         "type": "tarball",
-        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz"
+        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz?rev=5e56f5a973e24292b125dca9e9d506b0a91d6903"
       },
       "original": {
         "rev": "5e56f5a973e24292b125dca9e9d506b0a91d6903",
         "type": "tarball",
-        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz"
+        "url": "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz?rev=5e56f5a973e24292b125dca9e9d506b0a91d6903"
       }
     },
     "llm-agents": {
