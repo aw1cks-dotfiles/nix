@@ -23,6 +23,7 @@ Use this skill when changing module layout, host composition, flake schemas, exp
 - Add `flake.aspects.*` only for narrow, cross-cutting machine traits such as `generic-linux`, `nvidia`, or `manuals`.
 - Keep shared host facts in `hosts/_facts.nix` and keep composition-only values in host files or constructors.
 - Keep cross-target constructor helpers in `modules/constructors/_lib.nix` small and contract-focused; do not let them become a second module system.
+- Keep repo-local Nix package overrides and additions under `packages/<pname>/`. Wire them into the configured `pkgs` via the overlay in `modules/constructors/_lib.nix` so hosts pick them up automatically, and expose them as `flake.packages.<system>.<pname>` through a matching `modules/integrations/<pname>.nix`.
 - For standalone Home Manager NVIDIA hosts, keep driver pins in host-local JSON files such as `hosts/<host>/nvidia.json`; keep the reusable contract and wiring in `modules/constructors/home-manager.nix`.
 
 ## Host Facts Rules
@@ -57,7 +58,7 @@ In other words:
 ## Naming Guidance
 
 - Prefer names that describe behavior, not implementation leftovers.
-- Treat existing `packages/*` and `shells/*` modules as feature modules unless they genuinely represent only packages or shells.
+- Treat existing modules whose path contains `packages/` or `shells/` (such as `modules/home/packages/*` or `modules/home/shells/*`) as feature modules unless they genuinely represent only packages or shells. The top-level `packages/<pname>/` tree is separate: it is the source-of-truth for repo-local Nix package overrides, not a module category.
 - Prefer `modules/integrations/*` for runtime consumers of flake inputs when the file is not itself the source of truth for `flake-file.inputs.*` declarations.
 - Keep profile files short: imports plus a brief membership comment.
 

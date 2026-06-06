@@ -27,6 +27,7 @@ This file applies to the entire public repo.
 - Keep hosts as explicit composition roots.
 - Prefer flake `apps` and `packages` for supported operational tooling.
 - Keep reusable schema in `modules/schema/`, constructors in `modules/constructors/`, hidden flake-file contract inputs in `modules/_internal/flake-file-inputs/default.nix`, and runtime consumers in visible modules such as `modules/integrations/*`.
+- Keep repo-local Nix package overrides and additions under `packages/<pname>/`. Wire them into the configured `pkgs` via the overlay in `modules/constructors/_lib.nix` so hosts pick them up automatically, and expose them as `flake.packages.<system>.<pname>` through a matching `modules/integrations/<pname>.nix`.
 - Prefer `flake.profiles.*` for repeated intent bundles; keep `flake.modules.*` atomic.
 - Downstream flakes should consume reusable exports, not repo-local host declarations.
 

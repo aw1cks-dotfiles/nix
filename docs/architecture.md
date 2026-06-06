@@ -31,6 +31,7 @@ The hidden `modules/_internal/flake-file-inputs/default.nix` file is the reusabl
 - `modules/shared/`: cross-target reusable modules
 - `modules/home/`, `modules/darwin/`, `modules/nixos/`: target-specific reusable modules and profiles
 - `modules/roles/defaults.nix`: role-to-profile mapping used by constructors
+- `packages/<pname>/`: source-of-truth Nix expressions for repo-local package overrides and additions; wired into the configured `pkgs` via the overlay in `modules/constructors/_lib.nix`, and exposed as `flake.packages.<system>.<pname>` through a matching `modules/integrations/<pname>.nix`
 - `hosts/default.nix`: explicit host loader for repo-local host roots
 - `hosts/facts.nix`: normalized shared host metadata module
 - `hosts/<name>/configuration.nix`: repo-local host composition roots
