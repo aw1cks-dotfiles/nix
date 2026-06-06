@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 {
   aw1cks.modules.home.neovim =
     { config, pkgs, ... }:
@@ -9,6 +9,8 @@
         extraPackages = with pkgs; [ tree-sitter ];
         viAlias = true;
         vimAlias = true;
+        withPython3 = lib.mkDefault true;
+        withRuby = lib.mkDefault true;
       };
 
       home.sessionVariables = {
