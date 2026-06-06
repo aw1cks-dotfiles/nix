@@ -23,7 +23,7 @@
         ++ lib.optionals pkgs.stdenv.isLinux [
           gedit
           nautilus
-          omnissa-horizon-client
+          omnissa-horizon-client-next
           wl-clipboard
           xclip
         ];
