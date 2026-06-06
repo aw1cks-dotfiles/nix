@@ -81,7 +81,7 @@
                     enableMcpIntegration = lib.mkDefault true;
                     package = lib.mkDefault pkgs.llm-agents.opencode;
 
-                    rules = lib.mkDefault ./files/opencode/AGENTS.md;
+                    context = lib.mkDefault ./files/opencode/AGENTS.md;
 
                     settings = lib.mkDefault {
                       # Keep agent selection in `agent` and shared reasoning defaults in

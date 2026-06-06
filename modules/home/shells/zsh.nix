@@ -263,7 +263,10 @@ in
           };
         };
 
-        yazi.enable = true;
+        yazi = {
+          enable = true;
+          shellWrapperName = "yy";
+        };
 
         zsh = {
           enable = true;

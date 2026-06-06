@@ -4,8 +4,10 @@
     networking.networkmanager.dns = "systemd-resolved";
     services.resolved = {
       enable = true;
-      dnssec = "allow-downgrade";
-      domains = [ "~." ];
+      settings.Resolve = {
+        DNSSEC = "allow-downgrade";
+        Domains = [ "~." ];
+      };
     };
   };
 }
