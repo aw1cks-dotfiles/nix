@@ -35,7 +35,7 @@
   };
 
   mermaid-rs-renderer = {
-    url = lib.mkDefault "github:1jehuang/mermaid-rs-renderer";
+    url = lib.mkDefault "github:1jehuang/mermaid-rs-renderer/v0.2.1";
     flake = false;
   };
 

@@ -92,7 +92,7 @@
       flake = false;
     };
     mermaid-rs-renderer = {
-      url = "github:1jehuang/mermaid-rs-renderer";
+      url = "github:1jehuang/mermaid-rs-renderer/v0.2.1";
       flake = false;
     };
     niri = {
