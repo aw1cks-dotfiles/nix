@@ -25,9 +25,7 @@
   };
 
   lazyvim-nix = {
-    # Temporary fork to work around some tree-sitter issues. See pfassina/lazyvim-nix#72
-    url = lib.mkDefault "github:aw1cks-forks/lazyvim-nix/fix/ts_parser_metadata_from_nvim_treesitter";
-    # url = lib.mkDefault "github:pfassina/lazyvim-nix";
+    url = lib.mkDefault "github:pfassina/lazyvim-nix";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 

@@ -40,7 +40,7 @@
     };
     import-tree.url = "github:vic/import-tree";
     lazyvim-nix = {
-      url = "github:aw1cks-forks/lazyvim-nix/fix/ts_parser_metadata_from_nvim_treesitter";
+      url = "github:pfassina/lazyvim-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     lix = {

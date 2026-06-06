@@ -160,7 +160,7 @@ let
   _ = if cfg.enable then conflictChecks else null;
 in
 {
-  options.programs.lazyvim = import (lazyvimNixPath + "/options.nix") { inherit lib; };
+  options.programs.lazyvim = import (lazyvimNixPath + "/options.nix") { inherit lib dataLib; };
 
   config = mkIf cfg.enable {
     _module.args._conflictCheck = conflictChecks;
