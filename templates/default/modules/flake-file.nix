@@ -17,6 +17,12 @@
       }
     '';
 
+    # Only declare bootstrap inputs the downstream owns directly here.
+    # The `dendritic-lib` input itself, plus all reusable shared inputs
+    # (agenix, home-manager, lix, …) and their follows are provided by
+    # `inputs.dendritic-lib.flakeModules.downstream-flake-file` above.
+    # To override, e.g. for a local path checkout:
+    #   flake-file.inputs.dendritic-lib.url = "path:../dendritic-lib";
     inputs = {
       flake-file.url = "github:vic/flake-file";
 
@@ -28,15 +34,6 @@
       import-tree.url = "github:vic/import-tree";
 
       nixpkgs.url = "github:NixOS/nixpkgs/release-25.11";
-
-      dendritic-lib = {
-        url = "github:aw1cks-dotfiles/nix";
-        inputs = {
-          flake-parts.follows = "flake-parts";
-          import-tree.follows = "import-tree";
-          nixpkgs.follows = "nixpkgs";
-        };
-      };
     };
   };
 }
