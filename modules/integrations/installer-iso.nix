@@ -7,7 +7,7 @@
 {
   perSystem =
     { system, pkgs, ... }:
-    lib.mkIf pkgs.stdenv.isLinux (
+    lib.mkIf (pkgs.stdenv.isLinux && config.aw1cks.identity.selected.authorizedKeys != [ ]) (
       let
         installerSystem = inputs.nixpkgs.lib.nixosSystem {
           inherit system;

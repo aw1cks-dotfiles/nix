@@ -1,7 +1,7 @@
 diff --git a/generic/default.nix b/generic/default.nix
 --- a/generic/default.nix
 +++ b/generic/default.nix
-@@ -215,9 +215,12 @@
+@@ -215,7 +215,10 @@
          export rundir="$(pwd)"
          ${lib.getBin test-driver}/bin/nixos-test-driver \
          ${lib.optionalString interactive "--interactive"} \
@@ -13,3 +13,48 @@ diff --git a/generic/default.nix b/generic/default.nix
            --vlans ${lib.concatStringsSep " " vlans} \
            -- ${hostPkgs.writeText "test-script" testScriptWithMounts}
        '';
+diff --git a/ubuntu/default.nix b/ubuntu/default.nix
+--- a/ubuntu/default.nix
++++ b/ubuntu/default.nix
+@@ -6,15 +6,33 @@
+     url = image.name;
+   };
+   images = lib.mapAttrs (k: v: fetchImage v) imagesJSON.${system};
+-  makeVmTestForImage = imageID: image: { testScript, sharedDirs ? {}, diskSize ? null, extraPathsToRegister ? [ ], machineConfigModule ? generic.defaultMachineConfigModule }: generic.makeVmTest {
+-    name = "vm-test-ubuntu_${imageID}";
+-    inherit system testScript sharedDirs machineConfigModule;
+-    image = prepareUbuntuImage {
+-      inherit diskSize extraPathsToRegister;
+-      hostPkgs = pkgs;
+-      originalImage = image;
++  makeVmTestForImage =
++    imageID: image:
++    {
++      testScript,
++      sharedDirs ? { },
++      diskSize ? null,
++      extraPathsToRegister ? [ ],
++      memorySize ? null,
++      machineConfigModule ? generic.defaultMachineConfigModule,
++    }:
++    generic.makeVmTest {
++      name = "vm-test-ubuntu_${imageID}";
++      inherit system testScript sharedDirs;
++      machineConfigModule =
++        { ... }:
++        {
++          imports = [ machineConfigModule ];
++          nodes.vm.virtualisation = lib.mkIf (memorySize != null) {
++            inherit memorySize;
++          };
++        };
++      image = prepareUbuntuImage {
++        inherit diskSize extraPathsToRegister;
++        hostPkgs = pkgs;
++        originalImage = image;
++      };
+     };
+-  };
+   prepareUbuntuImage = { hostPkgs, originalImage, diskSize, extraPathsToRegister }:
+     let
+       pkgs = hostPkgs;

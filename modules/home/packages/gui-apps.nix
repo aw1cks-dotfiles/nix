@@ -31,7 +31,7 @@
       programs = {
         obsidian = {
           enable = true;
-          # not available on hm-25.11 yet
+          # Keep disabled until this repo opts into managing Obsidian's CLI integration.
           # cli.enable = true;
         };
       };

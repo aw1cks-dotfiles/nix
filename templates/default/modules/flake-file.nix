@@ -33,7 +33,7 @@
 
       import-tree.url = "github:vic/import-tree";
 
-      nixpkgs.url = "github:NixOS/nixpkgs/release-25.11";
+      nixpkgs.url = "github:NixOS/nixpkgs/release-26.05";
     };
   };
 }
