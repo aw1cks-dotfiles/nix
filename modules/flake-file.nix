@@ -6,7 +6,16 @@
   ];
 
   flake.flakeModules = {
-    downstream-flake-file = ./_internal/flake-file-inputs;
+    downstream-flake-file = {
+      imports = [
+        # Shared transitive inputs (agenix, home-manager, lix, …)
+        ./_internal/flake-file-inputs
+        # Auto-generated `dendritic-lib` input + follows for every shared and
+        # bootstrap input. Downstreams should NOT redeclare `dendritic-lib`
+        # manually unless they are intentionally overriding the contract.
+        ./_internal/downstream-dendritic-input.nix
+      ];
+    };
     default = {
       # Keep repo-local flake-file wiring out of the reusable downstream module surface.
       disabledModules = [ ./flake-file.nix ];
