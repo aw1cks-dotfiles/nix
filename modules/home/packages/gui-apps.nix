@@ -23,6 +23,12 @@
         ++ lib.optionals pkgs.stdenv.isLinux [
           gedit
           nautilus
+          # Install both Horizon clients side by side. `-next` is the
+          # .NET/Avalonia rewrite and is preferred on Wayland because the
+          # classic GTK3 client still depends on a libX11/XKB workaround.
+          # Classic is kept as a fallback (e.g. for environments where
+          # Next's OAuth/browser flow does not work).
+          omnissa-horizon-client
           omnissa-horizon-client-next
           wl-clipboard
           xclip
