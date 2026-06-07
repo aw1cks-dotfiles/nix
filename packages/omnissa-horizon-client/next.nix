@@ -95,6 +95,21 @@ let
     # libclientSdkCPrimitive.so calls g_settings_new("org.gnome.system.proxy")
     # during proxy detection. The schema must be present or glib will abort.
     export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:/usr/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+
+    # Make host binaries available so xdg-open / gio can launch the system
+    # browser for OAuth/SAML SSO flows.
+    export PATH="/etc/host-current-system/sw/bin:$PATH"
+    # xdg-open needs a browser to hand off to. If the host set BROWSER we
+    # respect it; otherwise try common browsers from the host system.
+    if [ -z "''${BROWSER:-}" ]; then
+      for _b in firefox chromium google-chrome-stable zen-twilight zen; do
+        if command -v "$_b" >/dev/null 2>&1; then
+          export BROWSER="$_b"
+          break
+        fi
+      done
+    fi
+
     exec "$bundle_tmp/horizon-client-next" "$@"
   '';
 
@@ -102,6 +117,9 @@ let
     pname = "horizon-client-next";
     inherit version;
     runScript = runScript;
+    extraBwrapArgs = [
+      "--ro-bind-try" "/run/current-system/sw" "/etc/host-current-system/sw"
+    ];
 
     targetPkgs =
       pkgs: with pkgs; [
