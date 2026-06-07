@@ -79,6 +79,10 @@ let
         # did, so provide them via the FHS env.
         openssl
         curl
+        # Required so the OAuth/SAML SSO browser flow can find the
+        # system browser via xdg-open. Without this, sign-in silently
+        # fails for connection servers that require browser SSO.
+        xdg-utils
         omnissaHorizonClientFiles
         (writeTextDir "etc/omnissa/config" configText)
       ];
@@ -97,9 +101,24 @@ let
     '';
   };
 
-  desktopItem = makeDesktopItem {
+  # Two desktop entries: a visible launcher with no field codes, and a
+  # hidden URI handler with %u + MimeType. Splitting these out matters
+  # because some launchers (e.g. Noctalia) pass desktop entry field
+  # codes through as literal CLI arguments instead of stripping them
+  # per the spec, which makes the app treat "%u" as a connection URL
+  # and exit immediately.
+  launcherDesktopItem = makeDesktopItem {
     name = "horizon-client";
     desktopName = "Omnissa Horizon Client";
+    icon = "${omnissaHorizonClientFiles}/share/icons/horizon-client.png";
+    exec = "${fhsEnv}/bin/horizon-client";
+    categories = [ "Network" ];
+  };
+
+  uriHandlerDesktopItem = makeDesktopItem {
+    name = "horizon-client-uri-handler";
+    desktopName = "Omnissa Horizon Client (URI handler)";
+    noDisplay = true;
     icon = "${omnissaHorizonClientFiles}/share/icons/horizon-client.png";
     exec = "${fhsEnv}/bin/horizon-client %u";
     mimeTypes = [
@@ -117,7 +136,10 @@ stdenv.mkDerivation {
 
   nativeBuildInputs = [ copyDesktopItems ];
 
-  desktopItems = [ desktopItem ];
+  desktopItems = [
+    launcherDesktopItem
+    uriHandlerDesktopItem
+  ];
 
   installPhase = ''
     runHook preInstall

@@ -153,13 +153,34 @@ let
         libice
         libsm
         xkeyboard-config
+        # Required for the SSO browser flow. Horizon Client Next's
+        # IBrowserLauncherService spawns the system browser via
+        # `xdg-open` for OAuth/SAML sign-in; without this the Connect
+        # button silently fails because there is no way to surface the
+        # auth dialog.
+        xdg-utils
         omnissaHorizonClientFiles
       ];
   };
 
-  desktopItem = makeDesktopItem {
+  # Two desktop entries: a visible launcher with no field codes, and a
+  # hidden URI handler with %u + MimeType. Splitting these out matters
+  # because some launchers (e.g. Noctalia) pass desktop entry field
+  # codes through as literal CLI arguments instead of stripping them
+  # per the spec, which makes the app treat "%u" as a connection URL
+  # and exit immediately.
+  launcherDesktopItem = makeDesktopItem {
     name = "horizon-client-next";
     desktopName = "Omnissa Horizon Client Next";
+    icon = "${omnissaHorizonClientFiles}/share/icons/horizon-client.png";
+    exec = "${fhsEnv}/bin/horizon-client-next";
+    categories = [ "Network" ];
+  };
+
+  uriHandlerDesktopItem = makeDesktopItem {
+    name = "horizon-client-next-uri-handler";
+    desktopName = "Omnissa Horizon Client Next (URI handler)";
+    noDisplay = true;
     icon = "${omnissaHorizonClientFiles}/share/icons/horizon-client.png";
     exec = "${fhsEnv}/bin/horizon-client-next %u";
     mimeTypes = [
@@ -180,7 +201,10 @@ stdenv.mkDerivation {
 
   nativeBuildInputs = [ copyDesktopItems ];
 
-  desktopItems = [ desktopItem ];
+  desktopItems = [
+    launcherDesktopItem
+    uriHandlerDesktopItem
+  ];
 
   installPhase = ''
     runHook preInstall
