@@ -17,6 +17,7 @@
         "openmtp"
         "openvpn-connect"
         "tailscale-app"
+        "tunnelblick"
         "whatsapp"
         "ytmdesktop-youtube-music"
       ];
