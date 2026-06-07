@@ -26,6 +26,10 @@ let
     # Force x11 so it goes through XWayland and avoids the GTK3/XKB crash.
     runScript = writeShellScript "horizon-client-run" ''
       export GDK_BACKEND=x11
+      # The host uses adw-gtk3-dark which isn't in the FHS sandbox; fall
+      # back to Adwaita:dark (bundled with gtk3-x11) to avoid GTK widget
+      # assertion failures in cdk_broker_view that lead to SIGSEGV.
+      export GTK_THEME="Adwaita:dark"
 
       # libclientSdkCPrimitive.so calls g_settings_new("org.gnome.system.proxy")
       # during proxy detection. The schema must be present or glib will abort.
