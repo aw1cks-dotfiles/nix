@@ -6,9 +6,8 @@
   copyDesktopItems,
   gsettings-desktop-schemas,
   makeDesktopItem,
+  writeShellScript,
   writeTextDir,
-  gdk-pixbuf,
-  librsvg,
   configText ? "",
 }:
 let
@@ -22,9 +21,33 @@ let
     pname = "horizon-client";
     inherit version;
 
-    # In 2603 the upstream binary handles its own environment setup.
-    # We point directly at the ELF; the FHS env provides the required libs.
-    runScript = "${omnissaHorizonClientFiles}/lib/omnissa/horizon/bin/horizon-client";
+    # The Horizon Client binary links against GTK3-x11 and crashes on
+    # Wayland-native GDK backends with SIGSEGV during window creation.
+    # Force x11 so it goes through XWayland and avoids the GTK3/XKB crash.
+    runScript = writeShellScript "horizon-client-run" ''
+      export GDK_BACKEND=x11
+
+      # libclientSdkCPrimitive.so calls g_settings_new("org.gnome.system.proxy")
+      # during proxy detection. The schema must be present or glib will abort.
+      export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:/usr/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+
+      # Make host binaries available so xdg-open can launch the system
+      # browser for OAuth/SAML SSO flows (same approach as -next client).
+      export PATH="/etc/host-current-system/sw/bin:$PATH"
+      if [ -z "''${BROWSER:-}" ]; then
+        for _b in firefox chromium google-chrome-stable zen-twilight zen; do
+          if command -v "$_b" >/dev/null 2>&1; then
+            export BROWSER="$_b"
+            break
+          fi
+        done
+      fi
+
+      exec ${omnissaHorizonClientFiles}/lib/omnissa/horizon/bin/horizon-client "$@"
+    '';
+    extraBwrapArgs = [
+      "--ro-bind-try" "/run/current-system/sw" "/etc/host-current-system/sw"
+    ];
 
     targetPkgs =
       pkgs: with pkgs; [
@@ -37,6 +60,8 @@ let
         freetype
         gdk-pixbuf
         glib
+        # GSettings schema for org.gnome.system.proxy (proxy detection).
+        gsettings-desktop-schemas
         # 2603 ships only the omnissa-bundled libglibmm-2.4.so.1 (backfilled
         # from 2512); the horizon-client binary additionally NEEDs the
         # libglibmm_generate_extra_defs helper, so pull in the full GTK3 C++
@@ -86,19 +111,6 @@ let
         omnissaHorizonClientFiles
         (writeTextDir "etc/omnissa/config" configText)
       ];
-
-    # Regenerate gdk-pixbuf loaders.cache to include the librsvg SVG loader.
-    extraBuildCommands = ''
-      cache_dir=$out/usr/lib64/gdk-pixbuf-2.0/2.10.0
-      cache=$cache_dir/loaders.cache
-      if [ -f "$cache" ]; then
-        rm -f "$cache"
-        ${gdk-pixbuf.dev}/bin/gdk-pixbuf-query-loaders \
-          ${gdk-pixbuf}/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so \
-          ${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so \
-          > "$cache"
-      fi
-    '';
   };
 
   # Two desktop entries: a visible launcher with no field codes, and a

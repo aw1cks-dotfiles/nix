@@ -106,10 +106,11 @@ in
 
       users.users.alex.extraGroups = lib.mkAfter [ "input" ];
 
-      # Run the embedded Home Manager activation after the user manager exists
-      # so user units like Noctalia autostart are actually reloaded.
-      systemd.services.home-manager-alex.after = [ "systemd-user-sessions.service" ];
-      systemd.services.home-manager-alex.wants = [ "systemd-user-sessions.service" ];
+      # NixOS home-manager module already sets Before=systemd-user-sessions.service
+      # so home-manager activation completes before user login.
+      # Adding After=systemd-user-sessions.service creates an ordering cycle
+      # (Before + After on the same pair), which systemd breaks by deleting
+      # the job — leaving the switch hung indefinitely.
 
       time.timeZone = "Europe/London";
 
