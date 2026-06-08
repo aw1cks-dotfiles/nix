@@ -50,7 +50,9 @@ let
       exec ${omnissaHorizonClientFiles}/lib/omnissa/horizon/bin/horizon-client "$@"
     '';
     extraBwrapArgs = [
-      "--ro-bind-try" "/run/current-system/sw" "/etc/host-current-system/sw"
+      "--ro-bind-try"
+      "/run/current-system/sw"
+      "/etc/host-current-system/sw"
     ];
 
     targetPkgs =
