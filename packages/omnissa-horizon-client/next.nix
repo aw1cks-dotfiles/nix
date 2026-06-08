@@ -89,7 +89,12 @@ let
     export DOTNET_EnableWriteXorExecute=0
     export APP_CONTEXT_BASE_DIRECTORY="$bundle_tmp/"
     # libclientSdkCPrimitive.so is at $files/lib/; crtbora/omnissabase at $files/lib/omnissa/.
-    export LD_LIBRARY_PATH="$bundle_tmp:${omnissaHorizonClientFiles}/lib:${omnissaHorizonClientFiles}/lib/omnissa:${gcc-unwrapped.lib}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    # /run/opengl-driver/lib is appended last so the host's GPU drivers
+    # (mesa / NVIDIA, whichever the host has) are available for the
+    # bundled FFmpeg's VA-API hardware decode path without overriding
+    # the bundled libs the .NET runtime depends on.
+    export LD_LIBRARY_PATH="$bundle_tmp:${omnissaHorizonClientFiles}/lib:${omnissaHorizonClientFiles}/lib/omnissa:${gcc-unwrapped.lib}/lib:/run/opengl-driver/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export LIBVA_DRIVERS_PATH="/run/opengl-driver/lib/dri"
     # Work around null-deref crash in CdkClientInfo_GetHIDInfo (still present in 2603).
     export LD_PRELOAD="${hidStub}/lib/libhorizon-hid-stub.so''${LD_PRELOAD:+:$LD_PRELOAD}"
     # libclientSdkCPrimitive.so calls g_settings_new("org.gnome.system.proxy")
@@ -128,6 +133,9 @@ let
       "--ro-bind-try"
       "/run/current-system/sw"
       "/etc/host-current-system/sw"
+      # See package.nix for why we don't explicitly bind
+      # /run/opengl-driver here even though we point LD_LIBRARY_PATH at
+      # it: buildFHSEnv's default /run auto-mount already covers it.
     ];
 
     targetPkgs =
@@ -154,6 +162,9 @@ let
         libtiff
         libudev0-shim
         libuuid
+        # VA-API library for bundled FFmpeg HW video decode; backend
+        # driver comes from /run/opengl-driver via LIBVA_DRIVERS_PATH.
+        libva
         pango
         pcsclite
         pixman

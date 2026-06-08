@@ -57,6 +57,22 @@ let
       # during proxy detection. The schema must be present or glib will abort.
       export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:/usr/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
 
+      # Expose host GPU drivers inside the FHS sandbox so the bundled
+      # FFmpeg can hardware-decode the BLAST H.264/HEVC/AV1 video stream.
+      # /run/opengl-driver on NixOS resolves to whichever
+      # hardware.graphics drivers the host is using (mesa for Intel/AMD,
+      # version-matched libnvidia-* + libcuda + libnvcuvid for NVIDIA via
+      # hardware.nvidia.modesetting.enable), so this single path covers
+      # all three vendors transparently. LIBVA_DRIVERS_PATH tells libva
+      # where to find the backend driver inside that tree. For NVIDIA
+      # specifically, the host must also have nvidia-vaapi-driver in
+      # hardware.graphics.extraPackages for VA-API to find a backend;
+      # without it the client falls back to software decode via libx264
+      # (the visible symptom is ~5-15fps frame target in the protocol
+      # log).
+      export LD_LIBRARY_PATH="/run/opengl-driver/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+      export LIBVA_DRIVERS_PATH="/run/opengl-driver/lib/dri"
+
       # PATH setup:
       #  * /usr/lib/omnissa/horizon/client must come first so the client
       #    can spawn the horizon-protocol helper binary during BLAST
@@ -82,6 +98,14 @@ let
       "--ro-bind-try"
       "/run/current-system/sw"
       "/etc/host-current-system/sw"
+      # NB: /run/opengl-driver is exposed automatically by buildFHSEnv's
+      # default auto-mount of /run (it walks / and bind-mounts every
+      # non-ignored directory, which covers /run and therefore the
+      # /run/opengl-driver symlink). Just exporting LD_LIBRARY_PATH /
+      # LIBVA_DRIVERS_PATH in the runScript is enough; an explicit
+      # --ro-bind-try here would attempt to re-mount a path that's
+      # already bind-mounted and breaks on hosts where the symlink
+      # target is in a different store path than the running system.
     ];
 
     targetPkgs =
@@ -114,6 +138,11 @@ let
         libudev0-shim
         libuuid
         libv4l
+        # libva is the VA-API library that the bundled FFmpeg
+        # (libavcodec.so.62.omnissa) dlopens for hardware video decode;
+        # the backend driver itself comes from /run/opengl-driver via
+        # LIBVA_DRIVERS_PATH set in runScript.
+        libva
         pango
         pcsclite
         pixman
