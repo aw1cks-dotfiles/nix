@@ -86,6 +86,21 @@ let
     cp -r "${bundleDir}/." "$bundle_tmp/"
     chmod -R u+w "$bundle_tmp"
 
+    # Write a small debug breadcrumb under XDG_STATE so we can confirm
+    # what env actually reached the bundle binary (LD_PRELOAD in
+    # particular - the bwrap init's `source /etc/profile` has been
+    # observed to clobber preload paths in similar setups). Append-only
+    # one line per launch; trivial to read with `tail -n 5
+    # ~/.local/state/horizon-client-next/launch-env.log`.
+    state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/horizon-client-next"
+    mkdir -p "$state_dir"
+    {
+      printf '== %s pid=%s ==\n' "$(date -Iseconds)" "$$"
+      printf 'LD_PRELOAD=%s\n' "''${LD_PRELOAD:-<unset>}"
+      printf 'LD_LIBRARY_PATH=%s\n' "''${LD_LIBRARY_PATH:-<unset>}"
+      printf 'PATH=%s\n' "$PATH"
+    } >> "$state_dir/launch-env.log"
+
     export DOTNET_EnableWriteXorExecute=0
     export APP_CONTEXT_BASE_DIRECTORY="$bundle_tmp/"
     # libclientSdkCPrimitive.so is at $files/lib/; crtbora/omnissabase at $files/lib/omnissa/.
@@ -100,6 +115,9 @@ let
     # libclientSdkCPrimitive.so calls g_settings_new("org.gnome.system.proxy")
     # during proxy detection. The schema must be present or glib will abort.
     export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:/usr/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+
+    # Folder redirection / "File Sharing" UI; see package.nix for rationale.
+    export ENABLE_FOLDER_REDIRECTION=TRUE
 
     # PATH setup:
     #  * /usr/lib/omnissa/horizon/client must come first so the client

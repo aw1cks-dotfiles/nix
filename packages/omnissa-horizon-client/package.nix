@@ -57,6 +57,14 @@ let
       # during proxy detection. The schema must be present or glib will abort.
       export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:/usr/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
 
+      # Folder redirection (the "File Sharing" UI in the client). The
+      # upstream bin/horizon-client wrapper enables this conditionally
+      # on $libpath/horizon/vdpService/libtsdrClient.so being present
+      # (verified shipped by the 2603 multi-arch tarball). Without this
+      # env var the TSDR plugin still loads and connects, but the
+      # File Sharing menu stays greyed out.
+      export ENABLE_FOLDER_REDIRECTION=TRUE
+
       # Expose host GPU drivers inside the FHS sandbox so the bundled
       # FFmpeg can hardware-decode the BLAST H.264/HEVC/AV1 video stream.
       # /run/opengl-driver on NixOS resolves to whichever
