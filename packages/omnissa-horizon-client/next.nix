@@ -118,7 +118,9 @@ let
     inherit version;
     runScript = runScript;
     extraBwrapArgs = [
-      "--ro-bind-try" "/run/current-system/sw" "/etc/host-current-system/sw"
+      "--ro-bind-try"
+      "/run/current-system/sw"
+      "/etc/host-current-system/sw"
     ];
 
     targetPkgs =
