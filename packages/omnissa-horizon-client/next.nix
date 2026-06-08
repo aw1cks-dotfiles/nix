@@ -86,20 +86,14 @@ let
     cp -r "${bundleDir}/." "$bundle_tmp/"
     chmod -R u+w "$bundle_tmp"
 
-    # Write a small debug breadcrumb under XDG_STATE so we can confirm
-    # what env actually reached the bundle binary (LD_PRELOAD in
-    # particular - the bwrap init's `source /etc/profile` has been
-    # observed to clobber preload paths in similar setups). Append-only
-    # one line per launch; trivial to read with `tail -n 5
-    # ~/.local/state/horizon-client-next/launch-env.log`.
     state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/horizon-client-next"
     mkdir -p "$state_dir"
-    {
-      printf '== %s pid=%s ==\n' "$(date -Iseconds)" "$$"
-      printf 'LD_PRELOAD=%s\n' "''${LD_PRELOAD:-<unset>}"
-      printf 'LD_LIBRARY_PATH=%s\n' "''${LD_LIBRARY_PATH:-<unset>}"
-      printf 'PATH=%s\n' "$PATH"
-    } >> "$state_dir/launch-env.log"
+    # The hid-stub LD_PRELOAD shim writes a one-line load breadcrumb to
+    # this file when the bundled .NET binary actually starts with it
+    # loaded. If $state_dir/hid-stub.log has a "hid-stub loaded pid=..."
+    # entry shortly after a launch, the shim is in the process. If not,
+    # something between our exec and the binary stripped LD_PRELOAD.
+    export HORIZON_HID_STUB_LOG="$state_dir/hid-stub.log"
 
     export DOTNET_EnableWriteXorExecute=0
     export APP_CONTEXT_BASE_DIRECTORY="$bundle_tmp/"
@@ -139,6 +133,18 @@ let
         fi
       done
     fi
+
+    # Final env snapshot just before exec, so we can verify what the
+    # bundled binary actually sees (in particular that our LD_PRELOAD
+    # / LD_LIBRARY_PATH / PATH exports survived). Append-only, one
+    # block per launch.
+    {
+      printf '== %s pid=%s ==\n' "$(date -Iseconds)" "$$"
+      printf 'LD_PRELOAD=%s\n' "''${LD_PRELOAD:-<unset>}"
+      printf 'LD_LIBRARY_PATH=%s\n' "''${LD_LIBRARY_PATH:-<unset>}"
+      printf 'PATH=%s\n' "$PATH"
+      printf 'HORIZON_HID_STUB_LOG=%s\n' "''${HORIZON_HID_STUB_LOG:-<unset>}"
+    } >> "$state_dir/launch-env.log"
 
     exec "$bundle_tmp/horizon-client-next" "$@"
   '';
