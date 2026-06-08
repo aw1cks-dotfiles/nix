@@ -96,9 +96,16 @@ let
     # during proxy detection. The schema must be present or glib will abort.
     export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:/usr/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
 
-    # Make host binaries available so xdg-open / gio can launch the system
-    # browser for OAuth/SAML SSO flows.
-    export PATH="/etc/host-current-system/sw/bin:$PATH"
+    # PATH setup:
+    #  * /usr/lib/omnissa/horizon/client must come first so the client
+    #    can spawn the horizon-protocol helper binary during BLAST
+    #    session launch (matches what the upstream bin/horizon-client
+    #    wrapper does for the classic client). Without it, the helper
+    #    never starts and the session fails with VDPCONNECT_FAILURE.
+    #  * /etc/host-current-system/sw/bin makes host binaries available
+    #    so xdg-open / gio can launch the system browser for OAuth /
+    #    SAML SSO flows.
+    export PATH="/usr/lib/omnissa/horizon/client:/etc/host-current-system/sw/bin:$PATH"
     # xdg-open needs a browser to hand off to. If the host set BROWSER we
     # respect it; otherwise try common browsers from the host system.
     if [ -z "''${BROWSER:-}" ]; then

@@ -21,14 +21,21 @@ let
     pname = "horizon-client";
     inherit version;
 
-    # The Horizon Client binary links against GTK3-x11 and crashes on
-    # Wayland-native GDK backends with SIGSEGV during window creation.
-    # Force x11 so it goes through XWayland and avoids the GTK3/XKB crash.
+    # Exec the upstream bin/horizon-client shell wrapper (NOT the deep
+    # ELF directly): the wrapper does GDK_BACKEND=x11, LD_LIBRARY_PATH,
+    # LIBVA_DRI3_DISABLE, and crucially `export PATH="$binPath/client:$PATH"`
+    # so the helper binary at /usr/lib/omnissa/horizon/client/horizon-protocol
+    # is found when the client tries to spawn it during BLAST session
+    # launch. Without that, the helper never starts, no MKS viewctrl
+    # Unix socket is created, and the session fails with
+    # VDPCONNECT_FAILURE.
     runScript = writeShellScript "horizon-client-run" ''
-      export GDK_BACKEND=x11
       # The host uses adw-gtk3-dark which isn't in the FHS sandbox; fall
       # back to Adwaita:dark (bundled with gtk3-x11) to avoid GTK widget
       # assertion failures in cdk_broker_view that lead to SIGSEGV.
+      # Originally diagnosed against 2512-era ABI-mismatched libs; with
+      # the multi-arch 2603 tarball this may no longer be needed but is
+      # left in place pending interactive verification.
       export GTK_THEME="Adwaita:dark"
 
       # libclientSdkCPrimitive.so calls g_settings_new("org.gnome.system.proxy")
@@ -47,7 +54,7 @@ let
         done
       fi
 
-      exec ${omnissaHorizonClientFiles}/lib/omnissa/horizon/bin/horizon-client "$@"
+      exec ${omnissaHorizonClientFiles}/bin/horizon-client "$@"
     '';
     extraBwrapArgs = [
       "--ro-bind-try"
