@@ -21,15 +21,30 @@ let
     pname = "horizon-client";
     inherit version;
 
-    # Exec the upstream bin/horizon-client shell wrapper (NOT the deep
-    # ELF directly): the wrapper does GDK_BACKEND=x11, LD_LIBRARY_PATH,
-    # LIBVA_DRI3_DISABLE, and crucially `export PATH="$binPath/client:$PATH"`
-    # so the helper binary at /usr/lib/omnissa/horizon/client/horizon-protocol
-    # is found when the client tries to spawn it during BLAST session
-    # launch. Without that, the helper never starts, no MKS viewctrl
-    # Unix socket is created, and the session fails with
-    # VDPCONNECT_FAILURE.
+    # The Horizon Client binary links against GTK3-x11 and crashes on
+    # Wayland-native GDK backends with SIGSEGV during window creation.
+    # Force x11 so it goes through XWayland and avoids the GTK3/XKB crash.
+    #
+    # Exec the deep ELF at lib/omnissa/horizon/bin/horizon-client directly
+    # rather than the upstream ${files}/bin/horizon-client shell wrapper:
+    # that wrapper prepends /usr/lib/omnissa to LD_LIBRARY_PATH, which
+    # then loads Omnissa's bundled libgtkmm-3.0.so.1 (and the rest of
+    # the *mm bindings) AHEAD of nixpkgs' newer versions. The nixpkgs
+    # libgtk-3.so.0 / libgdk-3.so.0 in the FHS env are ABI-incompatible
+    # with the older Omnissa C++ binding libs, so the client SIGSEGVs
+    # early during widget initialization (gdb backtrace confirms
+    # /usr/lib/omnissa/libgtkmm-3.0.so.1 loaded with assertion failures
+    # in cdk_broker_view*).
+    #
+    # We replicate just the env that the upstream wrapper sets and
+    # that we actually need (GDK_BACKEND, PATH for horizon-protocol),
+    # without the LD_LIBRARY_PATH prepend that the wrapper does. PATH
+    # for horizon-protocol matters because the client `exec`s that
+    # helper by name during BLAST session launch; without it on PATH
+    # no MKS viewctrl Unix socket is created and the session fails
+    # with VDPCONNECT_FAILURE.
     runScript = writeShellScript "horizon-client-run" ''
+      export GDK_BACKEND=x11
       # The host uses adw-gtk3-dark which isn't in the FHS sandbox; fall
       # back to Adwaita:dark (bundled with gtk3-x11) to avoid GTK widget
       # assertion failures in cdk_broker_view that lead to SIGSEGV.
@@ -42,9 +57,16 @@ let
       # during proxy detection. The schema must be present or glib will abort.
       export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:/usr/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
 
-      # Make host binaries available so xdg-open can launch the system
-      # browser for OAuth/SAML SSO flows (same approach as -next client).
-      export PATH="/etc/host-current-system/sw/bin:$PATH"
+      # PATH setup:
+      #  * /usr/lib/omnissa/horizon/client must come first so the client
+      #    can spawn the horizon-protocol helper binary during BLAST
+      #    session launch (matches what the upstream bin/horizon-client
+      #    wrapper does). Without it, the helper never starts and the
+      #    session fails with VDPCONNECT_FAILURE.
+      #  * /etc/host-current-system/sw/bin makes host binaries available
+      #    so xdg-open can launch the system browser for OAuth / SAML
+      #    SSO flows.
+      export PATH="/usr/lib/omnissa/horizon/client:/etc/host-current-system/sw/bin:$PATH"
       if [ -z "''${BROWSER:-}" ]; then
         for _b in firefox chromium google-chrome-stable zen-twilight zen; do
           if command -v "$_b" >/dev/null 2>&1; then
@@ -54,7 +76,7 @@ let
         done
       fi
 
-      exec ${omnissaHorizonClientFiles}/bin/horizon-client "$@"
+      exec ${omnissaHorizonClientFiles}/lib/omnissa/horizon/bin/horizon-client "$@"
     '';
     extraBwrapArgs = [
       "--ro-bind-try"

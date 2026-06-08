@@ -64,14 +64,16 @@ stdenv.mkDerivation {
     # is_glibcxx_compatible probe into the wrong code path.
     rm -f "$out/lib/omnissa/gcc/libstdc++.so.6"
 
-    # Same reasoning for the bundled OpenSSL: Omnissa ships an older
-    # libcrypto.so.3 / libssl.so.3 under $libpath/ which gets ahead of
-    # the FHS env's openssl on LD_LIBRARY_PATH and shadows it. Anything
-    # built against a newer OpenSSL (e.g. opensc's libopenscpkcs11.so,
-    # required for smartcard auth) then fails to load with
-    # "OPENSSL_3.4.0 not found", silently disabling smartcard support
-    # and pulling the older crypto into the rest of the process.
-    rm -f "$out/lib/omnissa/libcrypto.so.3" "$out/lib/omnissa/libssl.so.3"
+    # NOTE: do NOT remove the bundled libcrypto.so.3 / libssl.so.3 from
+    # $out/lib/omnissa/. Initially this looked like the right cleanup
+    # (mirrors the libstdc++ removal above, and would let opensc's
+    # libopenscpkcs11.so resolve OPENSSL_3.4.0 symbols against the FHS
+    # env's openssl). In practice removing it makes libclientSdkCPrimitive.so
+    # segfault on the first TLS HTTPS call to the broker
+    # (CdkSetLocaleTask), almost certainly because the binary was built
+    # against the bundled OpenSSL ABI. Keep the bundle's libcrypto/libssl
+    # and tolerate the opensc startup load error until smartcard becomes
+    # something we actually need.
 
     # Smartcard authentication during initial broker connection.
     mkdir -p "$out/lib/omnissa/horizon/pkcs11"
