@@ -1257,11 +1257,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1764470739,
-        "narHash": "sha256-sa9f81B1dWO16QtgDTWHX8DQbiHKzHndpaunY5EQtwE=",
+        "lastModified": 1780715792,
+        "narHash": "sha256-4+8gPeiPeud89mjo865RwpqmKwa1MThRsq2SvRxo7mg=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "3bfa664055e1a09c6aedab5533c5fc8d6ca5741a",
+        "rev": "27b7e78c6935293ee868469cc4172e9b8b17823b",
         "type": "github"
       },
       "original": {
@@ -1655,17 +1655,16 @@
       },
       "locked": {
         "dir": "nix",
-        "lastModified": 1780778372,
-        "narHash": "sha256-j2stct+biHhyxRfkuQp94xEQZSy2asLbzotJPBok+No=",
-        "owner": "aw1cks-forks",
+        "lastModified": 1780817067,
+        "narHash": "sha256-vUDzlSpBctqQxouMJBrQJyv3S0J9YFGFV+V898v0jFA=",
+        "owner": "wezterm",
         "repo": "wezterm",
-        "rev": "e933d22905aa75bfc98380265db4397dcb7ef6c9",
+        "rev": "8afe0ad30739c5aa106c19e8a75b1dfc83bcfb56",
         "type": "github"
       },
       "original": {
         "dir": "nix",
-        "owner": "aw1cks-forks",
-        "ref": "fix/nix-rust-overlay-update",
+        "owner": "wezterm",
         "repo": "wezterm",
         "type": "github"
       }
