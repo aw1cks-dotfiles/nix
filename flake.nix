@@ -26,7 +26,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     disko = {
-      url = "github:nix-community/disko/5ae05d98d2bebc0a9521c9fc89bd2e5cffa05926";
+      url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-file.url = "github:vic/flake-file";
