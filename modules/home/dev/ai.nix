@@ -36,6 +36,8 @@
         opencode = lib.mkOption {
           type = lib.types.submoduleWith {
             shorthandOnlyDefinesConfig = true;
+            # See the omp option below for why pkgs is passed via specialArgs.
+            specialArgs = { inherit pkgs; };
             modules = [
               (
                 { lib, ... }:
@@ -197,6 +199,33 @@
           default = { };
           description = "OpenCode home-manager configuration";
         };
+
+        omp = lib.mkOption {
+          type = lib.types.submoduleWith {
+            shorthandOnlyDefinesConfig = true;
+            # Pass pkgs explicitly: submodule modules resolve unset args via
+            # `_module.args`, which needs the outer config fixpoint and recurses
+            # when the option is forced from config evaluation.
+            specialArgs = { inherit pkgs; };
+            modules = [
+              (
+                { lib, pkgs, ... }:
+                {
+                  freeformType = lib.types.attrsOf lib.types.anything;
+
+                  config = {
+                    enable = lib.mkDefault true;
+                    # One agent packaging source: llm-agents also builds omp, so
+                    # the binary follows the same overlay/cache path as opencode.
+                    package = lib.mkDefault pkgs.llm-agents.omp;
+                  };
+                }
+              )
+            ];
+          };
+          default = { };
+          description = "OMP (oh-my-pi) home-manager configuration, forwarded to programs.omp";
+        };
       };
 
       config = {
@@ -206,6 +235,7 @@
         ];
 
         programs.mcp = cfg.mcp;
+        programs.omp = cfg.omp;
         programs.opencode = lib.mkMerge [
           (builtins.removeAttrs cfg.opencode [
             "skillsSource"
