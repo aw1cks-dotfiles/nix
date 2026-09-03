@@ -59,7 +59,7 @@
         uv = {
           enable = true;
           settings = {
-            native-tls = true;
+            system-certs = true;
           };
         };
       };
