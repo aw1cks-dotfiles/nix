@@ -234,7 +234,7 @@
 
             push = {
               autoSetupRemote = true;
-              default = "upstream";
+              default = "simple";
               followTags = true;
             };
 
