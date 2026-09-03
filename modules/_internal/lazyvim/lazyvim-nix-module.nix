@@ -37,7 +37,7 @@ let
     ignoreBuildNotifications = cfg.ignoreBuildNotifications;
   };
   configLib = import (lazyvimNixPath + "/lib/config-generation.nix") { inherit lib; };
-  fileLib = import (lazyvimNixPath + "/lib/file-scanning.nix") { inherit lib pkgs config; };
+  fileLib = import (lazyvimNixPath + "/lib/file-scanning.nix") { inherit lib; };
 
   cfg = config.programs.lazyvim;
 
