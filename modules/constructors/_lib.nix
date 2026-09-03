@@ -98,7 +98,7 @@ rec {
           # buildkit 0.25+ is required for nerdctl build with containerd worker.
           buildkit = _final.unstable.buildkit;
         })
-        inputs.llm-agents.overlays.default
+        inputs.llm-agents.overlays.shared-nixpkgs
       ];
     };
 
@@ -127,8 +127,13 @@ rec {
       home = [
         inputs.agenix.homeManagerModules.default
         inputs.stylix.homeModules.stylix
+        # Defines `programs.omp` for the shared AI module; inert unless enabled.
+        inputs.oh-my-pi.homeManagerModules.default
       ];
-      homeEmbedded = [ inputs.stylix.homeModules.stylix ];
+      homeEmbedded = [
+        inputs.stylix.homeModules.stylix
+        inputs.oh-my-pi.homeManagerModules.default
+      ];
     }
     .${target};
 

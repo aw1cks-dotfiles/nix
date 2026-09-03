@@ -62,8 +62,18 @@
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 
+  # No nixpkgs follow: keeping llm-agents' own pin makes its flake package
+  # outputs match the numtide CI cache (cache.numtide.com). The
+  # shared-nixpkgs overlay is unaffected — it builds against the consumer's
+  # pkgs either way.
   llm-agents = {
     url = lib.mkDefault "github:numtide/llm-agents.nix";
+  };
+
+  # Consumed for its home-manager module (`programs.omp`); the omp package
+  # itself comes from llm-agents so the agent set stays on one packaging.
+  oh-my-pi = {
+    url = lib.mkDefault "github:can1357/oh-my-pi";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
   };
 
