@@ -3,11 +3,30 @@
 {
   aw1cks.modules.home.kubernetes =
     { pkgs, ... }:
+    let
+      helm-unittest = pkgs.kubernetes-helmPlugins.helm-unittest.overrideAttrs (oldAttrs: {
+        postInstall = (oldAttrs.postInstall or "") + ''
+          if grep -q '$HELM_PLUGIN_DIR/untt-linux-amd64' "$out/helm-unittest/plugin.yaml"; then
+            substituteInPlace "$out/helm-unittest/plugin.yaml" \
+              --replace-fail '$HELM_PLUGIN_DIR/untt-linux-amd64' '$HELM_PLUGIN_DIR/untt' \
+              --replace-fail '$HELM_PLUGIN_DIR/untt-linux-arm64' '$HELM_PLUGIN_DIR/untt' \
+              --replace-fail '$HELM_PLUGIN_DIR/untt-linux-ppc64le' '$HELM_PLUGIN_DIR/untt' \
+              --replace-fail '$HELM_PLUGIN_DIR/untt-linux-s390x' '$HELM_PLUGIN_DIR/untt' \
+              --replace-fail '$HELM_PLUGIN_DIR/untt-macos-amd64' '$HELM_PLUGIN_DIR/untt' \
+              --replace-fail '$HELM_PLUGIN_DIR/untt-macos-arm64' '$HELM_PLUGIN_DIR/untt'
+          fi
+        '';
+      });
+    in
     {
       home.packages =
         with pkgs;
         [
+          argo-expr
+          argo-rollouts
+          argo-workflows
           argocd
+          argonaut
           cilium-cli
           helm-docs
           helmfile
@@ -31,7 +50,7 @@
             plugins = [
               kubernetes-helmPlugins.helm-diff
               kubernetes-helmPlugins.helm-secrets
-              kubernetes-helmPlugins.helm-unittest
+              helm-unittest
             ];
           })
           kustomize
