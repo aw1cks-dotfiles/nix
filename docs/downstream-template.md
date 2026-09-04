@@ -37,6 +37,36 @@ The template demonstrates a simple split:
 
 This keeps shared library concerns reusable while giving the downstream repo room for private certificates, private git settings, internal package sources, and site-specific policies.
 
+## AI Model Routing
+
+The shared Home Manager AI module exposes provider-specific model tiers under `modules.ai.models` so downstream hosts can replace models without copying the OpenCode or OMP agent maps:
+
+```nix
+{
+  modules.ai.models = {
+    frontier = {
+      opencode = {
+        model = "anthropic/claude-opus-4-6";
+        variant = "high";
+      };
+      omp = "anthropic/claude-opus-4-6:high";
+    };
+
+    small = {
+      opencode = {
+        model = "ollama/qwen3-coder";
+        variant = null;
+      };
+      omp = "ollama/qwen3-coder";
+    };
+  };
+}
+```
+
+The available tiers are `frontier`, `premium`, `standard`, and `small`. OpenCode and OMP use different provider namespaces and model-selector syntax, so each tier keeps separate values for the two clients. Setting an OpenCode `variant` to `null` omits the variant.
+
+These tier values feed the shared default agent and model-role assignments. A downstream module can still override an individual assignment directly through `modules.ai.opencode.settings.agent.*` or `modules.ai.omp.settings.modelRoles.*`; those explicit settings take precedence over the shared defaults.
+
 ## Identity Use In The Template
 
 The template extends `aw1cks.identities` with a downstream-specific identity example in `templates/default/modules/org/meta.nix`.
