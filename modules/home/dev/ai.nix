@@ -236,8 +236,36 @@
                     # the binary follows the same overlay/cache path as opencode.
                     package = lib.mkDefault pkgs.llm-agents.omp;
 
-                    settings = lib.mkDefault {
-                      modelRoles = {
+                    # Per-key defaults: a downstream `settings` attrset merges
+                    # key-by-key (last one wins per key) instead of replacing
+                    # this whole block, so private overlays can override the
+                    # model routing without restating shared UI preferences.
+                    settings = {
+                      # State markers: without these every switch re-runs
+                      # onboarding and re-prompts for dev consent.
+                      setupVersion = lib.mkDefault 2;
+                      dev.autoqaConsent = lib.mkDefault "granted";
+
+                      theme.dark = lib.mkDefault "dark-sakura";
+                      composer.shape = lib.mkDefault "rail";
+                      statusLine = lib.mkDefault {
+                        preset = "nerd";
+                        contextLine = "percentage";
+                      };
+                      display = lib.mkDefault {
+                        cacheMissMarker = true;
+                        showTurnTime = true;
+                        showTokenUsage = true;
+                      };
+                      tui.tight = lib.mkDefault true;
+                      terminal.showProgress = lib.mkDefault true;
+                      defaultThinkingLevel = lib.mkDefault "auto";
+                      advisor.enabled = lib.mkDefault false;
+                      tools.approvalMode = lib.mkDefault "write";
+                      github.enabled = lib.mkDefault true;
+                      astGrep.enabled = lib.mkDefault true;
+
+                      modelRoles = lib.mkDefault {
                         default = premium_model.omp;
                         smol = small_model.omp;
                         slow = frontier_model.omp;
@@ -250,19 +278,19 @@
                         advisor = frontier_model.omp;
                       };
 
-                      task = {
+                      # Per-subkey defaults so a downstream `task.isolation.*`
+                      # choice merges instead of replacing this block.
+                      task.maxRecursionDepth = lib.mkDefault 1;
+                      task.agentModelOverrides = lib.mkDefault {
                         # Permit one layer of delegation and strip task spawning
                         # from those child agents.
-                        maxRecursionDepth = 1;
-                        agentModelOverrides = {
-                          scout = "@smol";
-                          librarian = "@smol";
-                          sonic = "@smol";
-                          task = "@task";
-                          designer = "@designer";
-                          reviewer = "@slow";
-                          security-reviewer = "@slow";
-                        };
+                        scout = "@smol";
+                        librarian = "@smol";
+                        sonic = "@smol";
+                        task = "@task";
+                        designer = "@designer";
+                        reviewer = "@slow";
+                        security-reviewer = "@slow";
                       };
                     };
                   };
