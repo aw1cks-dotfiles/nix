@@ -48,6 +48,7 @@
         nixos-hardware.follows = "nixos-hardware";
         nixpkgs.follows = "nixpkgs";
         nixpkgs-unstable.follows = "nixpkgs-unstable";
+        oh-my-pi.follows = "oh-my-pi";
         stylix.follows = "stylix";
         treefmt-nix.follows = "treefmt-nix";
         wezterm.follows = "wezterm";
@@ -83,10 +84,7 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
-    llm-agents = {
-      url = "github:numtide/llm-agents.nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    llm-agents.url = "github:numtide/llm-agents.nix";
     lucidglyph = {
       url = "github:maximilionus/lucidglyph";
       flake = false;
@@ -96,7 +94,7 @@
       flake = false;
     };
     niri = {
-      url = "github:sodiboo/niri-flake";
+      url = "github:epireyn/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
@@ -111,6 +109,10 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs.url = "github:NixOS/nixpkgs/release-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    oh-my-pi = {
+      url = "github:can1357/oh-my-pi";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -30,7 +30,7 @@
   };
 
   niri = {
-    url = lib.mkDefault "github:sodiboo/niri-flake";
+    url = lib.mkDefault "github:epireyn/niri-flake";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
   };
 
