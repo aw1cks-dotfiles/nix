@@ -265,6 +265,34 @@
                       github.enabled = lib.mkDefault true;
                       astGrep.enabled = lib.mkDefault true;
 
+                      # Keep agents on structured tools: OMP supplies its own
+                      # tool-shadowing defaults; these cover web and GitHub
+                      # commands where the native tools preserve more context.
+                      bashInterceptor = {
+                        enabled = lib.mkDefault true;
+                        patterns = lib.mkDefault [
+                          {
+                            pattern = "^\\s*(curl|wget)\\s+";
+                            tool = "read";
+                            message = "Use the read tool with the URL instead; it returns clean reader-mode content without a subprocess.";
+                          }
+                          {
+                            pattern = "^\\s*gh\\s+(issue|pr)\\s+(view|list|search|checkout|create|diff)\\b";
+                            tool = "github";
+                            message = "Use the github tool instead; it wraps gh with structured output and caching.";
+                          }
+                        ];
+                      };
+
+                      # sudo stays available but always asks, including in
+                      # yolo sessions.
+                      bash.patterns = lib.mkDefault [
+                        {
+                          match = "sudo *";
+                          approval = "prompt";
+                        }
+                      ];
+
                       modelRoles = lib.mkDefault {
                         default = premium_model.omp;
                         smol = small_model.omp;
@@ -280,6 +308,7 @@
 
                       # Per-subkey defaults so a downstream `task.isolation.*`
                       # choice merges instead of replacing this block.
+                      task.isolation.mode = lib.mkDefault "auto";
                       task.maxRecursionDepth = lib.mkDefault 1;
                       task.agentModelOverrides = lib.mkDefault {
                         # Permit one layer of delegation and strip task spawning
