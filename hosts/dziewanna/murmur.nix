@@ -29,8 +29,10 @@ in
       messagelimit=9999
     '';
 
-    sslKey = "${certDir}/key.pem";
-    sslCert = "${certDir}/fullchain.pem";
+    tls = {
+      keyPath = "${certDir}/key.pem";
+      certPath = "${certDir}/fullchain.pem";
+    };
   };
 
   # Allow Murmur traffic and HTTP ACME challenges on the live host.
