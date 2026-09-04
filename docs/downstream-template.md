@@ -67,6 +67,8 @@ The available tiers are `frontier`, `premium`, `standard`, and `small`. OpenCode
 
 These tier values feed the shared default agent and model-role assignments. A downstream module can still override an individual assignment directly through `modules.ai.opencode.settings.agent.*` or `modules.ai.omp.settings.modelRoles.*`; those explicit settings take precedence over the shared defaults.
 
+Shared OMP defaults (theme, status line, approval mode, onboarding markers, delegation guard) are declared per-key with `lib.mkDefault` under `modules.ai.omp.settings`, so a downstream `settings` attrset merges key-by-key instead of replacing the shared block. Downstream modules only declare the deltas — typically model routing and provider policy. Nested defaults are per-subkey (`task.maxRecursionDepth`, `task.agentModelOverrides`) for the same reason: a downstream `task.isolation.*` assignment merges with, rather than replaces, the shared delegation guard.
+
 ## Identity Use In The Template
 
 The template extends `aw1cks.identities` with a downstream-specific identity example in `templates/default/modules/org/meta.nix`.
