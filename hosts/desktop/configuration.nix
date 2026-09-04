@@ -14,7 +14,7 @@ let
 in
 {
   configurations.nixos.desktop = {
-    module = {
+    module = { pkgs, ... }: {
       imports = [
         config.aw1cks.profiles.nixos.desktop-perf
         inputs.nixos-hardware.nixosModules.common-pc
@@ -86,7 +86,7 @@ in
 
       home-manager.extraSpecialArgs.inputs = inputs;
 
-      programs.niri.package = inputs.niri.packages.x86_64-linux.niri-unstable;
+      programs.niri.package = pkgs.niri;
 
       services.openssh = {
         enable = true;

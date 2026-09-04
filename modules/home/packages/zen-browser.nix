@@ -13,6 +13,8 @@
     let
       cfg = config.modules.zen-browser;
       browserDesktopFile = "zen-twilight.desktop";
+      zenDarwinPackage =
+        inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.twilight-unwrapped;
       myMimeApps = pkgs.writeText "mimeapps.list" ''
         [Default Applications]
         text/html=${browserDesktopFile}
@@ -77,6 +79,12 @@
 
         programs.zen-browser = {
           enable = true;
+          # Home Manager 26.05 applies Firefox wrapper arguments to Zen's signed,
+          # unwrapped Darwin package. Remove once home-manager#9486 is backported.
+          # See zen-browser-flake#82 and zen-browser-flake#361.
+          package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
+            lib.mkForce (lib.makeOverridable (_: zenDarwinPackage) { })
+          );
           profiles.default = {
             id = 0;
             isDefault = true;

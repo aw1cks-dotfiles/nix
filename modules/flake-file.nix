@@ -52,7 +52,8 @@
         inputs.nixpkgs.follows = "nixpkgs";
       };
       noctalia = {
-        url = "github:noctalia-dev/noctalia-shell";
+        # TODO: migrate the desktop host to Noctalia v5's new TOML configuration.
+        url = "github:noctalia-dev/noctalia-shell/legacy-v4";
         inputs.nixpkgs.follows = "nixpkgs-unstable";
       };
       nixos-images = {
