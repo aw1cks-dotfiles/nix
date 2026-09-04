@@ -10,12 +10,91 @@
     }:
     let
       cfg = config.modules.ai;
-      readOnlyAgentPermission = {
+      mkModelTierOption =
+        {
+          description,
+          opencodeModel,
+          opencodeVariant ? null,
+          ompModel,
+        }:
+        lib.mkOption {
+          type = lib.types.submodule {
+            options = {
+              opencode = lib.mkOption {
+                type = lib.types.submodule {
+                  options = {
+                    model = lib.mkOption {
+                      type = lib.types.str;
+                      description = "OpenCode provider/model identifier for this tier.";
+                    };
+                    variant = lib.mkOption {
+                      type = lib.types.nullOr lib.types.str;
+                      description = "Optional OpenCode model variant for this tier.";
+                    };
+                  };
+                };
+                description = "OpenCode model selection for this tier.";
+              };
+              omp = lib.mkOption {
+                type = lib.types.str;
+                description = "OMP model selector for this tier, including an optional thinking suffix.";
+              };
+            };
+          };
+          default = {
+            opencode = {
+              model = opencodeModel;
+              variant = opencodeVariant;
+            };
+            omp = ompModel;
+          };
+          inherit description;
+        };
+      frontier_model = cfg.models.frontier;
+      premium_model = cfg.models.premium;
+      standard_model = cfg.models.standard;
+      small_model = cfg.models.small;
+      opencodeAgent = tier: lib.filterAttrs (_: value: value != null) tier.opencode;
+      subagentPermission = {
+        task = "deny";
+      };
+      readOnlyAgentPermission = subagentPermission // {
         edit = "deny";
       };
     in
     {
       options.modules.ai = {
+        models = lib.mkOption {
+          type = lib.types.submodule {
+            options = {
+              frontier = mkModelTierOption {
+                description = "Frontier model used for the most demanding planning and review tasks.";
+                opencodeModel = "openai/gpt-5.6-sol-pro";
+                opencodeVariant = "high";
+                # OMP's ChatGPT subscription provider does not expose the Pro model.
+                ompModel = "openai-codex/gpt-5.6-sol:high";
+              };
+              premium = mkModelTierOption {
+                description = "Premium model used for primary interactive work.";
+                opencodeModel = "openai/gpt-5.6-sol";
+                ompModel = "openai-codex/gpt-5.6-sol:medium";
+              };
+              standard = mkModelTierOption {
+                description = "Standard model used for general delegated work.";
+                opencodeModel = "openai/gpt-5.6-terra";
+                ompModel = "openai-codex/gpt-5.6-terra:medium";
+              };
+              small = mkModelTierOption {
+                description = "Small model used for exploration and lightweight background work.";
+                opencodeModel = "openai/gpt-5.6-luna";
+                ompModel = "openai-codex/gpt-5.6-luna";
+              };
+            };
+          };
+          default = { };
+          description = "Provider-specific model tiers shared by the OpenCode and OMP defaults.";
+        };
+
         mcp = lib.mkOption {
           type = lib.types.anything;
           description = "MCP home-manager configuration";
@@ -86,36 +165,11 @@
                     context = lib.mkDefault ./files/opencode/AGENTS.md;
 
                     settings = lib.mkDefault {
-                      # Keep agent selection in `agent` and shared reasoning defaults in
-                      # `provider.openrouter.models` so model-specific tuning stays deduplicated.
-                      model = "openrouter/openai/gpt-5.4-mini";
-                      small_model = "openrouter/google/gemini-2.5-flash-lite";
-
-                      provider.openrouter.models = {
-                        "anthropic/claude-opus-4.6".options.reasoning = {
-                          max_tokens = 4000;
-                          exclude = true;
-                        };
-
-                        "anthropic/claude-sonnet-4.6".options.reasoning = {
-                          max_tokens = 2000;
-                          exclude = true;
-                        };
-
-                        "openai/gpt-5.4-mini".options.reasoning = {
-                          effort = "low";
-                          exclude = true;
-                        };
-
-                        "x-ai/grok-4.1-fast".options.reasoning = {
-                          enabled = false;
-                        };
-
-                        "z-ai/glm-5.1".options.reasoning = {
-                          effort = "low";
-                          exclude = true;
-                        };
-                      };
+                      model = premium_model.opencode.model;
+                      small_model = small_model.opencode.model;
+                      # Let primary agents delegate once, but prevent subagents
+                      # from recursively launching more subagents.
+                      subagent_depth = 1;
 
                       permission = {
                         glob = "allow";
@@ -137,58 +191,21 @@
                       };
 
                       agent = {
-                        plan = {
-                          description = "Task classification and decomposition";
-                          mode = "subagent";
-                          model = "openrouter/google/gemini-2.5-flash-lite";
+                        build = opencodeAgent premium_model;
+
+                        plan = opencodeAgent frontier_model;
+
+                        general = (opencodeAgent standard_model) // {
+                          permission = subagentPermission;
+                        };
+
+                        explore = (opencodeAgent small_model) // {
                           permission = readOnlyAgentPermission;
                         };
 
-                        summary-helper = {
-                          description = "Logs, docs, and large text compression";
-                          mode = "subagent";
-                          model = "openrouter/google/gemini-2.5-flash-lite";
-                          permission = readOnlyAgentPermission;
-                        };
-
-                        explore = {
-                          description = "A fast, read-only agent for narrowing codebase scope";
-                          mode = "subagent";
-                          model = "openrouter/z-ai/glm-5.1";
-                          permission = readOnlyAgentPermission;
-                        };
-
-                        fast-helper = {
-                          description = "Cheap fast helper for broad utility work";
-                          mode = "subagent";
-                          model = "openrouter/x-ai/grok-4.1-fast";
-                        };
-
-                        general = {
-                          description = "General-purpose coding and execution agent";
-                          mode = "subagent";
-                          model = "openrouter/openai/gpt-5.4-mini";
-                        };
-
-                        deep-review = {
-                          description = "Long-context reviewer for difficult synthesis and judgment";
-                          mode = "subagent";
-                          model = "openrouter/anthropic/claude-sonnet-4.6";
-                          permission = readOnlyAgentPermission;
-                        };
-
-                        premium-review = {
-                          description = "Premium reviewer for high-risk judgment calls";
-                          mode = "subagent";
-                          model = "openrouter/anthropic/claude-opus-4.6";
-                          permission = readOnlyAgentPermission;
-                        };
-
-                        experimental-open = {
-                          description = "Experimental cheap open-model helper lane";
-                          mode = "subagent";
-                          model = "openrouter/google/gemma-4-26b-a4b-it";
-                        };
+                        title = opencodeAgent small_model;
+                        summary = opencodeAgent small_model;
+                        compaction = opencodeAgent standard_model;
                       };
                     };
                   };
@@ -218,6 +235,36 @@
                     # One agent packaging source: llm-agents also builds omp, so
                     # the binary follows the same overlay/cache path as opencode.
                     package = lib.mkDefault pkgs.llm-agents.omp;
+
+                    settings = lib.mkDefault {
+                      modelRoles = {
+                        default = premium_model.omp;
+                        smol = small_model.omp;
+                        slow = frontier_model.omp;
+                        vision = standard_model.omp;
+                        plan = frontier_model.omp;
+                        designer = premium_model.omp;
+                        commit = small_model.omp;
+                        tiny = small_model.omp;
+                        task = standard_model.omp;
+                        advisor = frontier_model.omp;
+                      };
+
+                      task = {
+                        # Permit one layer of delegation and strip task spawning
+                        # from those child agents.
+                        maxRecursionDepth = 1;
+                        agentModelOverrides = {
+                          scout = "@smol";
+                          librarian = "@smol";
+                          sonic = "@smol";
+                          task = "@task";
+                          designer = "@designer";
+                          reviewer = "@slow";
+                          security-reviewer = "@slow";
+                        };
+                      };
+                    };
                   };
                 }
               )
