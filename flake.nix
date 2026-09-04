@@ -64,7 +64,7 @@
       flake = false;
     };
     niri = {
-      url = "github:sodiboo/niri-flake";
+      url = "github:epireyn/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
