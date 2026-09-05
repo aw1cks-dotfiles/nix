@@ -1,7 +1,13 @@
-{ inputs, ... }:
+let
+  lixModule =
+    { pkgs, ... }:
+    {
+      nix.package = pkgs.lixPackageSets.latest.lix;
+    };
+in
 {
   aw1cks.modules = {
-    nixos.lix = inputs.lix-module.nixosModules.default;
-    darwin.lix = inputs.lix-module.darwinModules.default;
+    nixos.lix = lixModule;
+    darwin.lix = lixModule;
   };
 }

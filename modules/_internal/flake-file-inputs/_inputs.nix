@@ -15,7 +15,7 @@
   };
 
   disko = {
-    url = lib.mkDefault "github:nix-community/disko/5ae05d98d2bebc0a9521c9fc89bd2e5cffa05926";
+    url = lib.mkDefault "github:nix-community/disko";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 
@@ -35,8 +35,8 @@
   };
 
   mermaid-rs-renderer = {
-    url = lib.mkDefault "github:1jehuang/mermaid-rs-renderer/v0.2.1";
-    flake = false;
+    url = lib.mkDefault "github:1jehuang/mermaid-rs-renderer/v0.3.1";
+    inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
   };
 
   nix-index-database = {
@@ -126,16 +126,5 @@
     # https://github.com/wezterm/wezterm/pull/7726
     url = lib.mkDefault "github:wezterm/wezterm?dir=nix";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
-  };
-
-  lix = {
-    url = lib.mkDefault "https://git.lix.systems/lix-project/lix/archive/main.tar.gz";
-    flake = false;
-  };
-
-  lix-module = {
-    url = lib.mkDefault "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz?rev=5e56f5a973e24292b125dca9e9d506b0a91d6903";
-    inputs.lix.follows = lib.mkDefault "lix";
-    inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 }

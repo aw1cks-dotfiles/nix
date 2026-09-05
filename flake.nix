@@ -26,7 +26,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     disko = {
-      url = "github:nix-community/disko/5ae05d98d2bebc0a9521c9fc89bd2e5cffa05926";
+      url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-file.url = "github:vic/flake-file";
@@ -43,25 +43,14 @@
       url = "github:pfassina/lazyvim-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    lix = {
-      url = "https://git.lix.systems/lix-project/lix/archive/main.tar.gz";
-      flake = false;
-    };
-    lix-module = {
-      url = "https://git.lix.systems/api/v1/repos/lix-project/nixos-module/archive/5e56f5a973e24292b125dca9e9d506b0a91d6903.tar.gz?rev=5e56f5a973e24292b125dca9e9d506b0a91d6903";
-      inputs = {
-        lix.follows = "lix";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
     llm-agents.url = "github:numtide/llm-agents.nix";
     lucidglyph = {
       url = "github:maximilionus/lucidglyph";
       flake = false;
     };
     mermaid-rs-renderer = {
-      url = "github:1jehuang/mermaid-rs-renderer/v0.2.1";
-      flake = false;
+      url = "github:1jehuang/mermaid-rs-renderer/v0.3.1";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     niri = {
       url = "github:epireyn/niri-flake";
@@ -77,7 +66,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-vm-test = {
-      url = "github:Enzime/nix-vm-test/pr-105-latest";
+      url = "github:numtide/nix-vm-test";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nixos-anywhere = {

@@ -5,9 +5,8 @@
     let
       configDir = ./files;
       configDirString = toString configDir;
-      mermaidRendererPackage = import ../../dev/_mermaid.nix {
-        inherit inputs lib;
-      } pkgs;
+      mermaidRendererPackage =
+        inputs.mermaid-rs-renderer.packages.${pkgs.stdenv.hostPlatform.system}.default;
       mmdrLightConfig = ./files/mmdr-light.json;
       mmdrDarkConfig = ./files/mmdr-dark.json;
       mmdcScript = pkgs.replaceVars ./files/mmdc.sh {

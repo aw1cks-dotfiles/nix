@@ -1,13 +1,11 @@
 # Core development tools — from nix-upstream/modules/development/default.nix
 # Language-specific tools are in separate modules: ai.nix, containers.nix, java.nix, rust.nix
-{ inputs, lib, ... }:
+{ inputs, ... }:
 {
   aw1cks.modules.home.dev-tools =
     { config, pkgs, ... }:
     let
-      mmdr = import ./_mermaid.nix {
-        inherit inputs lib;
-      } pkgs;
+      mmdr = inputs.mermaid-rs-renderer.packages.${pkgs.stdenv.hostPlatform.system}.default;
     in
     {
       home.packages =
