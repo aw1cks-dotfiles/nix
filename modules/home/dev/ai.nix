@@ -260,6 +260,7 @@
                       tui.tight = lib.mkDefault true;
                       terminal.showProgress = lib.mkDefault true;
                       defaultThinkingLevel = lib.mkDefault "auto";
+                      extendedContext = lib.mkDefault true;
                       advisor.enabled = lib.mkDefault false;
                       tools.approvalMode = lib.mkDefault "write";
                       github.enabled = lib.mkDefault true;
