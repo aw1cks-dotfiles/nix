@@ -78,14 +78,48 @@ let
   automaticTreesitterParsers = treesitterLib.automaticTreesitterParsers cfg enabledExtraNames;
   systemPackages = dependenciesLib.systemPackages cfg enabledExtraNames;
 
-  # Avoid build-at-eval scanner work when the config is already provided as a
-  # Nix path. That scanner only exists to discover unmanaged user plugin files
-  # from a live home directory, which breaks cross-platform flake evaluation.
-  userPlugins =
-    if cfg.enable && cfg.configFiles == null then
-      fileLib.scanUserPlugins "${config.home.homeDirectory}/.config/${cfg.appName}"
+  scanPluginDirectory =
+    pluginsDir:
+    if !builtins.pathExists pluginsDir then
+      [ ]
     else
-      [ ];
+      let
+        luaFiles = lib.filter (path: lib.hasSuffix ".lua" (toString path)) (
+          lib.filesystem.listFilesRecursive pluginsDir
+        );
+        tokenRe = ''"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)"'';
+        extractFromFile =
+          path:
+          let
+            matches = builtins.filter builtins.isList (builtins.split tokenRe (builtins.readFile path));
+            names = lib.unique (map builtins.head matches);
+          in
+          map (
+            name:
+            let
+              parts = lib.splitString "/" name;
+            in
+            {
+              inherit name;
+              owner = builtins.elemAt parts 0;
+              repo = builtins.elemAt parts 1;
+              source_file = baseNameOf (toString path);
+              user_plugin = true;
+            }
+          ) names;
+      in
+      lib.sort (a: b: a.name < b.name) (lib.concatMap extractFromFile luaFiles);
+
+  # File-based LazyVim configuration stores specs in configFiles/plugins.
+  # Discovering them here keeps every spec in the Nix-generated dev path
+  # instead of allowing lazy.nvim to fetch it at runtime.
+  userPlugins =
+    if !cfg.enable then
+      [ ]
+    else if cfg.configFiles != null then
+      scanPluginDirectory (cfg.configFiles + "/plugins")
+    else
+      fileLib.scanUserPlugins "${config.home.homeDirectory}/.config/${cfg.appName}";
 
   corePlugins = builtins.filter (p: p.is_core or false) (dataLib.pluginData.plugins or [ ]);
 

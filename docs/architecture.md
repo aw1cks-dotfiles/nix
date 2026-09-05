@@ -36,6 +36,9 @@ The hidden `modules/_internal/flake-file-inputs/default.nix` file is the reusabl
 - `hosts/<name>/configuration.nix`: repo-local host composition roots
 - `hosts/<name>/*.nix`: host-private support files imported by that host root when needed
 
+The reusable Neovim module configures Avante.nvim to use OMP through ACP; see
+[Avante.nvim with OMP ACP](./avante-omp.md) for its operational contract.
+
 ## Shared Namespaces
 
 The public reusable namespace in this repo is `aw1cks.*`.
