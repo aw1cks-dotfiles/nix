@@ -78,7 +78,7 @@
           vault
         ]
         # Linux-only tools are omitted on nix-darwin hosts.
-        ++ lib.optionals pkgs.stdenv.isLinux [
+        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
           grpc_cli
           inotify-info
           inotify-tools

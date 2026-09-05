@@ -2,7 +2,7 @@
 {
   perSystem =
     { system, pkgs, ... }:
-    lib.mkIf pkgs.stdenv.isDarwin {
+    lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       apps.darwin = {
         type = "app";
         program = "${inputs.nix-darwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild";

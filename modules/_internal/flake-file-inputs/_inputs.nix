@@ -119,12 +119,4 @@
     url = lib.mkDefault "github:numtide/treefmt-nix";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
-
-  wezterm = {
-    # see:
-    # https://github.com/wezterm/wezterm/pull/7463
-    # https://github.com/wezterm/wezterm/pull/7726
-    url = lib.mkDefault "github:wezterm/wezterm?dir=nix";
-    inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
-  };
 }
