@@ -118,7 +118,6 @@ in
 
     home = {
       imports = [ sharedHomeModule ];
-      modules.lazyvim.enable = true;
       home.stateVersion = "25.05";
     };
   };
@@ -131,7 +130,6 @@ in
       pinFile = ./nvidia.json;
     };
     module = {
-      modules.lazyvim.enable = true;
       home.stateVersion = "25.05";
     };
   };

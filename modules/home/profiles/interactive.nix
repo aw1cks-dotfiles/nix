@@ -8,7 +8,6 @@ in
     imports = [
       modules.home.cli-tools
       modules.home.gpg
-      modules.home.lazyvim
       modules.home.neovim
       modules.home.vcs
       modules.home.zsh

@@ -1,12 +1,10 @@
 { inputs, lib, ... }:
 {
-  aw1cks.modules.home.lazyvim =
+  aw1cks.modules.home.neovim =
     { config, pkgs, ... }:
     let
-      cfg = config.modules.lazyvim;
-      inherit (cfg) configDir;
+      configDir = ./files;
       configDirString = toString configDir;
-      sqliteLibraryPath = lib.makeLibraryPath [ pkgs.sqlite ];
       mermaidRendererPackage = import ../../dev/_mermaid.nix {
         inherit inputs lib;
       } pkgs;
@@ -46,7 +44,7 @@
           let
             relativePath = lib.removePrefix "${configDirString}/" (toString file);
           in
-          lib.nameValuePair "${cfg.appName}/${relativePath}" { source = file; }
+          lib.nameValuePair "nvim/${relativePath}" { source = file; }
         ) ftpluginFiles
       );
       queryLinks = lib.listToAttrs (
@@ -55,79 +53,36 @@
           let
             relativePath = lib.removePrefix "${configDirString}/" (toString file);
           in
-          lib.nameValuePair "${cfg.appName}/${relativePath}" { source = file; }
+          lib.nameValuePair "nvim/${relativePath}" { source = file; }
         ) queryFiles
       );
-      lazyvimWrapper = pkgs.writeShellApplication {
-        name = cfg.commandName;
-        text = ''
-          export NVIM_APPNAME="${cfg.appName}"
-          ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
-            export LD_LIBRARY_PATH="${sqliteLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-          ''}
-          ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
-            export DYLD_FALLBACK_LIBRARY_PATH="${sqliteLibraryPath}''${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
-          ''}
-          exec -a "${cfg.commandName}" "${config.programs.neovim.finalPackage}/bin/nvim" "$@"
-        '';
-      };
     in
     {
-      imports = [ (import ../../../_internal/lazyvim/lazyvim-nix-module.nix { inherit inputs; }) ];
+      imports = [ (import ../../../_internal/neovim/lazyvim-nix-module.nix { inherit inputs; }) ];
 
-      options.modules.lazyvim = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-          description = ''
-            Enable the repo-provided LazyVim migration behind a separate command.
-            The shipped config is intentionally personal but can be replaced by
-            overriding this module's options.
-          '';
+      config = {
+        programs.neovim = {
+          defaultEditor = true;
+          viAlias = true;
+          vimAlias = true;
         };
 
-        appName = lib.mkOption {
-          type = lib.types.str;
-          default = "lazyvim";
-          description = "NVIM_APPNAME namespace used for the migrated LazyVim configuration.";
+        home.sessionVariables = {
+          # We use an absolute path for SUDO_EDITOR.
+          # home-manager hosts will not have the nix PATH setup and silently fall back.
+          # NOTE: this can go stale when a new HM generation is built.
+          # TODO: add a guard condition to avoid this for darwin/nixos
+          SUDO_EDITOR = "${config.programs.neovim.finalPackage}/bin/nvim";
+          VISUAL = "nvim";
         };
-
-        commandName = lib.mkOption {
-          type = lib.types.str;
-          default = "lazyvim";
-          description = "Wrapper command name for the migrated LazyVim configuration.";
-        };
-
-        configDir = lib.mkOption {
-          type = lib.types.path;
-          default = ./files;
-          description = ''
-            Repo-provided LazyVim configuration directory. Override this to swap
-            in a different config tree while keeping the wrapped command setup.
-          '';
-        };
-      };
-
-      config = lib.mkIf cfg.enable {
-        assertions = [
-          {
-            assertion = cfg.appName != "nvim";
-            message = "modules.lazyvim.appName must stay distinct from the default nvim app namespace.";
-          }
-          {
-            assertion = cfg.commandName != "nvim";
-            message = "modules.lazyvim.commandName must stay distinct from the default nvim command.";
-          }
-        ];
 
         programs.lazyvim = {
           enable = true;
-          inherit (cfg) appName;
+          appName = "nvim";
           configFiles = configDir;
           pluginSource = "latest";
 
           extras = {
-            ai.copilot.enable = true;
             coding."mini-surround".enable = true;
             editor = {
               navic.enable = true;
@@ -283,7 +238,6 @@
           ];
         };
 
-        home.packages = [ lazyvimWrapper ];
         xdg.configFile = ftpluginLinks // queryLinks;
       };
     };
