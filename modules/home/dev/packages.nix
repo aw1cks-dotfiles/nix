@@ -1,11 +1,20 @@
 # Core development tools — from nix-upstream/modules/development/default.nix
 # Language-specific tools are in separate modules: ai.nix, containers.nix, java.nix, rust.nix
-{ inputs, ... }:
+{ inputs, lib, ... }:
 {
   aw1cks.modules.home.dev-tools =
     { config, pkgs, ... }:
     let
-      mmdr = inputs.mermaid-rs-renderer.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      mmdr =
+        inputs.mermaid-rs-renderer.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
+          {
+            buildInputs =
+              lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+                pkgs.fontconfig
+                pkgs.freetype
+              ]
+              ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.libiconv ];
+          };
     in
     {
       home.packages =
@@ -42,7 +51,7 @@
           protoc-gen-tonic
         ]
         # FIXME: this is pulling in a broken version of bazel on macOS
-        ++ lib.optionals pkgs.stdenv.isLinux [
+        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
           protoc-gen-js
         ];
 

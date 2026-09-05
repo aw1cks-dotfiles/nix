@@ -33,7 +33,7 @@ in
     { config, pkgs, ... }:
     let
       clipboardHelpers =
-        if pkgs.stdenv.isDarwin then
+        if pkgs.stdenv.hostPlatform.isDarwin then
           ''
             function resolve_clipboard_copy_command() {
               REPLY='pbcopy'

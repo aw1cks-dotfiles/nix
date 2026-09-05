@@ -3,8 +3,9 @@
   aw1cks.modules.home.gpg =
     { pkgs, ... }:
     let
-      pinentryPackage = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-tty;
-      pinentryProgram = if pkgs.stdenv.isDarwin then "pinentry-mac" else "pinentry";
+      pinentryPackage =
+        if pkgs.stdenv.hostPlatform.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-tty;
+      pinentryProgram = if pkgs.stdenv.hostPlatform.isDarwin then "pinentry-mac" else "pinentry";
     in
     {
       home.packages = [ pinentryPackage ];

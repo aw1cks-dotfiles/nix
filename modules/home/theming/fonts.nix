@@ -36,7 +36,7 @@
       home.packages = [
         inputs.apple-fonts.packages.${pkgs.stdenv.hostPlatform.system}.sf-pro-nerd
       ]
-      ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && isStandaloneHome) [ appleEmoji ];
+      ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && isStandaloneHome) [ appleEmoji ];
 
       # GTK can override fontconfig AA/hinting through desktop interface settings,
       # so pin these to the Lucidglyph-friendly values as well.

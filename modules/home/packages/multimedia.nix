@@ -11,7 +11,7 @@
           syncplay
           ytmdesktop
         ]
-        ++ lib.optionals pkgs.stdenv.isLinux [
+        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
           playerctl
           pwvucontrol
         ];
@@ -44,7 +44,7 @@
           };
         };
 
-        obs-studio.enable = pkgs.stdenv.isLinux;
+        obs-studio.enable = pkgs.stdenv.hostPlatform.isLinux;
         yt-dlp.enable = true;
       };
     };

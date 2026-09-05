@@ -6,7 +6,15 @@
       configDir = ./files;
       configDirString = toString configDir;
       mermaidRendererPackage =
-        inputs.mermaid-rs-renderer.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        inputs.mermaid-rs-renderer.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
+          {
+            buildInputs =
+              lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+                pkgs.fontconfig
+                pkgs.freetype
+              ]
+              ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.libiconv ];
+          };
       mmdrLightConfig = ./files/mmdr-light.json;
       mmdrDarkConfig = ./files/mmdr-dark.json;
       mmdcScript = pkgs.replaceVars ./files/mmdc.sh {

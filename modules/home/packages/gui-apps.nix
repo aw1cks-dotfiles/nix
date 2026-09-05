@@ -20,7 +20,7 @@
           syncplay
           zoom-us
         ]
-        ++ lib.optionals pkgs.stdenv.isLinux [
+        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
           gedit
           nautilus
           omnissa-horizon-client

@@ -1,5 +1,5 @@
 # Wezterm - extracted from gui-apps
-{ inputs, ... }:
+{ ... }:
 {
   aw1cks.modules.home.wezterm =
     {
@@ -11,9 +11,9 @@
     let
       cfg = config.modules.wezterm;
       weztermPlatform =
-        if pkgs.stdenv.isDarwin then
+        if pkgs.stdenv.hostPlatform.isDarwin then
           "darwin"
-        else if pkgs.stdenv.isLinux then
+        else if pkgs.stdenv.hostPlatform.isLinux then
           "linux"
         else
           "unknown";
@@ -60,7 +60,7 @@
 
         package = lib.mkOption {
           type = lib.types.package;
-          default = inputs.wezterm.packages.${pkgs.stdenv.hostPlatform.system}.default;
+          default = pkgs.unstable.wezterm;
           description = "Wezterm package to install.";
         };
 
@@ -173,11 +173,15 @@
               };
               size = lib.mkOption {
                 type = lib.types.int;
-                default = if pkgs.stdenv.isDarwin || pkgs.stdenv.isLinux then 18 else 14;
+                default = if pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.hostPlatform.isLinux then 18 else 14;
               };
               emojiFallback = lib.mkOption {
                 type = lib.types.str;
-                default = if pkgs.stdenv.isDarwin || pkgs.stdenv.isLinux then "Apple Color Emoji" else "JoyPixels";
+                default =
+                  if pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.hostPlatform.isLinux then
+                    "Apple Color Emoji"
+                  else
+                    "JoyPixels";
               };
             };
           };
@@ -190,18 +194,18 @@
             options = {
               backgroundOpacity = lib.mkOption {
                 type = lib.types.number;
-                default = if pkgs.stdenv.isDarwin then 0.75 else 0.85;
+                default = if pkgs.stdenv.hostPlatform.isDarwin then 0.75 else 0.85;
               };
               decorations = lib.mkOption {
                 type = lib.types.str;
-                default = if pkgs.stdenv.isLinux then "NONE" else "TITLE | RESIZE";
+                default = if pkgs.stdenv.hostPlatform.isLinux then "NONE" else "TITLE | RESIZE";
               };
               initialCols = lib.mkOption {
                 type = lib.types.int;
                 default =
-                  if pkgs.stdenv.isDarwin then
+                  if pkgs.stdenv.hostPlatform.isDarwin then
                     120
-                  else if pkgs.stdenv.isLinux then
+                  else if pkgs.stdenv.hostPlatform.isLinux then
                     180
                   else
                     80;
@@ -209,9 +213,9 @@
               initialRows = lib.mkOption {
                 type = lib.types.int;
                 default =
-                  if pkgs.stdenv.isDarwin then
+                  if pkgs.stdenv.hostPlatform.isDarwin then
                     36
-                  else if pkgs.stdenv.isLinux then
+                  else if pkgs.stdenv.hostPlatform.isLinux then
                     48
                   else
                     24;
@@ -222,15 +226,15 @@
               };
               macosBackgroundBlur = lib.mkOption {
                 type = lib.types.nullOr lib.types.int;
-                default = if pkgs.stdenv.isDarwin then 20 else null;
+                default = if pkgs.stdenv.hostPlatform.isDarwin then 20 else null;
               };
               nativeMacosFullscreenMode = lib.mkOption {
                 type = lib.types.nullOr lib.types.bool;
-                default = if pkgs.stdenv.isDarwin then false else null;
+                default = if pkgs.stdenv.hostPlatform.isDarwin then false else null;
               };
               macosFullscreenExtendBehindNotch = lib.mkOption {
                 type = lib.types.nullOr lib.types.bool;
-                default = if pkgs.stdenv.isDarwin then true else null;
+                default = if pkgs.stdenv.hostPlatform.isDarwin then true else null;
               };
             };
           };

@@ -96,10 +96,6 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    wezterm = {
-      url = "github:wezterm/wezterm?dir=nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {
