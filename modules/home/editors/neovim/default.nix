@@ -24,6 +24,15 @@
           exec ${pkgs.runtimeShell} ${mmdcScript} "$@"
         '';
       };
+      ompAcpConfig = pkgs.writeText "omp-avante-acp.yml" ''
+        tools:
+          approval:
+            bash: allow
+      '';
+      avanteConfig = pkgs.replaceVars ./files/plugins/avante.lua {
+        omp = "${config.programs.omp.package}/bin/omp";
+        ompAcpConfig = ompAcpConfig;
+      };
       ftpluginFiles = builtins.filter (
         file:
         let
@@ -238,7 +247,12 @@
           ];
         };
 
-        xdg.configFile = ftpluginLinks // queryLinks;
+        xdg.configFile =
+          ftpluginLinks
+          // queryLinks
+          // {
+            "nvim/lua/plugins/avante.lua".source = lib.mkForce avanteConfig;
+          };
       };
     };
 }
