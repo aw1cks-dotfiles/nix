@@ -5,7 +5,6 @@
       system.stateVersion = 6;
     };
     home = {
-      modules.lazyvim.enable = true;
       modules.ai.opencode.ollama = {
         enable = true;
         endpoint = "desktop.gentoo-boa.ts.net";

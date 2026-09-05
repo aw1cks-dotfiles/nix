@@ -14,9 +14,8 @@
   #   module = {
   #     imports = [
   #       config.org.profiles.home.work
+  #       config.aw1cks.modules.home.neovim
   #     ];
-  #
-  #     modules.lazyvim.enable = true;
   #
   #     home.stateVersion = "25.11";
   #   };
@@ -32,9 +31,9 @@
   #   home = {
   #     imports = [
   #       config.org.profiles.home.work
+  #       config.aw1cks.modules.home.neovim
   #     ];
   #
-  #     modules.lazyvim.enable = true;
   #     home.stateVersion = "25.11";
   #   };
   # };
