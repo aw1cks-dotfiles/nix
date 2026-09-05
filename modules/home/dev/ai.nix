@@ -285,12 +285,158 @@
                         ];
                       };
 
-                      # sudo stays available but always asks, including in
-                      # yolo sessions.
+                      # Keep privilege escalation gated, including in yolo
+                      # sessions. Auto-approve only explicit, read-only Git
+                      # forms; broad subcommands such as `git branch *` also
+                      # include mutating operations.
                       bash.patterns = lib.mkDefault [
                         {
                           match = "sudo *";
                           approval = "prompt";
+                        }
+                        {
+                          match = "git status";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git status --short";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git status --short --branch";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git status --porcelain";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git status --porcelain=v1";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git status --porcelain=v2";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git diff --no-ext-diff --no-textconv";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git diff --no-ext-diff --no-textconv -- *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git diff --cached --no-ext-diff --no-textconv";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git diff --cached --no-ext-diff --no-textconv -- *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git diff --check";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git rev-parse --show-toplevel";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git rev-parse --is-inside-work-tree";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git rev-parse --abbrev-ref HEAD";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git rev-parse --verify *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git merge-base *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git branch --show-current";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git branch --list";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git branch --list *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git branch -r";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git symbolic-ref --short HEAD";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git symbolic-ref refs/remotes/origin/HEAD";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git log";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git log --oneline";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git log --oneline --decorate";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git log --oneline --decorate --graph --all";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git show --no-ext-diff --no-textconv";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git ls-files";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git ls-files -- *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git worktree list";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git remote";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git remote -v";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git remote get-url *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git config --get *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git config --get-all *";
+                          approval = "allow";
+                        }
+                        {
+                          match = "git config --get-regexp *";
+                          approval = "allow";
                         }
                       ];
 
