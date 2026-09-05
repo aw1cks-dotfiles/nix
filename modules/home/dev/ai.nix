@@ -72,7 +72,7 @@
                 opencodeModel = "openai/gpt-5.6-sol-pro";
                 opencodeVariant = "high";
                 # OMP's ChatGPT subscription provider does not expose the Pro model.
-                ompModel = "openai-codex/gpt-5.6-sol:high";
+                ompModel = "openai-codex/gpt-6-astra:high";
               };
               premium = mkModelTierOption {
                 description = "Premium model used for primary interactive work.";
