@@ -63,7 +63,8 @@
             color_labels = "enabled";
             editor = "nvim";
             git_protocol = "ssh";
-            prefer_editor_prompt = "enabled";
+            # This interferes with non-TTY PR creation e.g. from an agent
+            prefer_editor_prompt = "disabled";
             spinner = "enabled";
           };
         };
