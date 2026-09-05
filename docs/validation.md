@@ -81,11 +81,11 @@ Provisioning-specific note:
 - for the provisioning wrapper-app slice, the narrowest useful validation is `nix run .#install-host -- --help` or another argument error path that proves the wrapper resolves and prints its usage without attempting an install
 - when a host uses `hosts/<name>/bootstrap-pre-kexec.sh`, validate both the wrapper entrypoint and the rendered script path by static inspection, and treat a real SSH-target run as the first meaningful proof that the pre-kexec source-OS preparation actually works
 - for the VM-backed provisioning validation slice, prefer `nix run .#install-host-vm-test -- <hostname>` because it exercises the repo-local provisioning command shape against `system.build.installTest` without needing a real SSH target
-- if that VM-backed path fails with a `qemu-common` signature mismatch, check whether the pinned `disko` revision crossed commit `ec90d55ff3bc330759d3bfbfc254985e08c96b1f`; on the current stable `nixpkgs` base, this repo works around that regression by pinning `disko` to pre-regression commit `5ae05d98d2bebc0a9521c9fc89bd2e5cffa05926`
+- because `disko` tracks upstream again, re-evaluate a real host's resolved `disko` config and `system.build.diskoScript` after each lock update; run `nix run .#install-host-vm-test -- desktop` on x86_64 Linux when changes cross the VM test path
 - the current expected success path is `nix run .#install-host-vm-test -- desktop`, which should complete the VM-backed `system.build.installTest` run and emit a `vm-test-run-disko-*` store path
 - for the disposable SSH-target slice, the narrowest useful validation is a disposable Linux VM with SSH enabled and a temporary root key, then `nix run .#install-host -- <hostname> root@127.0.0.1 ...` against its forwarded port
 - for the current disposable SSH-target rehearsal, the narrowest useful validation is `nix run .#install-host-kexec-test`, which builds the repo-local Ubuntu-backed kexec test derived from `nixos-anywhere`'s own upstream test fixture
-- if the disposable SSH-target rehearsal fails inside `nix-vm-test` with `do not use python3Packages when building Python packages`, make `nix-vm-test` follow `nixpkgs-unstable`; the current fork still expects that older alias behavior
-- the repo-local kexec rehearsal patches the imported `nix-vm-test` source so its driver invocation uses the current `nixos-test-driver` argument shape: `--vm-names`, `--vm-start-scripts`, and explicit empty container lists from the pinned `nixpkgs-unstable` input
+- keep `nix-vm-test` following `nixpkgs-unstable`; this avoids the removed `python3Packages` alias behavior that broke the disposable SSH-target rehearsal
+- upstream `nix-vm-test` now supplies the required memory/CPU options and current `nixos-test-driver` configuration, so the repo consumes it directly without a source patch
 
 If a change affects generated flake output, update `modules/flake-file.nix` and regenerate with `nix run .#write-flake` before validating.

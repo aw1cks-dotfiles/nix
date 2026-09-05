@@ -61,7 +61,7 @@
         inputs.nixos-unstable.follows = "nixpkgs-unstable";
       };
       nix-vm-test = {
-        url = "github:Enzime/nix-vm-test/pr-105-latest";
+        url = "github:numtide/nix-vm-test";
         inputs.nixpkgs.follows = "nixpkgs-unstable";
       };
       flake-parts = {

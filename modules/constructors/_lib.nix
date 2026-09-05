@@ -84,22 +84,46 @@ rec {
         allowUnfreePredicate = _: true;
         nvidia.acceptLicense = true;
       };
-      overlays = (if enableLix then [ inputs.lix-module.overlays.default ] else [ ]) ++ [
-        (_final: _prev: {
-          unstable = import inputs.nixpkgs-unstable {
-            inherit system;
-            config.allowUnfree = true;
-          };
-          # containerd 2.2.3+ and nerdctl 2.2.2+ are required by the shared
-          # nerdctl module for EROFS snapshotter support. nixpkgs stable lags
-          # significantly behind unstable for both; promote from unstable.
-          containerd = _final.unstable.containerd;
-          nerdctl = _final.unstable.nerdctl;
-          # buildkit 0.25+ is required for nerdctl build with containerd worker.
-          buildkit = _final.unstable.buildkit;
-        })
-        inputs.llm-agents.overlays.shared-nixpkgs
-      ];
+      overlays =
+        (
+          if enableLix then
+            [
+              (
+                _final: prev:
+                let
+                  latestLix = prev.lixPackageSets.latest;
+                in
+                {
+                  inherit (latestLix)
+                    colmena
+                    nix-eval-jobs
+                    nix-fast-build
+                    nixpkgs-review
+                    ;
+                  lix = latestLix.lix;
+                  nix = latestLix.lix;
+                }
+              )
+            ]
+          else
+            [ ]
+        )
+        ++ [
+          (_final: _prev: {
+            unstable = import inputs.nixpkgs-unstable {
+              inherit system;
+              config.allowUnfree = true;
+            };
+            # containerd 2.2.3+ and nerdctl 2.2.2+ are required by the shared
+            # nerdctl module for EROFS snapshotter support. nixpkgs stable lags
+            # significantly behind unstable for both; promote from unstable.
+            containerd = _final.unstable.containerd;
+            nerdctl = _final.unstable.nerdctl;
+            # buildkit 0.25+ is required for nerdctl build with containerd worker.
+            buildkit = _final.unstable.buildkit;
+          })
+          inputs.llm-agents.overlays.shared-nixpkgs
+        ];
     };
 
   baseModulesFor =
