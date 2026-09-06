@@ -18,6 +18,7 @@ in
     # Developer-focused GUI applications for interactive workstations.
     imports = [
       config.aw1cks.modules.home.dev-gui-apps
+      config.aw1cks.modules.home.zed
     ];
   };
 }

@@ -14,6 +14,7 @@ in
       home = {
         base = [ profiles.home.base ];
         roles = {
+          dev-gui = [ profiles.home.dev-gui ];
           developer = [ profiles.home.developer ];
           desktop = [ profiles.home.desktop ];
           interactive = [ profiles.home.interactive ];

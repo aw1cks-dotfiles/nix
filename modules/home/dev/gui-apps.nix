@@ -11,8 +11,8 @@
           slack
           vscode
           wireshark
-          zeal
         ]
+        ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [ zeal ]
         ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
           utm
           podman-desktop
