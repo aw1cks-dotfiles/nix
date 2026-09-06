@@ -1,3 +1,5 @@
+import base64
+
 import argparse
 import json
 import socket
@@ -64,11 +66,21 @@ def fetch_nvidia_hash_from_mirror(version: str, arch: str) -> str | None:
     return parts[0]
 
 
+def sri_sha256(hex_digest: str) -> str:
+    try:
+        digest = bytes.fromhex(hex_digest)
+    except ValueError:
+        die(f"NVIDIA mirror returned an invalid SHA-256 digest: {hex_digest}")
+    if len(digest) != 32:
+        die(f"NVIDIA mirror returned a non-SHA-256 digest: {hex_digest}")
+    return f"sha256-{base64.b64encode(digest).decode('ascii')}"
+
+
 def prefetch_nvidia_hash(version: str, arch: str) -> str:
     url = nvidia_installer_url(version, arch)
     mirror_hash = fetch_nvidia_hash_from_mirror(version, arch)
     if mirror_hash:
-        return mirror_hash
+        return sri_sha256(mirror_hash)
 
     log(f"Mirror hash unavailable, prefetching: {url}")
     result = subprocess.run(
@@ -104,6 +116,20 @@ def git_toplevel() -> Path:
     return Path(result.stdout.strip())
 
 
+def resolve_pin_path(repo_root: Path, pin_file: str) -> Path:
+    relative_pin_path = Path(pin_file)
+    if relative_pin_path.is_absolute() or ".." in relative_pin_path.parts:
+        die(f"NVIDIA pin path must be repository-relative: {pin_file}")
+
+    resolved_repo_root = repo_root.resolve()
+    resolved_pin_path = (resolved_repo_root / relative_pin_path).resolve()
+    try:
+        resolved_pin_path.relative_to(resolved_repo_root)
+    except ValueError:
+        die(f"NVIDIA pin path escapes repository root: {pin_file}")
+    return resolved_pin_path
+
+
 def render_pin_file(version: str, sha256: str) -> str:
     return json.dumps({"version": version, "sha256": sha256}, indent=2) + "\n"
 
@@ -135,7 +161,7 @@ def main() -> None:
     version = args.version or detect_nvidia_version()
     sha256 = prefetch_nvidia_hash(version, target["arch"])
 
-    pin_path = git_toplevel() / target["pinFile"]
+    pin_path = resolve_pin_path(git_toplevel(), target["pinFile"])
     if not pin_path.is_file():
         die(f"Pin file not found: {target['pinFile']}")
 
@@ -148,6 +174,9 @@ def main() -> None:
 
     pin_path.write_text(new_contents)
     log(f"Updated {target['pinFile']} to version={version} sha256={sha256}")
+    log("After rebuilding, apply the NVIDIA runtime libraries with:")
+    log('  sudo "$(command -v non-nixos-gpu-setup)"')
+
 
 
 if __name__ == "__main__":

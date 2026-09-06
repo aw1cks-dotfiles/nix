@@ -160,6 +160,7 @@ Unknown role names fail constructor assertions during evaluation.
 - attr names must follow `user@host` or `user@host.domain`
 - the `user` segment must match the resolved constructor user
 - `nvidia.enable` and `nvidia.pinFile` provide the shared standalone Linux NVIDIA contract
+- Linux hosts get `targets.genericLinux.enable` plus `/nix/var/nix/profiles/default/bin` on `home.sessionPath`, because the `nix.sh` that `genericLinux` sources only exports the per-user profile and leaves a daemon-installed Nix or Lix client off `PATH`
 
 `configurations.nixos` is for NixOS systems.
 
