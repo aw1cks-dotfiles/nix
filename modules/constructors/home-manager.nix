@@ -70,13 +70,24 @@ let
       };
     };
 
+  relativePinFileFor =
+    name: pinFile:
+    let
+      sourceRoot = "${toString inputs.self.outPath}/";
+      sourcePinFile = toString pinFile;
+    in
+    if lib.hasPrefix sourceRoot sourcePinFile then
+      lib.removePrefix sourceRoot sourcePinFile
+    else
+      throw "configurations.home.${name}.nvidia.pinFile must reside in the flake source tree for update-nvidia-version: ${sourcePinFile}";
+
   nvidiaEntries = lib.mapAttrsToList (
     _: meta:
     lib.nameValuePair meta.shortHost {
       attr = meta.name;
       system = meta.system;
       arch = meta.nvidia.arch;
-      pinFile = meta.nvidia.pinFile;
+      pinFile = relativePinFileFor meta.name meta.nvidia.pinFile;
     }
   ) (lib.filterAttrs (_: meta: meta.nvidia.enable) homeMetadata);
 
@@ -99,7 +110,6 @@ in
             default = null;
             description = "Optional system string, e.g. x86_64-linux or aarch64-darwin. Defaults from host facts when omitted.";
           };
-
           nvidia = {
             enable = lib.mkEnableOption "NVIDIA pin metadata for updater tooling";
 
@@ -107,8 +117,9 @@ in
               type = lib.types.nullOr lib.types.path;
               default = null;
               description = ''
-                Path to the host-local Nix file containing NVIDIA driver pins.
-                Required when nvidia.enable = true.
+                Path to the host-local JSON file containing NVIDIA driver pins.
+                Required when nvidia.enable = true. The updater can modify only
+                pin files below the consuming flake's source root.
               '';
             };
           };
@@ -232,6 +243,12 @@ in
           # layered on top only when a pin file is provided.
           (lib.mkIf (lib.hasSuffix "-linux" resolvedSystem) {
             targets.genericLinux.enable = true;
+
+            # genericLinux sources ${nix.package}/etc/profile.d/nix.sh, which
+            # only exports the per-user profile. On daemon installs the
+            # default profile holds the nix/lix client itself, so without this
+            # a manually installed Nix is missing from PATH entirely.
+            home.sessionPath = [ "/nix/var/nix/profiles/default/bin" ];
           })
           (lib.mkIf nvidia.enable (nvidiaModuleFor meta))
         ];

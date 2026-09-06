@@ -136,6 +136,8 @@ Standalone Linux Home Manager hosts can opt into the shared NVIDIA contract:
 ```
 
 The pin file is JSON and must contain `version` and `sha256` keys.
+The updater resolves this host-local path against the consuming flake's Git root, so it must remain inside that flake's source tree.
+On non-NixOS Linux, after an NVIDIA pin update, rebuild the Home Manager generation and then run `sudo "$(command -v non-nixos-gpu-setup)"` to update `/run/opengl-driver` and EGL platform links.
 
 ## 5. Add Secrets Separately
 
