@@ -6,6 +6,7 @@
       kind = "darwin";
       roles = [
         "desktop"
+        "dev-gui"
         "developer"
         "interactive"
         "multimedia"
@@ -32,6 +33,7 @@
       kind = "nixos";
       roles = [
         "desktop"
+        "dev-gui"
         "developer"
         "interactive"
         "multimedia"
