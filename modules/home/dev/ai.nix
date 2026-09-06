@@ -61,6 +61,9 @@
       readOnlyAgentPermission = subagentPermission // {
         edit = "deny";
       };
+      ompModelsFile = (pkgs.formats.yaml { }).generate "omp-models.yml" {
+        providers.openai-codex.modelOverrides.gpt-6-astra.contextWindow = 872000;
+      };
     in
     {
       options.modules.ai = {
@@ -492,6 +495,11 @@
 
         programs.mcp = cfg.mcp;
         programs.omp = cfg.omp;
+        # OMP 18.1.11 discards Astra's provider-advertised max_context_window,
+        # so extendedContext leaves the model at its 272K default instead of 872K.
+        # Remove this override after https://github.com/can1357/oh-my-pi/pull/10872
+        # ships; tracked by https://github.com/can1357/oh-my-pi/issues/10968.
+        home.file.".omp/agent/models.yml".source = lib.mkDefault ompModelsFile;
         programs.opencode = lib.mkMerge [
           (builtins.removeAttrs cfg.opencode [
             "skillsSource"
