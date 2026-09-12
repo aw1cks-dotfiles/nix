@@ -266,12 +266,22 @@
                       github.enabled = lib.mkDefault true;
                       astGrep.enabled = lib.mkDefault true;
 
-                      # Keep agents on the structured GitHub tool. OMP supplies
-                      # generic tool-shadowing defaults; this preserves GitHub
-                      # API semantics and cache behavior for repository queries.
+                      # Keep inspection on structured tools while preserving
+                      # commands whose native HTTP or text-transform semantics
+                      # are required. GitHub requests retain their API routing.
                       bashInterceptor = {
                         enabled = lib.mkDefault true;
                         patterns = lib.mkDefault [
+                          {
+                            pattern = "^\\s*(grep|rg|ag|ack)\\b";
+                            tool = "grep";
+                            message = "Use the structured grep tool instead; it returns file and line context without shell parsing.";
+                          }
+                          {
+                            pattern = "^\\s*(cat|head|tail|less|more)\\b";
+                            tool = "read";
+                            message = "Use read with a line-range selector instead; it preserves file context and avoids truncated shell output.";
+                          }
                           {
                             pattern = "^\\s*gh\\s+(issue|pr)\\s+(view|list|search|checkout|create|diff)\\b";
                             tool = "github";
