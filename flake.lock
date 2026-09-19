@@ -252,6 +252,22 @@
         "type": "github"
       }
     },
+    "crds-catalog": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788094093,
+        "narHash": "sha256-j9+9CLBBuG15m0J68DMZKADILaKM166CJSuF1tWv3wc=",
+        "owner": "datreeio",
+        "repo": "CRDs-catalog",
+        "rev": "866b2653a5334db9aed20ad74701e20fd464471b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "datreeio",
+        "repo": "CRDs-catalog",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -1212,6 +1228,7 @@
       "inputs": {
         "agenix": "agenix",
         "apple-fonts": "apple-fonts",
+        "crds-catalog": "crds-catalog",
         "disko": "disko",
         "flake-file": "flake-file",
         "flake-parts": "flake-parts",

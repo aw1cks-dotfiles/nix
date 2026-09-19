@@ -14,6 +14,11 @@
     };
   };
 
+  crds-catalog = {
+    url = lib.mkDefault "github:datreeio/CRDs-catalog";
+    flake = false;
+  };
+
   disko = {
     url = lib.mkDefault "github:nix-community/disko";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";

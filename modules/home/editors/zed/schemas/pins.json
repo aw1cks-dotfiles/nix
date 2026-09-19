@@ -1,0 +1,694 @@
+{
+  "kubernetesVersion": "1.36.0",
+  "kubernetesRevision": "07b64c5376535fbbd6fb9910621e1a41f7613c14",
+  "definitions": {
+    "url": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/07b64c5376535fbbd6fb9910621e1a41f7613c14/v1.36.0-standalone-strict/_definitions.json",
+    "hash": "sha256-7XamvM+if/CFw5CVLWQmehjJG+sEWz4zEX1ILiZRDPM="
+  },
+  "schemas": [
+    {
+      "group": "acme.cert-manager.io",
+      "kind": "Challenge",
+      "version": "v1",
+      "path": "acme.cert-manager.io/challenge_v1.json"
+    },
+    {
+      "group": "acme.cert-manager.io",
+      "kind": "Order",
+      "version": "v1",
+      "path": "acme.cert-manager.io/order_v1.json"
+    },
+    {
+      "group": "argoproj.io",
+      "kind": "Application",
+      "version": "v1alpha1",
+      "path": "argoproj.io/application_v1alpha1.json"
+    },
+    {
+      "group": "argoproj.io",
+      "kind": "ApplicationSet",
+      "version": "v1alpha1",
+      "path": "argoproj.io/applicationset_v1alpha1.json"
+    },
+    {
+      "group": "argoproj.io",
+      "kind": "AppProject",
+      "version": "v1alpha1",
+      "path": "argoproj.io/appproject_v1alpha1.json"
+    },
+    {
+      "group": "cert-manager.io",
+      "kind": "Certificate",
+      "version": "v1",
+      "path": "cert-manager.io/certificate_v1.json"
+    },
+    {
+      "group": "cert-manager.io",
+      "kind": "CertificateRequest",
+      "version": "v1",
+      "path": "cert-manager.io/certificaterequest_v1.json"
+    },
+    {
+      "group": "cert-manager.io",
+      "kind": "ClusterIssuer",
+      "version": "v1",
+      "path": "cert-manager.io/clusterissuer_v1.json"
+    },
+    {
+      "group": "cert-manager.io",
+      "kind": "Issuer",
+      "version": "v1",
+      "path": "cert-manager.io/issuer_v1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ClusterExternalSecret",
+      "version": "v1",
+      "path": "external-secrets.io/clusterexternalsecret_v1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ClusterExternalSecret",
+      "version": "v1beta1",
+      "path": "external-secrets.io/clusterexternalsecret_v1beta1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ClusterPushSecret",
+      "version": "v1alpha1",
+      "path": "external-secrets.io/clusterpushsecret_v1alpha1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ClusterSecretStore",
+      "version": "v1",
+      "path": "external-secrets.io/clustersecretstore_v1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ClusterSecretStore",
+      "version": "v1alpha1",
+      "path": "external-secrets.io/clustersecretstore_v1alpha1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ClusterSecretStore",
+      "version": "v1beta1",
+      "path": "external-secrets.io/clustersecretstore_v1beta1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ExternalSecret",
+      "version": "v1",
+      "path": "external-secrets.io/externalsecret_v1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ExternalSecret",
+      "version": "v1alpha1",
+      "path": "external-secrets.io/externalsecret_v1alpha1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "ExternalSecret",
+      "version": "v1beta1",
+      "path": "external-secrets.io/externalsecret_v1beta1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "PushSecret",
+      "version": "v1alpha1",
+      "path": "external-secrets.io/pushsecret_v1alpha1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "SecretStore",
+      "version": "v1",
+      "path": "external-secrets.io/secretstore_v1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "SecretStore",
+      "version": "v1alpha1",
+      "path": "external-secrets.io/secretstore_v1alpha1.json"
+    },
+    {
+      "group": "external-secrets.io",
+      "kind": "SecretStore",
+      "version": "v1beta1",
+      "path": "external-secrets.io/secretstore_v1beta1.json"
+    },
+    {
+      "group": "externaldns.k8s.io",
+      "kind": "DNSEndpoint",
+      "version": "v1alpha1",
+      "path": "externaldns.k8s.io/dnsendpoint_v1alpha1.json"
+    },
+    {
+      "group": "gateway.envoyproxy.io",
+      "kind": "Backend",
+      "version": "v1alpha1",
+      "path": "gateway.envoyproxy.io/backend_v1alpha1.json"
+    },
+    {
+      "group": "gateway.envoyproxy.io",
+      "kind": "BackendTrafficPolicy",
+      "version": "v1alpha1",
+      "path": "gateway.envoyproxy.io/backendtrafficpolicy_v1alpha1.json"
+    },
+    {
+      "group": "gateway.envoyproxy.io",
+      "kind": "ClientTrafficPolicy",
+      "version": "v1alpha1",
+      "path": "gateway.envoyproxy.io/clienttrafficpolicy_v1alpha1.json"
+    },
+    {
+      "group": "gateway.envoyproxy.io",
+      "kind": "EnvoyExtensionPolicy",
+      "version": "v1alpha1",
+      "path": "gateway.envoyproxy.io/envoyextensionpolicy_v1alpha1.json"
+    },
+    {
+      "group": "gateway.envoyproxy.io",
+      "kind": "EnvoyPatchPolicy",
+      "version": "v1alpha1",
+      "path": "gateway.envoyproxy.io/envoypatchpolicy_v1alpha1.json"
+    },
+    {
+      "group": "gateway.envoyproxy.io",
+      "kind": "EnvoyProxy",
+      "version": "v1alpha1",
+      "path": "gateway.envoyproxy.io/envoyproxy_v1alpha1.json"
+    },
+    {
+      "group": "gateway.envoyproxy.io",
+      "kind": "HTTPRouteFilter",
+      "version": "v1alpha1",
+      "path": "gateway.envoyproxy.io/httproutefilter_v1alpha1.json"
+    },
+    {
+      "group": "gateway.envoyproxy.io",
+      "kind": "SecurityPolicy",
+      "version": "v1alpha1",
+      "path": "gateway.envoyproxy.io/securitypolicy_v1alpha1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "BackendLBPolicy",
+      "version": "v1alpha2",
+      "path": "gateway.networking.k8s.io/backendlbpolicy_v1alpha2.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "BackendTLSPolicy",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/backendtlspolicy_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "BackendTLSPolicy",
+      "version": "v1alpha3",
+      "path": "gateway.networking.k8s.io/backendtlspolicy_v1alpha3.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "Gateway",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/gateway_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "Gateway",
+      "version": "v1beta1",
+      "path": "gateway.networking.k8s.io/gateway_v1beta1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "GatewayClass",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/gatewayclass_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "GatewayClass",
+      "version": "v1beta1",
+      "path": "gateway.networking.k8s.io/gatewayclass_v1beta1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "GRPCRoute",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/grpcroute_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "GRPCRoute",
+      "version": "v1alpha2",
+      "path": "gateway.networking.k8s.io/grpcroute_v1alpha2.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "HTTPRoute",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/httproute_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "HTTPRoute",
+      "version": "v1beta1",
+      "path": "gateway.networking.k8s.io/httproute_v1beta1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "ListenerSet",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/listenerset_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "ReferenceGrant",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/referencegrant_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "ReferenceGrant",
+      "version": "v1alpha2",
+      "path": "gateway.networking.k8s.io/referencegrant_v1alpha2.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "ReferenceGrant",
+      "version": "v1beta1",
+      "path": "gateway.networking.k8s.io/referencegrant_v1beta1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "TCPRoute",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/tcproute_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "TCPRoute",
+      "version": "v1alpha2",
+      "path": "gateway.networking.k8s.io/tcproute_v1alpha2.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "TLSRoute",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/tlsroute_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "TLSRoute",
+      "version": "v1alpha2",
+      "path": "gateway.networking.k8s.io/tlsroute_v1alpha2.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "TLSRoute",
+      "version": "v1alpha3",
+      "path": "gateway.networking.k8s.io/tlsroute_v1alpha3.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "UDPRoute",
+      "version": "v1",
+      "path": "gateway.networking.k8s.io/udproute_v1.json"
+    },
+    {
+      "group": "gateway.networking.k8s.io",
+      "kind": "UDPRoute",
+      "version": "v1alpha2",
+      "path": "gateway.networking.k8s.io/udproute_v1alpha2.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "ACRAccessToken",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/acraccesstoken_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "CloudsmithAccessToken",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/cloudsmithaccesstoken_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "ClusterGenerator",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/clustergenerator_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "ECRAuthorizationToken",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/ecrauthorizationtoken_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "Fake",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/fake_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "GCRAccessToken",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/gcraccesstoken_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "GeneratorState",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/generatorstate_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "GithubAccessToken",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/githubaccesstoken_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "Grafana",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/grafana_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "MFA",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/mfa_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "Password",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/password_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "QuayAccessToken",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/quayaccesstoken_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "SSHKey",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/sshkey_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "STSSessionToken",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/stssessiontoken_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "UUID",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/uuid_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "VaultDynamicSecret",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/vaultdynamicsecret_v1alpha1.json"
+    },
+    {
+      "group": "generators.external-secrets.io",
+      "kind": "Webhook",
+      "version": "v1alpha1",
+      "path": "generators.external-secrets.io/webhook_v1alpha1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "Kafka",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafka_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "Kafka",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafka_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaBridge",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafkabridge_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaBridge",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkabridge_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaConnect",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafkaconnect_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaConnect",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkaconnect_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaConnector",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafkaconnector_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaConnector",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkaconnector_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaMirrorMaker2",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafkamirrormaker2_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaMirrorMaker2",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkamirrormaker2_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaMirrorMaker",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkamirrormaker_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaNodePool",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafkanodepool_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaNodePool",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkanodepool_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaRebalance",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafkarebalance_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaRebalance",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkarebalance_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaTopic",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafkatopic_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaTopic",
+      "version": "v1alpha1",
+      "path": "kafka.strimzi.io/kafkatopic_v1alpha1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaTopic",
+      "version": "v1beta1",
+      "path": "kafka.strimzi.io/kafkatopic_v1beta1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaTopic",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkatopic_v1beta2.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaUser",
+      "version": "v1",
+      "path": "kafka.strimzi.io/kafkauser_v1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaUser",
+      "version": "v1alpha1",
+      "path": "kafka.strimzi.io/kafkauser_v1alpha1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaUser",
+      "version": "v1beta1",
+      "path": "kafka.strimzi.io/kafkauser_v1beta1.json"
+    },
+    {
+      "group": "kafka.strimzi.io",
+      "kind": "KafkaUser",
+      "version": "v1beta2",
+      "path": "kafka.strimzi.io/kafkauser_v1beta2.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "Alertmanager",
+      "version": "v1",
+      "path": "monitoring.coreos.com/alertmanager_v1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "AlertmanagerConfig",
+      "version": "v1alpha1",
+      "path": "monitoring.coreos.com/alertmanagerconfig_v1alpha1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "PodMonitor",
+      "version": "v1",
+      "path": "monitoring.coreos.com/podmonitor_v1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "Probe",
+      "version": "v1",
+      "path": "monitoring.coreos.com/probe_v1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "Prometheus",
+      "version": "v1",
+      "path": "monitoring.coreos.com/prometheus_v1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "PrometheusAgent",
+      "version": "v1alpha1",
+      "path": "monitoring.coreos.com/prometheusagent_v1alpha1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "PrometheusRule",
+      "version": "v1",
+      "path": "monitoring.coreos.com/prometheusrule_v1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "ScrapeConfig",
+      "version": "v1alpha1",
+      "path": "monitoring.coreos.com/scrapeconfig_v1alpha1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "ServiceMonitor",
+      "version": "v1",
+      "path": "monitoring.coreos.com/servicemonitor_v1.json"
+    },
+    {
+      "group": "monitoring.coreos.com",
+      "kind": "ThanosRuler",
+      "version": "v1",
+      "path": "monitoring.coreos.com/thanosruler_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "Backup",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/backup_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "Cluster",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/cluster_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "ClusterImageCatalog",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/clusterimagecatalog_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "Database",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/database_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "DatabaseRole",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/databaserole_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "FailoverQuorum",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/failoverquorum_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "ImageCatalog",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/imagecatalog_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "Pooler",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/pooler_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "Publication",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/publication_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "ScheduledBackup",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/scheduledbackup_v1.json"
+    },
+    {
+      "group": "postgresql.cnpg.io",
+      "kind": "Subscription",
+      "version": "v1",
+      "path": "postgresql.cnpg.io/subscription_v1.json"
+    }
+  ]
+}
