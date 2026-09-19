@@ -25,6 +25,10 @@
       url = "github:Lyndeno/apple-fonts.nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    crds-catalog = {
+      url = "github:datreeio/CRDs-catalog";
+      flake = false;
+    };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -69,6 +69,67 @@ These tier values feed the shared default agent and model-role assignments. A do
 
 Shared OMP defaults (theme, status line, approval mode, onboarding markers, task isolation/delegation guards, and bash-interception safety policy) are declared per-key with `lib.mkDefault` under `modules.ai.omp.settings`, so a downstream `settings` attrset merges key-by-key instead of replacing the shared block. Downstream modules only declare the deltas — typically model routing and provider policy. Nested defaults are per-subkey (`task.maxRecursionDepth`, `task.agentModelOverrides`) for the same reason: a downstream `task.isolation.*` assignment merges with, rather than replaces, the shared delegation guard.
 
+## Zed Kubernetes And CRD Schemas
+
+`inputs.dendritic-lib.flakeModules.default` provides `config.aw1cks.modules.home.zed`
+in the flake-module configuration. Downstream Home Manager compositions inherit
+its tooling/options only if they import that feature directly or through a profile;
+adding the input alone does not enable Zed. There is no `flake.modules` output.
+
+Public CRD schemas come from the shared **`crds-catalog` non-flake input**. The
+`downstream-flake-file` contract declares it and automatically generates
+`dendritic-lib.inputs.crds-catalog.follows = "crds-catalog"`. After adopting this
+library change, regenerate the downstream flake with `nix run .#write-flake` and
+lock the new input. Update it independently with `nix flake update crds-catalog`.
+
+To select a different revision, add this to the downstream **flake-parts module**
+that configures `flake-file` (replace the illustrative revision):
+
+```nix
+{
+  flake-file.inputs.crds-catalog.url = "github:datreeio/CRDs-catalog/<revision>";
+}
+```
+
+A catalog fork or local snapshot can also be used if it preserves the selected
+`<group>/<kind>_<version>.json` paths. Regenerate with `nix run .#write-flake` after
+changing the URL. Consumers managing `flake.nix` directly must declare
+`inputs.crds-catalog` with `flake = false` and the matching
+`inputs.dendritic-lib.inputs.crds-catalog.follows = "crds-catalog"` themselves.
+The curated public selection is unchanged by an input override: use `extraCRDs`
+for additional operators or release-accurate CRD overrides rather than expecting
+all catalog entries to be imported.
+
+With the feature imported, add a downstream **Home Manager module**, not flake settings:
+
+```nix
+{ ... }:
+{
+  aw1cks.zed.kubernetes = {
+    extraCRDs = [ ./crds/platform.yaml ];
+    manifestGlobs = [ "**/platform/resources/**/*.yaml" ];
+  };
+}
+```
+
+The paths are illustrative downstream locations, not files supplied here; the CRD
+path is relative to this Home Manager module. `extraCRDs` accepts raw
+`apiextensions.k8s.io/v1` CRD YAML/JSON, multi-document files, and `List` wrappers;
+only served versions are compiled. Both lists merge additively with shared config.
+Use `lib.mkForce` (adding `lib` to the module arguments) to replace `manifestGlobs`
+intentionally. No raw Zed schema settings replacement is needed.
+
+Downstream CRDs for installed operator releases override matching public
+group/version/kind schemas; duplicate GVKs among extras fail. The read-only
+`aw1cks.zed.kubernetes.schemaPackage` exposes `bundle.json`, `inventory.json`, and
+`kubeconform/` for YAML LS, Helm, and kubeconform, with no unknown-GVK remote fallback.
+
+Definitions must use self-contained references; nonlocal references are rejected.
+Private CRDs enter the world-readable Nix store and potentially binary caches:
+include **definitions only**, never instances or credentials. See
+[Zed schema policy and validation limits](./zed-parity.md#yaml-kubernetes-and-helm-schemas)
+for pinned coverage, strictness, network caveats, and checks not performed.
+
 ## Identity Use In The Template
 
 The template extends `aw1cks.identities` with a downstream-specific identity example in `templates/default/modules/org/meta.nix`.

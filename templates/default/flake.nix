@@ -25,11 +25,16 @@
       url = "github:Lyndeno/apple-fonts.nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    crds-catalog = {
+      url = "github:datreeio/CRDs-catalog";
+      flake = false;
+    };
     dendritic-lib = {
       url = "github:aw1cks-dotfiles/nix";
       inputs = {
         agenix.follows = "agenix";
         apple-fonts.follows = "apple-fonts";
+        crds-catalog.follows = "crds-catalog";
         disko.follows = "disko";
         flake-file.follows = "flake-file";
         flake-parts.follows = "flake-parts";
