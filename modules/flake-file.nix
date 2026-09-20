@@ -53,7 +53,7 @@
       };
       noctalia = {
         # TODO: migrate the desktop host to Noctalia v5's new TOML configuration.
-        url = "github:noctalia-dev/noctalia-shell/legacy-v4";
+        url = "github:noctalia-dev/noctalia/legacy-v4";
         inputs.nixpkgs.follows = "nixpkgs-unstable";
       };
       nixos-images = {
@@ -68,8 +68,8 @@
         url = "github:hercules-ci/flake-parts";
         inputs.nixpkgs-lib.follows = "nixpkgs";
       };
-      flake-file.url = "github:vic/flake-file";
-      import-tree.url = "github:vic/import-tree";
+      flake-file.url = "github:denful/flake-file";
+      import-tree.url = "github:denful/import-tree";
     };
   };
 }
