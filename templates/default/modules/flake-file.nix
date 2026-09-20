@@ -24,14 +24,14 @@
     # To override, e.g. for a local path checkout:
     #   flake-file.inputs.dendritic-lib.url = "path:../dendritic-lib";
     inputs = {
-      flake-file.url = "github:vic/flake-file";
+      flake-file.url = "github:denful/flake-file";
 
       flake-parts = {
         url = "github:hercules-ci/flake-parts";
         inputs.nixpkgs-lib.follows = "nixpkgs";
       };
 
-      import-tree.url = "github:vic/import-tree";
+      import-tree.url = "github:denful/import-tree";
 
       nixpkgs.url = "github:NixOS/nixpkgs/release-26.05";
     };
