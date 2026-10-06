@@ -26,6 +26,11 @@ let
     zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
     zstyle ':completion:*' menu select
     zstyle ':completion:*:default' list-colors ''${(s.:.)LS_COLORS}
+
+    function _set_terminal_title() {
+      print -Pn '\e]2;%n@%m: %~\a'
+    }
+    precmd_functions+=(_set_terminal_title)
   '';
 in
 {
