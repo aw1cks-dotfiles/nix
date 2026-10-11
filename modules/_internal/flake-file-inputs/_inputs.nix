@@ -8,10 +8,7 @@
 {
   agenix = {
     url = lib.mkDefault "github:ryantm/agenix";
-    inputs = {
-      home-manager.follows = lib.mkDefault "home-manager";
-      nixpkgs.follows = lib.mkDefault "nixpkgs";
-    };
+    inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 
   crds-catalog = {
