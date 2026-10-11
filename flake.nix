@@ -16,10 +16,7 @@
   inputs = {
     agenix = {
       url = "github:ryantm/agenix";
-      inputs = {
-        home-manager.follows = "home-manager";
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     apple-fonts = {
       url = "github:Lyndeno/apple-fonts.nix";
