@@ -5,6 +5,10 @@
   ],
   lockFileMaintenance: {
     enabled: true,
+    automerge: true,
+    automergeType: 'pr',
+    // Renovate must observe green CI itself before merging.
+    platformAutomerge: false,
     extends: [
       'schedule:weekly',
     ],
