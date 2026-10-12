@@ -240,8 +240,7 @@
                     # Build with OMP's own pinned Rust toolchain. The
                     # llm-agents overlay uses stable rustc, but OMP uses
                     # unstable standard-library APIs.
-                    package =
-                      lib.mkDefault inputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
+                    package = lib.mkDefault inputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
 
                     # Per-key defaults: a downstream `settings` attrset merges
                     # key-by-key (last one wins per key) instead of replacing
