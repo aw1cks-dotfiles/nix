@@ -72,25 +72,27 @@
             options = {
               frontier = mkModelTierOption {
                 description = "Frontier model used for the most demanding planning and review tasks.";
-                opencodeModel = "openai/gpt-5.6-sol-pro";
-                opencodeVariant = "high";
-                # OMP's ChatGPT subscription provider does not expose the Pro model.
-                ompModel = "openai-codex/gpt-6-astra:high";
+                opencodeModel = "openai/gpt-6-astra";
+                opencodeVariant = "xhigh";
+                ompModel = "openai-codex/gpt-6-astra:xhigh";
               };
               premium = mkModelTierOption {
                 description = "Premium model used for primary interactive work.";
-                opencodeModel = "openai/gpt-5.6-sol";
-                ompModel = "openai-codex/gpt-5.6-sol:medium";
+                opencodeModel = "openai/gpt-6.1-sol";
+                opencodeVariant = "high";
+                ompModel = "openai-codex/gpt-6.1-sol:high";
               };
               standard = mkModelTierOption {
                 description = "Standard model used for general delegated work.";
-                opencodeModel = "openai/gpt-5.6-terra";
-                ompModel = "openai-codex/gpt-5.6-terra:medium";
+                opencodeModel = "openai/gpt-6.1-sol";
+                opencodeVariant = "medium";
+                ompModel = "openai-codex/gpt-6.1-sol:medium";
               };
               small = mkModelTierOption {
                 description = "Small model used for exploration and lightweight background work.";
-                opencodeModel = "openai/gpt-5.6-luna";
-                ompModel = "openai-codex/gpt-5.6-luna";
+                opencodeModel = "openai/gpt-6-luna";
+                opencodeVariant = "low";
+                ompModel = "openai-codex/gpt-6-luna:low";
               };
             };
           };

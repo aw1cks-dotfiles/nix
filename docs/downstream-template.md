@@ -65,6 +65,19 @@ The shared Home Manager AI module exposes provider-specific model tiers under `m
 
 The available tiers are `frontier`, `premium`, `standard`, and `small`. OpenCode and OMP use different provider namespaces and model-selector syntax, so each tier keeps separate values for the two clients. Setting an OpenCode `variant` to `null` omits the variant.
 
+The default inventory uses models available through ChatGPT/Codex subscription sign-in:
+
+| Tier | Model | Reasoning effort |
+| --- | --- | --- |
+| `frontier` | GPT-6 Astra | `xhigh` |
+| `premium` | GPT-6.1 Sol | `high` |
+| `standard` | GPT-6.1 Sol | `medium` |
+| `small` | GPT-6 Luna | `low` |
+
+Premium and standard share the current Sol model, with lighter reasoning for general delegated work. Frontier prioritizes planning and review quality; small prioritizes latency and subscription efficiency. Both clients use explicit reasoning levels, and the frontier default does not require an API-only Pro model.
+
+These choices follow the [Codex model recommendations](https://developers.openai.com/codex/models) and [model-selection guidance](https://developers.openai.com/api/docs/guides/model-selection). Availability still depends on the signed-in account, client, and workspace permissions.
+
 These tier values feed the shared default agent and model-role assignments. A downstream module can still override an individual assignment directly through `modules.ai.opencode.settings.agent.*` or `modules.ai.omp.settings.modelRoles.*`; those explicit settings take precedence over the shared defaults.
 
 Shared OMP defaults (theme, status line, approval mode, onboarding markers, task isolation/delegation guards, and bash-interception safety policy) are declared per-key with `lib.mkDefault` under `modules.ai.omp.settings`, so a downstream `settings` attrset merges key-by-key instead of replacing the shared block. Downstream modules only declare the deltas — typically model routing and provider policy. Nested defaults are per-subkey (`task.maxRecursionDepth`, `task.agentModelOverrides`) for the same reason: a downstream `task.isolation.*` assignment merges with, rather than replaces, the shared delegation guard.
