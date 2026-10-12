@@ -72,8 +72,8 @@
     url = lib.mkDefault "github:numtide/llm-agents.nix";
   };
 
-  # Consumed for its home-manager module (`programs.omp`); the omp package
-  # itself comes from llm-agents so the agent set stays on one packaging.
+  # Consumed directly for its home-manager module (`programs.omp`) and package;
+  # upstream's package uses the Rust toolchain pinned by OMP itself.
   oh-my-pi = {
     url = lib.mkDefault "github:can1357/oh-my-pi";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";

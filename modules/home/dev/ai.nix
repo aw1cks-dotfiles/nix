@@ -1,5 +1,5 @@
 # AI coding tools — from nix-upstream/modules/development/ai.nix
-{ ... }:
+{ inputs, ... }:
 {
   aw1cks.modules.home.ai =
     {
@@ -235,9 +235,11 @@
 
                   config = {
                     enable = lib.mkDefault true;
-                    # One agent packaging source: llm-agents also builds omp, so
-                    # the binary follows the same overlay/cache path as opencode.
-                    package = lib.mkDefault pkgs.llm-agents.omp;
+                    # Build with OMP's own pinned Rust toolchain. The
+                    # llm-agents overlay uses stable rustc, but OMP uses
+                    # unstable standard-library APIs.
+                    package =
+                      lib.mkDefault inputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
 
                     # Per-key defaults: a downstream `settings` attrset merges
                     # key-by-key (last one wins per key) instead of replacing
