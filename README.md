@@ -38,3 +38,4 @@ This repo is opinionated about a few things:
 - Standalone Home Manager hosts use `configurations.home."user@host"` naming.
 - The shared NVIDIA contract for standalone Home Manager lives under `configurations.home.<name>.nvidia` and expects a host-local JSON pin file.
 - Downstream `flake-file` consumers should import `inputs.dendritic-lib.flakeModules.downstream-flake-file` alongside `inputs.flake-file.flakeModules.default`.
+- Zoom is installed through the Homebrew cask on macOS and `pkgs.zoom-us` on Linux. The macOS cask avoids the ad-hoc-signed Nix package invalidating hash-bound screen-recording permissions after upgrades. When migrating, quit Zoom before `just rebuild`, then launch `/Applications/zoom.us.app` and grant screen-recording access again; remove stale Home Manager Zoom entries from Privacy & Security if necessary.
