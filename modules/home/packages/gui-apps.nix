@@ -18,7 +18,6 @@
           # calibre
           ibm-plex
           syncplay
-          zoom-us
         ]
         ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
           gedit
@@ -26,6 +25,7 @@
           omnissa-horizon-client
           wl-clipboard
           xclip
+          zoom-us
         ];
 
       programs = {

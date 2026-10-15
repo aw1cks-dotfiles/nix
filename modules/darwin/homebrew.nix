@@ -20,6 +20,7 @@
         "tunnelblick"
         "whatsapp"
         "ytmdesktop-youtube-music"
+        "zoom"
       ];
     };
   };
