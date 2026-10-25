@@ -94,7 +94,7 @@
     # ships its own pinned nixpkgs to keep patch sets matched to the
     # kernel version; mismatched nixpkgs => build failures.
     #
-    # Binary cache: https://attic.xuyh0120.win/lantian (xddxdd's Hydra CI).
+    # Binary cache: https://cache.lantian.pub/lantian (xddxdd's Hydra CI).
     # Key added to modules/shared/nix-settings.nix. The `pinned` overlay was
     # previously needed for cache hits but since 2026-03-01 the flake pins its
     # own kernel source independent of nixpkgs, so the `default` overlay is
