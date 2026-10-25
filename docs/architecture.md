@@ -192,16 +192,22 @@ without `lib.mkForce`:
 
 ```nix
 configurations.darwin.work-mac.module = {
-  aw1cks.chatgptDesktop.enable = false;
+  modules.ai.chatgpt.enable = false;
 };
 ```
 
 The atomic module defaults to disabled when imported without the desktop
 profile. To opt in independently, import
 `config.aw1cks.modules.darwin.chatgpt-desktop` and set
-`aw1cks.chatgptDesktop.enable = true;` in the nix-darwin module. This enables
+`modules.ai.chatgpt.enable = true;` in the nix-darwin module. This enables
 Homebrew management; Homebrew itself must already be installed. This feature
 does not install an unofficial Linux client.
+
+The option uses the same `modules.ai` namespace as the Home Manager AI tools,
+but belongs to the nix-darwin module system: setting it inside a Home Manager
+configuration does not control system-wide Homebrew management. The desktop
+profile owns the GUI app default, independently of the developer AI profile
+and its OpenCode/OMP model-tier settings.
 
 Disabling removes the cask from the managed Brewfile. The desktop profile's
 existing `homebrew.onActivation.cleanup = "zap"` policy can uninstall it and
