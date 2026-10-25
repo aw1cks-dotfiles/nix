@@ -10,6 +10,6 @@ in
       modules.darwin.chatgpt-desktop
     ];
 
-    aw1cks.chatgptDesktop.enable = lib.mkDefault true;
+    modules.ai.chatgpt.enable = lib.mkDefault true;
   };
 }

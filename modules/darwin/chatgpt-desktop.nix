@@ -3,9 +3,10 @@
   aw1cks.modules.darwin.chatgpt-desktop =
     { config, lib, ... }:
     {
-      options.aw1cks.chatgptDesktop.enable = lib.mkEnableOption "the official ChatGPT desktop app via Homebrew";
+      options.modules.ai.chatgpt.enable =
+        lib.mkEnableOption "the official ChatGPT desktop app via Homebrew";
 
-      config = lib.mkIf config.aw1cks.chatgptDesktop.enable {
+      config = lib.mkIf config.modules.ai.chatgpt.enable {
         homebrew.enable = true;
         homebrew.casks = [ "chatgpt" ];
       };
