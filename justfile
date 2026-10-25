@@ -1,9 +1,6 @@
-# TODO: confirm if we really need this.
-# it should only be required during bootstrap,
-# but at that point we're unlikely to have `just` anyway,
-# since it's probably provided by nix.
+# Keep the caller's NIX_CONFIG intact. First activation has its own explicit,
+# narrowly scoped policy and does not require just to be installed.
 set export
-NIX_CONFIG := "experimental-features = nix-command flakes"
 
 is_wsl := path_exists("/proc/sys/fs/binfmt_misc/WSLInterop")
 is_nixos := path_exists("/run/current-system/nixos-version")
@@ -41,12 +38,26 @@ fix-nix-daemon:
   sudo launchctl kickstart -k system/org.nixos.nix-daemon; \
   if nix store ping --store daemon >/dev/null 2>&1; then echo "nix-daemon recovered"; else echo "launchd did not recover nix-daemon; a reboot is likely required"; exit 1; fi
 
-# Pre-seed /etc/nix/conf.d with the shared binary cache list.
-# Run this once on a fresh machine before the first `just rebuild` so that
-# substituters are trusted when the kernel (and other cached packages) are
-# first evaluated.  Requires root; will restart nix-daemon automatically.
-bootstrap-cache:
-  sudo nix run .#bootstrap-cache
+# Explicit owner: nixos, darwin, or standalone-hm. No flake app is built first.
+bootstrap owner target:
+  sh modules/integrations/_cache-bootstrap/bootstrap.sh bootstrap {{quote(owner)}} {{quote(target)}}
+
+# Compatibility name now requires an owner and target instead of writing conf.d.
+bootstrap-cache owner target: (bootstrap owner target)
+
+# Official-cache-only first switch for a broken inherited cache configuration.
+recover owner target:
+  sh modules/integrations/_cache-bootstrap/bootstrap.sh --recovery bootstrap {{quote(owner)}} {{quote(target)}}
+
+# Standalone daemon only; never run as a Home Manager activation hook.
+sync-caches:
+  sh modules/integrations/_cache-bootstrap/bootstrap.sh sync-caches
+
+check-caches:
+  sh modules/integrations/_cache-bootstrap/bootstrap.sh check-caches
+
+probe-cache store_path:
+  sh modules/integrations/_cache-bootstrap/bootstrap.sh probe {{quote(store_path)}}
 
 update:
   nix flake update
@@ -55,7 +66,7 @@ nix_sudo := if os() == "macos" { "sudo -H nix" } else { "nix" }
 gc_command := if os() == "macos" {
   "sudo -H nix-env --profile /nix/var/nix/profiles/system --delete-generations"
 } else {
-  "nix profile wipe-history" 
+  "nix profile wipe-history"
 }
 gc_day0_value := if os() == "macos" { "old" } else { "" }
 

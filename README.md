@@ -15,6 +15,7 @@ This repo is opinionated about a few things:
 - Adding a host: [`docs/adding-a-host.md`](./docs/adding-a-host.md)
 - Adding a role: [`docs/adding-a-role.md`](./docs/adding-a-role.md)
 - Validation expectations: [`docs/validation.md`](./docs/validation.md)
+- First activation and cache recovery (draft): [`docs/cache-bootstrap.md`](./docs/cache-bootstrap.md)
 - Secret-management guidance: [`docs/secret-management.md`](./docs/secret-management.md)
 - Downstream template and layering: [`docs/downstream-template.md`](./docs/downstream-template.md)
 
