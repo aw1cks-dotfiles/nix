@@ -185,6 +185,28 @@ Provisioning-specific bootstrap access stays repo-local rather than expanding th
 - hosts can provide an optional embedded `home` payload
 - the constructor derives `system.primaryUser`, `users.users.<name>.home`, and Home Manager username/home-directory defaults from resolved identity data
 
+The Darwin desktop profile imports `aw1cks.modules.darwin.chatgpt-desktop` and
+enables the official ChatGPT desktop app through Homebrew's `chatgpt` cask by
+default. Downstream consumers can disable it in their nix-darwin host module
+without `lib.mkForce`:
+
+```nix
+configurations.darwin.work-mac.module = {
+  aw1cks.chatgptDesktop.enable = false;
+};
+```
+
+The atomic module defaults to disabled when imported without the desktop
+profile. To opt in independently, import
+`config.aw1cks.modules.darwin.chatgpt-desktop` and set
+`aw1cks.chatgptDesktop.enable = true;` in the nix-darwin module. This enables
+Homebrew management; Homebrew itself must already be installed. This feature
+does not install an unofficial Linux client.
+
+Disabling removes the cask from the managed Brewfile. The desktop profile's
+existing `homebrew.onActivation.cleanup = "zap"` policy can uninstall it and
+remove application data on the next activation.
+
 ## Validation
 
 Validation is intentionally narrower than a full switch or deployment.
