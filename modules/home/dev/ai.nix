@@ -249,7 +249,7 @@
                       setupVersion = lib.mkDefault 2;
                       dev.autoqaConsent = lib.mkDefault "granted";
 
-                      theme.dark = lib.mkDefault "dark-sakura";
+                      theme.dark = lib.mkDefault "oxocarbon-dark";
                       composer.shape = lib.mkDefault "rail";
                       statusLine = lib.mkDefault {
                         preset = "nerd";
@@ -495,6 +495,10 @@
 
         programs.mcp = cfg.mcp;
         programs.omp = cfg.omp;
+        home.file.".omp/agent/themes/oxocarbon-dark.json" = lib.mkIf cfg.omp.enable {
+          source = ./files/omp/themes/oxocarbon-dark.json;
+        };
+
         programs.opencode = lib.mkMerge [
           (builtins.removeAttrs cfg.opencode [
             "skillsSource"

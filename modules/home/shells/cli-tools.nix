@@ -88,6 +88,7 @@
 
       programs.bat = {
         enable = true;
+        themes.oxocarbon-dark.src = ./files/bat/oxocarbon-dark.tmTheme;
         extraPackages = with pkgs; [
           bat-extras.core
         ];
@@ -95,7 +96,7 @@
           nonprintable-notation = "caret";
           paging = "auto";
           style = "changes,numbers";
-          theme = "Catppuccin Mocha";
+          theme = "oxocarbon-dark";
         };
       };
 

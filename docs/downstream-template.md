@@ -82,6 +82,18 @@ These tier values feed the shared default agent and model-role assignments. A do
 
 Shared OMP defaults (theme, status line, approval mode, onboarding markers, task isolation/delegation guards, and bash-interception safety policy) are declared per-key with `lib.mkDefault` under `modules.ai.omp.settings`, so a downstream `settings` attrset merges key-by-key instead of replacing the shared block. Downstream modules only declare the deltas — typically model routing and provider policy. Nested defaults are per-subkey (`task.maxRecursionDepth`, `task.agentModelOverrides`) for the same reason: a downstream `task.isolation.*` assignment merges with, rather than replaces, the shared delegation guard.
 
+### Oxocarbon themes
+
+The shared AI module installs `~/.omp/agent/themes/oxocarbon-dark.json` when OMP is enabled and defaults `modules.ai.omp.settings.theme.dark` to `oxocarbon-dark`.
+The JSON palette is adapted from [Oxocarbon.nvim](https://github.com/nyoom-engineering/oxocarbon.nvim); OMP does not change the terminal's background, so use `#161616` in the terminal for a matching canvas.
+Downstream configurations can override the dark theme through the existing per-key settings interface; the light-theme slot is unchanged.
+
+The shared CLI tools module supplies the checked-in `oxocarbon-dark.tmTheme` through `programs.bat.themes.oxocarbon-dark.src` and selects it with `programs.bat.config.theme`.
+Home Manager installs the theme and rebuilds bat's cache during activation; no manual `bat cache --build` step is needed after switching.
+The theme's source of truth is `modules/home/shells/files/bat/oxocarbon-dark.tmTheme`, not a mutable file under `~/.config/bat/themes`.
+
+After switching, check `bat --list-themes` for `oxocarbon-dark` and launch OMP normally to use its declared dark-theme default.
+
 ## Zed Kubernetes And CRD Schemas
 
 `inputs.dendritic-lib.flakeModules.default` provides `config.aw1cks.modules.home.zed`
