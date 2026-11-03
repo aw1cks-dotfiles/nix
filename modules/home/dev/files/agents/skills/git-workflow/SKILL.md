@@ -2,7 +2,6 @@
 name: git-workflow
 description: Branching strategy, commit message format, PR process, and release workflow. Load when creating branches, writing commit messages, opening PRs, or preparing releases.
 license: MIT
-compatibility: opencode
 ---
 
 ## Branching

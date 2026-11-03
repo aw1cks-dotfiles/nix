@@ -128,7 +128,7 @@
                   options = {
                     skillsSource = lib.mkOption {
                       type = lib.types.path;
-                      default = ./files/opencode/skills;
+                      default = ./files/agents/skills;
                       description = "Bundled OpenCode skills directory exposed as a stable downstream contract.";
                     };
 
@@ -496,7 +496,7 @@
         programs.mcp = cfg.mcp;
         programs.omp = cfg.omp;
         home.file.".omp/agent/themes/oxocarbon-dark.json" = lib.mkIf cfg.omp.enable {
-          source = ./files/omp/themes/oxocarbon-dark.json;
+          source = ./files/agents/omp/themes/oxocarbon-dark.json;
         };
 
         programs.opencode = lib.mkMerge [
