@@ -130,37 +130,51 @@
                       };
                       tui.tight = lib.mkDefault true;
                       terminal.showProgress = lib.mkDefault true;
-                      defaultThinkingLevel = lib.mkDefault "auto";
+                      # Pin reasoning effort instead of auto to prevent mid-session
+                      # thinking_level_change events from busting prompt caches.
+                      defaultThinkingLevel = lib.mkDefault "high";
                       extendedContext = lib.mkDefault true;
                       advisor.enabled = lib.mkDefault false;
+                      recap.enabled = lib.mkDefault false;
+                      provider.appendOnlyContext = lib.mkDefault "on";
                       tools.approvalMode = lib.mkDefault "write";
+                      tools.xdev = lib.mkDefault true;
+                      tools.xdevDocs = lib.mkDefault "builtins";
                       github.enabled = lib.mkDefault true;
                       astGrep.enabled = lib.mkDefault true;
 
-                      # Keep inspection on structured tools while preserving
-                      # commands whose native HTTP or text-transform semantics
-                      # are required. GitHub requests retain their API routing.
-                      bashInterceptor = {
-                        enabled = lib.mkDefault true;
-                        patterns = lib.mkDefault [
-                          {
-                            pattern = "^\\s*(grep|rg|ag|ack)\\b";
-                            tool = "grep";
-                            message = "Use the structured grep tool instead; it returns file and line context without shell parsing.";
-                          }
-                          {
-                            pattern = "^\\s*(cat|head|tail|less|more)\\b";
-                            tool = "read";
-                            message = "Use read with a line-range selector instead; it preserves file context and avoids truncated shell output.";
-                          }
-                          {
-                            pattern = "^\\s*gh\\s+(issue|pr)\\s+(view|list|search|checkout|create|diff)\\b";
-                            tool = "github";
-                            message = "Use the github tool instead; it wraps gh with structured output and caching.";
-                          }
-                        ];
+                      # Use OMP's built-in 10-rule DEFAULT_BASH_INTERCEPTOR_RULES
+                      # (cat/head/tail, grep/rg, find/fd, sed -i, perl -i, awk, echo >, nohup).
+                      bashInterceptor.enabled = lib.mkDefault true;
+
+                      edit = {
+                        mode = lib.mkDefault "hashline";
+                        autoRepair.enabled = lib.mkDefault true;
+                        modelVariants = lib.mkDefault {
+                          glm = "replace";
+                          qwen = "replace";
+                          deepseek = "replace";
+                          kimi = "replace";
+                        };
                       };
 
+                      compaction = {
+                        methodOrder = lib.mkDefault [
+                          "remote"
+                          "handoff"
+                          "shake"
+                          "soft"
+                        ];
+                        idleEnabled = lib.mkDefault false;
+                        idleThresholdTokens = lib.mkDefault 160000;
+                        idleTimeoutSeconds = lib.mkDefault 240;
+                        handoffSaveToDisk = lib.mkDefault true;
+                      };
+
+                      prewalk = {
+                        enabled = lib.mkDefault false;
+                        autoTarget = lib.mkDefault "@task";
+                      };
                       # Keep privilege escalation gated, including in yolo
                       # sessions. Auto-approve only explicit, read-only Git
                       # forms; broad subcommands such as `git branch *` also
@@ -333,6 +347,14 @@
                       # choice merges instead of replacing this block.
                       task.isolation.mode = lib.mkDefault "auto";
                       task.maxRecursionDepth = lib.mkDefault 1;
+                      task.prewalk = lib.mkDefault false;
+                      task.softRequestBudget = lib.mkDefault 50;
+                      task.agentSoftRequestBudget = lib.mkDefault {
+                        reviewer = 12;
+                        security-reviewer = 15;
+                        scout = 20;
+                        task = 40;
+                      };
                       task.agentModelOverrides = lib.mkDefault {
                         # Permit one layer of delegation and strip task spawning
                         # from those child agents.
