@@ -46,6 +46,14 @@ Example standalone Home Manager host:
 
 For standalone Home Manager hosts, the facts key must match the configuration name and follow `user@host` or `user@host.domain`.
 
+If enabling `modules.ai.omp.collab`, add `tailnetHost` to that machine's existing
+facts entry: its full Tailscale HTTPS hostname without a scheme, port, or
+trailing dot (for example `"my-host.example.ts.net"`). The feature derives its
+URLs from this fact. Enable it in the host's Home Manager AI configuration with
+`modules.ai.omp.collab.enable = true`; the opt-in belongs in composition, not
+facts. Both embedded and standalone Home Manager receive the machine's facts
+from the constructors.
+
 Keep these out of facts:
 
 - `module`

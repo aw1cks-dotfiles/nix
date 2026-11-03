@@ -97,9 +97,14 @@ Optional shared metadata includes fields such as:
   user = "...";
   homeDirectory = "...";
   hostName = "...";
+  tailnetHost = "my-host.example.ts.net"; # optional full Tailscale HTTPS hostname
   tags = [ ... ];
 }
 ```
+
+`tailnetHost` is machine metadata, not an AI service option. The opt-in
+`modules.ai.omp.collab` feature derives its browser and relay URLs from this
+fact; hosts without collab enabled do not need it.
 
 Facts are for safe shared metadata only.
 
@@ -128,6 +133,11 @@ They all:
 - inject `hostFacts` via `specialArgs` or `extraSpecialArgs`
 - expand role-derived imports from `modules/roles/defaults.nix`
 - add shared baseline imports from `modules/constructors/_lib.nix`
+
+NixOS and darwin constructors also forward the same `hostFacts` through
+`home-manager.extraSpecialArgs` into their embedded homes. Features such as
+OMP collab therefore consume one machine fact regardless of Home Manager
+deployment mode.
 
 The shared helper file `modules/constructors/_lib.nix` is intentionally small. It centralizes repeated constructor policy such as facts lookup, role expansion, target assertions, baseline imports, and user/home resolution.
 

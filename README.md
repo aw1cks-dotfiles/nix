@@ -17,6 +17,8 @@ This repo is opinionated about a few things:
 - Validation expectations: [`docs/validation.md`](./docs/validation.md)
 - Secret-management guidance: [`docs/secret-management.md`](./docs/secret-management.md)
 - Downstream template and layering: [`docs/downstream-template.md`](./docs/downstream-template.md)
+- Opt-in OMP collab over Tailscale: [`setup and operation`](./docs/downstream-template.md#self-hosted-omp-collab-over-tailscale)
+- Private Paseo with OMP Plugin: [`phone setup, authentication, and persistence`](./docs/downstream-template.md#private-paseo-with-the-omp-plugin)
 
 ## Flake Surface
 
