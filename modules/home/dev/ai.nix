@@ -13,54 +13,17 @@
       mkModelTierOption =
         {
           description,
-          opencodeModel,
-          opencodeVariant ? null,
-          ompModel,
+          model,
         }:
         lib.mkOption {
-          type = lib.types.submodule {
-            options = {
-              opencode = lib.mkOption {
-                type = lib.types.submodule {
-                  options = {
-                    model = lib.mkOption {
-                      type = lib.types.str;
-                      description = "OpenCode provider/model identifier for this tier.";
-                    };
-                    variant = lib.mkOption {
-                      type = lib.types.nullOr lib.types.str;
-                      description = "Optional OpenCode model variant for this tier.";
-                    };
-                  };
-                };
-                description = "OpenCode model selection for this tier.";
-              };
-              omp = lib.mkOption {
-                type = lib.types.str;
-                description = "OMP model selector for this tier, including an optional thinking suffix.";
-              };
-            };
-          };
-          default = {
-            opencode = {
-              model = opencodeModel;
-              variant = opencodeVariant;
-            };
-            omp = ompModel;
-          };
+          type = lib.types.str;
+          default = model;
           inherit description;
         };
       frontier_model = cfg.models.frontier;
       premium_model = cfg.models.premium;
       standard_model = cfg.models.standard;
       small_model = cfg.models.small;
-      opencodeAgent = tier: lib.filterAttrs (_: value: value != null) tier.opencode;
-      subagentPermission = {
-        task = "deny";
-      };
-      readOnlyAgentPermission = subagentPermission // {
-        edit = "deny";
-      };
     in
     {
       options.modules.ai = {
@@ -69,32 +32,24 @@
             options = {
               frontier = mkModelTierOption {
                 description = "Frontier model used for the most demanding planning and review tasks.";
-                opencodeModel = "openai/gpt-6-astra";
-                opencodeVariant = "xhigh";
-                ompModel = "openai-codex/gpt-6-astra:xhigh";
+                model = "openai-codex/gpt-6-astra:xhigh";
               };
               premium = mkModelTierOption {
                 description = "Premium model used for primary interactive work.";
-                opencodeModel = "openai/gpt-6.1-sol";
-                opencodeVariant = "high";
-                ompModel = "openai-codex/gpt-6.1-sol:high";
+                model = "openai-codex/gpt-6.1-sol:high";
               };
               standard = mkModelTierOption {
                 description = "Standard model used for general delegated work.";
-                opencodeModel = "openai/gpt-6.1-sol";
-                opencodeVariant = "medium";
-                ompModel = "openai-codex/gpt-6.1-sol:medium";
+                model = "openai-codex/gpt-6.1-sol:medium";
               };
               small = mkModelTierOption {
                 description = "Small model used for exploration and lightweight background work.";
-                opencodeModel = "openai/gpt-6-luna";
-                opencodeVariant = "low";
-                ompModel = "openai-codex/gpt-6-luna:low";
+                model = "openai-codex/gpt-6-luna:low";
               };
             };
           };
           default = { };
-          description = "Provider-specific model tiers shared by the OpenCode and OMP defaults.";
+          description = "Model tiers feeding the shared OMP defaults; values are OMP model selectors with an optional thinking suffix.";
         };
 
         mcp = lib.mkOption {
@@ -114,109 +69,10 @@
           };
         };
 
-        opencode = lib.mkOption {
-          type = lib.types.submoduleWith {
-            shorthandOnlyDefinesConfig = true;
-            # See the omp option below for why pkgs is passed via specialArgs.
-            specialArgs = { inherit pkgs; };
-            modules = [
-              (
-                { lib, ... }:
-                {
-                  freeformType = lib.types.attrsOf lib.types.anything;
-
-                  options = {
-                    skillsSource = lib.mkOption {
-                      type = lib.types.path;
-                      default = ./files/agents/skills;
-                      description = "Bundled OpenCode skills directory exposed as a stable downstream contract.";
-                    };
-
-                    ollama = lib.mkOption {
-                      type = lib.types.submodule {
-                        options = {
-                          enable = lib.mkOption {
-                            type = lib.types.bool;
-                            default = false;
-                            description = "Enable a local Ollama provider for OpenCode on this host.";
-                          };
-
-                          endpoint = lib.mkOption {
-                            type = lib.types.str;
-                            default = "localhost";
-                            description = "Host name or address for the Ollama endpoint.";
-                          };
-
-                          models = lib.mkOption {
-                            type = lib.types.attrsOf lib.types.anything;
-                            default = { };
-                            description = "Additional OpenCode model metadata exposed through the Ollama provider.";
-                          };
-                        };
-                      };
-                      default = { };
-                      description = "Optional local Ollama provider wiring for host-local experimentation.";
-                    };
-                  };
-
-                  config = {
-                    enable = lib.mkDefault true;
-                    enableMcpIntegration = lib.mkDefault true;
-                    package = lib.mkDefault pkgs.llm-agents.opencode;
-
-                    context = lib.mkDefault ./files/opencode/AGENTS.md;
-
-                    settings = lib.mkDefault {
-                      model = premium_model.opencode.model;
-                      small_model = small_model.opencode.model;
-                      # Let primary agents delegate once, but prevent subagents
-                      # from recursively launching more subagents.
-                      subagent_depth = 1;
-
-                      permission = {
-                        glob = "allow";
-                        grep = "allow";
-                        list = "allow";
-                        lsp = "allow";
-                        read = "allow";
-                        external_directory = {
-                          "/tmp" = "allow";
-                          "/nix/**" = "allow";
-                          "~/Documents/git/**" = "allow";
-                        };
-                        edit = {
-                          "/nix/**" = "deny";
-                          "~/Documents/git/**" = "ask";
-                        };
-                        "context7_*" = "allow";
-                        "websearch" = "allow";
-                      };
-
-                      agent = {
-                        build = opencodeAgent premium_model;
-
-                        plan = opencodeAgent frontier_model;
-
-                        general = (opencodeAgent standard_model) // {
-                          permission = subagentPermission;
-                        };
-
-                        explore = (opencodeAgent small_model) // {
-                          permission = readOnlyAgentPermission;
-                        };
-
-                        title = opencodeAgent small_model;
-                        summary = opencodeAgent small_model;
-                        compaction = opencodeAgent standard_model;
-                      };
-                    };
-                  };
-                }
-              )
-            ];
-          };
-          default = { };
-          description = "OpenCode home-manager configuration";
+        skillsSource = lib.mkOption {
+          type = lib.types.path;
+          default = ./files/agents/skills;
+          description = "Bundled shared agent skills directory exposed as a stable downstream contract.";
         };
 
         omp = lib.mkOption {
@@ -231,7 +87,6 @@
                 { lib, pkgs, ... }:
                 {
                   freeformType = lib.types.attrsOf lib.types.anything;
-
                   config = {
                     enable = lib.mkDefault true;
                     # Build with OMP's own pinned Rust toolchain. The
@@ -449,16 +304,16 @@
                       ];
 
                       modelRoles = lib.mkDefault {
-                        default = premium_model.omp;
-                        smol = small_model.omp;
-                        slow = frontier_model.omp;
-                        vision = standard_model.omp;
-                        plan = frontier_model.omp;
-                        designer = premium_model.omp;
-                        commit = small_model.omp;
-                        tiny = small_model.omp;
-                        task = standard_model.omp;
-                        advisor = frontier_model.omp;
+                        default = premium_model;
+                        smol = small_model;
+                        slow = frontier_model;
+                        vision = standard_model;
+                        plan = frontier_model;
+                        designer = premium_model;
+                        commit = small_model;
+                        tiny = small_model;
+                        task = standard_model;
+                        advisor = frontier_model;
                       };
 
                       # Per-subkey defaults so a downstream `task.isolation.*`
@@ -490,42 +345,12 @@
       config = {
         home.packages = with pkgs.llm-agents; [
           claude-code
-          opencode # keep this here, in case opencode managed config disabled
         ];
 
         programs.mcp = cfg.mcp;
         programs.omp = cfg.omp;
-        home.file.".omp/agent/themes/oxocarbon-dark.json" = lib.mkIf cfg.omp.enable {
-          source = ./files/agents/omp/themes/oxocarbon-dark.json;
-        };
-
-        programs.opencode = lib.mkMerge [
-          (builtins.removeAttrs cfg.opencode [
-            "skillsSource"
-            "ollama"
-          ])
-          (lib.mkIf cfg.opencode.ollama.enable {
-            settings.provider.ollama = {
-              npm = "@ai-sdk/openai-compatible";
-              name = "ollama";
-              options.baseURL = "http://${cfg.opencode.ollama.endpoint}:11434/v1";
-              inherit (cfg.opencode.ollama) models;
-            };
-          })
-        ];
-
-        xdg.configFile = lib.mkIf cfg.opencode.enable {
-          # Keep the skills tree as an installed directory so local skill files stay
-          # available even if the Home Manager option schema changes.
-          "opencode/skills" = {
-            source = cfg.opencode.skillsSource;
-            recursive = true;
-          };
-        };
-
-        home.sessionVariables = {
-          OPENCODE_EXPERIMENTAL_LSP_TOOL = "true";
-          OPENCODE_ENABLE_EXA = "true";
+        home.file = lib.mkIf cfg.omp.enable {
+          ".omp/agent/themes/oxocarbon-dark.json".source = ./files/agents/omp/themes/oxocarbon-dark.json;
         };
       };
     };

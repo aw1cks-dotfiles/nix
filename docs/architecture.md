@@ -207,7 +207,7 @@ The option uses the same `modules.ai` namespace as the Home Manager AI tools,
 but belongs to the nix-darwin module system: setting it inside a Home Manager
 configuration does not control system-wide Homebrew management. The desktop
 profile owns the GUI app default, independently of the developer AI profile
-and its OpenCode/OMP model-tier settings.
+and its OMP model-tier settings.
 
 Disabling removes the cask from the managed Brewfile. The desktop profile's
 existing `homebrew.onActivation.cleanup = "zap"` policy can uninstall it and
