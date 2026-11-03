@@ -1197,6 +1197,27 @@
         "type": "github"
       }
     },
+    "paseo": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793682533,
+        "narHash": "sha256-F7wWnxwotaxDwD+bAf3TVmWcSUQngLhNcqjCW1CvwBU=",
+        "owner": "getpaseo",
+        "repo": "paseo",
+        "rev": "8938fde3c713143f12eacbdd60c11fdfc0be0fb1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "getpaseo",
+        "ref": "v0.15.0",
+        "repo": "paseo",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -1223,6 +1244,7 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "noctalia": "noctalia",
         "oh-my-pi": "oh-my-pi",
+        "paseo": "paseo",
         "stylix": "stylix",
         "treefmt-nix": "treefmt-nix_6",
         "zen-browser": "zen-browser"

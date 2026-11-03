@@ -133,6 +133,7 @@ in
           users.users.${resolvedUser}.home = lib.mkDefault resolvedHomeDirectory;
         })
         (lib.mkIf (home != null && resolvedUser != null && resolvedHomeDirectory != null) {
+          home-manager.extraSpecialArgs = { inherit hostFacts; };
           home-manager.users.${resolvedUser} = xlib.mkHomeUserModule {
             inherit resolvedUser resolvedHomeDirectory;
             imports =

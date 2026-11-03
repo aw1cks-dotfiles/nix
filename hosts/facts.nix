@@ -13,6 +13,7 @@
       ];
       identity = "personal";
       hostName = "mbp";
+      tailnetHost = "mbp.gentoo-boa.ts.net";
     };
 
     "alex@desktop" = {

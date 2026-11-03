@@ -26,6 +26,11 @@
       small_model = cfg.models.small;
     in
     {
+      imports = [
+        (import ./_omp-collab.nix { inherit inputs; })
+        (import ./_paseo.nix { inherit inputs; })
+      ];
+
       options.modules.ai = {
         models = lib.mkOption {
           type = lib.types.submodule {
@@ -97,6 +102,64 @@
                       type = lib.types.listOf lib.types.str;
                       default = [ ];
                       description = "MCP server names written to disabledServers in ~/.omp/agent/mcp.json.";
+                    };
+                    collab = {
+                      enable = lib.mkEnableOption "the self-hosted OMP collab relay and browser client" // {
+                        description = ''
+                          Run loopback-only user services for native OMP session sharing.
+                          The HTTPS hostname comes from hostFacts.tailnetHost.
+                          Tailscale Serve must be configured separately; enabling this
+                          option never changes Tailscale configuration.
+                        '';
+                      };
+
+                      package = lib.mkOption {
+                        type = lib.types.package;
+                        default = import ../../integrations/_omp-collab-package.nix {
+                          inherit pkgs;
+                          ompInput = inputs.oh-my-pi;
+                        };
+                        defaultText = lib.literalExpression "the collab package built from inputs.oh-my-pi";
+                        description = "Package providing loopback-only omp-collab-web and omp-collab-relay executables.";
+                      };
+
+                      webPort = lib.mkOption {
+                        type = lib.types.port;
+                        default = 7467;
+                        description = "Loopback HTTP port serving the browser client.";
+                      };
+
+                      relayPort = lib.mkOption {
+                        type = lib.types.port;
+                        default = 7466;
+                        description = "Loopback WebSocket relay port.";
+                      };
+
+                      webHttpsPort = lib.mkOption {
+                        type = lib.types.port;
+                        default = 443;
+                        description = "HTTPS port published separately through Tailscale Serve for the browser client.";
+                      };
+
+                      relayHttpsPort = lib.mkOption {
+                        type = lib.types.port;
+                        default = 8443;
+                        description = "HTTPS port published separately through Tailscale Serve for the relay.";
+                      };
+
+                      autoStart = lib.mkOption {
+                        type = lib.types.enum [
+                          "off"
+                          "view"
+                          "control"
+                        ];
+                        default = "off";
+                        description = ''
+                          Default sharing policy for interactive OMP sessions. Off
+                          preserves manual /collab sharing; view or control opts
+                          into sharing every session with that guest permission.
+                        '';
+                      };
                     };
                   };
 
@@ -373,7 +436,7 @@
             ];
           };
           default = { };
-          description = "OMP (oh-my-pi) home-manager configuration, forwarded to programs.omp";
+          description = "OMP home-manager configuration plus opt-in native collab services.";
         };
       };
 
@@ -384,6 +447,7 @@
 
         programs.mcp = cfg.mcp;
         programs.omp = builtins.removeAttrs cfg.omp [
+          "collab"
           "extraMcpConfig"
           "disabledMcpServers"
         ];

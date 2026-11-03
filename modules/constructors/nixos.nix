@@ -143,6 +143,7 @@ in
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
+          home-manager.extraSpecialArgs = { inherit hostFacts; };
           home-manager.users.${resolvedUser} = xlib.mkHomeUserModule {
             inherit resolvedUser resolvedHomeDirectory;
             imports =
