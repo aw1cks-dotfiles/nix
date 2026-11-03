@@ -391,67 +391,70 @@
           {
             ".omp/agent/themes/oxocarbon-dark.json".source = ./files/agents/omp/themes/oxocarbon-dark.json;
           }
-          // lib.optionalAttrs (cfg.omp.extraMcpConfig != null || (config.programs.mcp.enable && config.programs.mcp.servers != { })) {
-            ".omp/agent/mcp.json".source =
-              let
-                hmServersJson = pkgs.writeText "hm-mcp-servers.json" (
-                  builtins.toJSON (if config.programs.mcp.enable then config.programs.mcp.servers else { })
-                );
-                disabledJson = pkgs.writeText "omp-disabled-mcps.json" (
-                  builtins.toJSON cfg.omp.disabledMcpServers
-                );
-                baseMcpPath = if cfg.omp.extraMcpConfig != null then "${cfg.omp.extraMcpConfig}" else "";
-              in
-              pkgs.runCommand "omp-mcp.json" { nativeBuildInputs = [ pkgs.python3 ]; } ''
-                python3 - "${baseMcpPath}" "${hmServersJson}" "${disabledJson}" "$out" <<'PY'
-                import json, re, sys
-                from pathlib import Path
+          //
+            lib.optionalAttrs
+              (
+                cfg.omp.extraMcpConfig != null || (config.programs.mcp.enable && config.programs.mcp.servers != { })
+              )
+              {
+                ".omp/agent/mcp.json".source =
+                  let
+                    hmServersJson = pkgs.writeText "hm-mcp-servers.json" (
+                      builtins.toJSON (if config.programs.mcp.enable then config.programs.mcp.servers else { })
+                    );
+                    disabledJson = pkgs.writeText "omp-disabled-mcps.json" (builtins.toJSON cfg.omp.disabledMcpServers);
+                    baseMcpPath = if cfg.omp.extraMcpConfig != null then "${cfg.omp.extraMcpConfig}" else "";
+                  in
+                  pkgs.runCommand "omp-mcp.json" { nativeBuildInputs = [ pkgs.python3 ]; } ''
+                    python3 - "${baseMcpPath}" "${hmServersJson}" "${disabledJson}" "$out" <<'PY'
+                    import json, re, sys
+                    from pathlib import Path
 
-                base_path, hm_path, disabled_path, out_path = sys.argv[1:5]
-                base = json.loads(Path(base_path).read_text()) if base_path and Path(base_path).exists() else {}
-                hm_servers = json.loads(Path(hm_path).read_text())
-                extra_disabled = json.loads(Path(disabled_path).read_text())
+                    base_path, hm_path, disabled_path, out_path = sys.argv[1:5]
+                    base = json.loads(Path(base_path).read_text()) if base_path and Path(base_path).exists() else {}
+                    hm_servers = json.loads(Path(hm_path).read_text())
+                    extra_disabled = json.loads(Path(disabled_path).read_text())
 
-                def retarget(val):
-                    if isinstance(val, str):
-                        return re.sub(r"\{env:([A-Za-z_][A-Za-z0-9_]*)\}", r"''${\1}", val)
-                    if isinstance(val, list):
-                        return [retarget(x) for x in val]
-                    if isinstance(val, dict):
-                        return {k: retarget(v) for k, v in val.items()}
-                    return val
+                    def retarget(val):
+                        if isinstance(val, str):
+                            return re.sub(r"\{env:([A-Za-z_][A-Za-z0-9_]*)\}", r"''${\1}", val)
+                        if isinstance(val, list):
+                            return [retarget(x) for x in val]
+                        if isinstance(val, dict):
+                            return {k: retarget(v) for k, v in val.items()}
+                        return val
 
-                def convert_hm(srv):
-                    if srv.get("disabled", False):
-                        return None
-                    out = {}
-                    if "url" in srv:
-                        out["type"] = "http"
-                        out["url"] = srv["url"]
-                        if "headers" in srv:
-                            out["headers"] = srv["headers"]
-                    elif "command" in srv:
-                        out["command"] = srv["command"]
-                        if "args" in srv:
-                            out["args"] = srv["args"]
-                        if "env" in srv:
-                            out["env"] = srv["env"]
-                    return retarget(out) if out else None
+                    def convert_hm(srv):
+                        if srv.get("disabled", False):
+                            return None
+                        out = {}
+                        if "url" in srv:
+                            out["type"] = "http"
+                            out["url"] = srv["url"]
+                            if "headers" in srv:
+                                out["headers"] = srv["headers"]
+                        elif "command" in srv:
+                            out["command"] = srv["command"]
+                            if "args" in srv:
+                                out["args"] = srv["args"]
+                            if "env" in srv:
+                                out["env"] = srv["env"]
+                        return retarget(out) if out else None
 
-                servers = dict(base.get("mcpServers") or {})
-                for name, srv in hm_servers.items():
-                    conv = convert_hm(srv)
-                    if conv:
-                        servers[name] = conv
+                    servers = dict(base.get("mcpServers") or {})
+                    for name, srv in hm_servers.items():
+                        conv = convert_hm(srv)
+                        if conv:
+                            servers[name] = conv
 
-                disabled = sorted(set(base.get("disabledServers") or []) | set(extra_disabled))
-                payload = {"mcpServers": servers}
-                if disabled:
-                    payload["disabledServers"] = disabled
-                Path(out_path).write_text(json.dumps(payload, indent=2) + "\n")
-                PY
-              '';
-          }
+                    disabled = sorted(set(base.get("disabledServers") or []) | set(extra_disabled))
+                    payload = {"mcpServers": servers}
+                    if disabled:
+                        payload["disabledServers"] = disabled
+                    Path(out_path).write_text(json.dumps(payload, indent=2) + "\n")
+                    PY
+                  '';
+              }
         );
       };
     };
