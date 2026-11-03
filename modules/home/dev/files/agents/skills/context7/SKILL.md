@@ -2,7 +2,6 @@
 name: context7
 description: Use Context7 MCP tools to fetch up-to-date library and framework documentation. Load whenever writing, planning, or reviewing code that involves any external library, framework, or API.
 license: MIT
-compatibility: opencode
 ---
 
 ## When to use
