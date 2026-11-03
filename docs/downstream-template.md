@@ -37,33 +37,25 @@ The template demonstrates a simple split:
 
 This keeps shared library concerns reusable while giving the downstream repo room for private certificates, private git settings, internal package sources, and site-specific policies.
 
+## Shared agent skills
+
+`modules.ai.skillsSource` exposes the bundled `context7` and `git-workflow` skill directories for downstream agent harnesses.
+Skill loading stays task-dependent; agent selection remains in the client's configuration rather than a bundled routing policy.
+
 ## AI Model Routing
 
-The shared Home Manager AI module exposes provider-specific model tiers under `modules.ai.models` so downstream hosts can replace models without copying the OpenCode or OMP agent maps:
+The shared Home Manager AI module exposes model tiers under `modules.ai.models` so downstream hosts can replace models without copying the OMP agent map:
 
 ```nix
 {
   modules.ai.models = {
-    frontier = {
-      opencode = {
-        model = "anthropic/claude-opus-4-6";
-        variant = "high";
-      };
-      omp = "anthropic/claude-opus-4-6:high";
-    };
-
-    small = {
-      opencode = {
-        model = "ollama/qwen3-coder";
-        variant = null;
-      };
-      omp = "ollama/qwen3-coder";
-    };
+    frontier = "anthropic/claude-opus-4-6:high";
+    small = "ollama/qwen3-coder";
   };
 }
 ```
 
-The available tiers are `frontier`, `premium`, `standard`, and `small`. OpenCode and OMP use different provider namespaces and model-selector syntax, so each tier keeps separate values for the two clients. Setting an OpenCode `variant` to `null` omits the variant.
+The available tiers are `frontier`, `premium`, `standard`, and `small`. Each value is an OMP model selector, including an optional `:thinking` suffix.
 
 The default inventory uses models available through ChatGPT/Codex subscription sign-in:
 
@@ -74,11 +66,11 @@ The default inventory uses models available through ChatGPT/Codex subscription s
 | `standard` | GPT-6.1 Sol | `medium` |
 | `small` | GPT-6 Luna | `low` |
 
-Premium and standard share the current Sol model, with lighter reasoning for general delegated work. Frontier prioritizes planning and review quality; small prioritizes latency and subscription efficiency. Both clients use explicit reasoning levels, and the frontier default does not require an API-only Pro model.
+Premium and standard share the current Sol model, with lighter reasoning for general delegated work. Frontier prioritizes planning and review quality; small prioritizes latency and subscription efficiency. OMP uses explicit reasoning levels, and the frontier default does not require an API-only Pro model.
 
 These choices follow the [Codex model recommendations](https://developers.openai.com/codex/models) and [model-selection guidance](https://developers.openai.com/api/docs/guides/model-selection). Availability still depends on the signed-in account, client, and workspace permissions.
 
-These tier values feed the shared default agent and model-role assignments. A downstream module can still override an individual assignment directly through `modules.ai.opencode.settings.agent.*` or `modules.ai.omp.settings.modelRoles.*`; those explicit settings take precedence over the shared defaults.
+These tier values feed the shared default model-role assignments. A downstream module can still override an individual assignment directly through `modules.ai.omp.settings.modelRoles.*`; those explicit settings take precedence over the shared defaults.
 
 Shared OMP defaults (theme, status line, approval mode, onboarding markers, task isolation/delegation guards, and bash-interception safety policy) are declared per-key with `lib.mkDefault` under `modules.ai.omp.settings`, so a downstream `settings` attrset merges key-by-key instead of replacing the shared block. Downstream modules only declare the deltas — typically model routing and provider policy. Nested defaults are per-subkey (`task.maxRecursionDepth`, `task.agentModelOverrides`) for the same reason: a downstream `task.isolation.*` assignment merges with, rather than replaces, the shared delegation guard.
 

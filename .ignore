@@ -1,5 +1,5 @@
-# Ignore patterns used by ripgrep & opencode
+# Ignore patterns used by ripgrep and agent tooling
 # This is used to exclude temporary prompts from git,
-# but allow opencode to see them
+# but keep them visible to agents
 docs/prompts/.keep
 !docs/prompts/*.md
