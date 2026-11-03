@@ -92,6 +92,8 @@ The shared CLI tools module supplies the checked-in `oxocarbon-dark.tmTheme` thr
 Home Manager installs the theme and rebuilds bat's cache during activation; no manual `bat cache --build` step is needed after switching.
 The theme's source of truth is `modules/home/shells/files/bat/oxocarbon-dark.tmTheme`, not a mutable file under `~/.config/bat/themes`.
 
+Delta uses the same palette: `modules/home/vcs/default.nix` declares a `delta "oxocarbon"` feature with `syntax-theme = "oxocarbon-dark"` and selects it via `programs.delta.options.features`. The syntax theme ships with delta's embedded bat themes, so no extra theme file is required.
+
 After switching, check `bat --list-themes` for `oxocarbon-dark` and launch OMP normally to use its declared dark-theme default.
 
 ## Zed Kubernetes And CRD Schemas

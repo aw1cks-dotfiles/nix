@@ -36,14 +36,7 @@
           enable = true;
           enableGitIntegration = true;
           enableJujutsuIntegration = true;
-          options = {
-            line-numbers = true;
-            line-numbers-left-format = "";
-            line-numbers-right-format = "│ ";
-            navigate = true;
-            side-by-side = true;
-            features = "mellow-barbet aw1cks";
-          };
+          options.features = "oxocarbon";
         };
 
         difftastic.enable = true;
@@ -246,11 +239,14 @@
 
             tag.sort = "version:refname";
 
-            # Source: https://github.com/dandavison/delta/blob/acd758f7a08df6c2ac5542a2c5a4034c664a9ed8/themes.gitconfig#L445-L475
-            "delta \"mellow-barbet\"" = {
+            # Palette from https://github.com/nyoom-engineering/oxocarbon.nvim
+            "delta \"oxocarbon\"" = {
               dark = true;
-              syntax-theme = "base16";
+              syntax-theme = "oxocarbon-dark";
               line-numbers = true;
+              line-numbers-left-format = "";
+              line-numbers-right-format = "│ ";
+              navigate = true;
               side-by-side = true;
               file-style = "brightwhite";
               file-decoration-style = "none";
@@ -260,29 +256,16 @@
               file-removed-label = "[-]";
               file-renamed-label = "[->]";
               hunk-header-decoration-style = "\"#3e3e43\" box ul";
-              plus-style = "brightgreen black";
-              plus-emph-style = "black green";
-              minus-style = "brightred black";
-              minus-emph-style = "black red";
-              line-numbers-minus-style = "brightred";
-              line-numbers-plus-style = "brightgreen";
               line-numbers-left-style = "\"#3e3e43\"";
               line-numbers-right-style = "\"#3e3e43\"";
               line-numbers-zero-style = "\"#57575f\"";
+              line-numbers-minus-style = "brightred";
+              line-numbers-plus-style = "brightgreen";
+              minus-style = "syntax \"#3b121e\"";
+              minus-emph-style = "black \"#ee5396\"";
+              plus-style = "syntax \"#0f2e20\"";
+              plus-emph-style = "black \"#42be65\"";
               zero-style = "syntax";
-              whitespace-error-style = "black bold";
-              blame-code-style = "syntax";
-              blame-palette = "\"#161617\" \"#1b1b1d\" \"#2a2a2d\" \"#3e3e43\"";
-              merge-conflict-begin-symbol = "~";
-              merge-conflict-end-symbol = "~";
-              merge-conflict-ours-diff-header-style = "yellow bold";
-              merge-conflict-ours-diff-header-decoration-style = "\"#3e3e43\" box";
-              merge-conflict-theirs-diff-header-style = "yellow bold";
-              merge-conflict-theirs-diff-header-decoration-style = "\"#3e3e43\" box";
-            };
-
-            "delta \"aw1cks\"" = {
-              syntax-theme = "Catppuccin Mocha";
             };
           };
         };
