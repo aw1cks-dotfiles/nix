@@ -79,6 +79,17 @@ in
 
     home.packages = [ cfg.package ];
 
+    services.tailscale-serve.endpoints = {
+      omp-collab-web = {
+        httpsPort = cfg.webHttpsPort;
+        targetPort = cfg.webPort;
+      };
+      omp-collab-relay = {
+        httpsPort = cfg.relayHttpsPort;
+        targetPort = cfg.relayPort;
+      };
+    };
+
     programs.omp = {
       enable = true;
       settings.collab = {

@@ -19,6 +19,8 @@ This repo is opinionated about a few things:
 - Downstream template and layering: [`docs/downstream-template.md`](./docs/downstream-template.md)
 - Opt-in OMP collab over Tailscale: [`setup and operation`](./docs/downstream-template.md#self-hosted-omp-collab-over-tailscale)
 - Private Paseo with OMP Plugin: [`phone setup, authentication, and persistence`](./docs/downstream-template.md#private-paseo-with-the-omp-plugin)
+- Nix-authoritative private Serve: [`whole-configuration apply and cleanup`](./docs/downstream-template.md#declarative-private-tailscale-serve)
+- Declarative macOS client preferences without replacing Tailscale.app: [`scope and setup`](./docs/downstream-template.md#declarative-tailscaleapp-preferences-on-darwin)
 
 ## Flake Surface
 

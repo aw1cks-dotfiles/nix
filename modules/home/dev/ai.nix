@@ -1,5 +1,8 @@
 # AI coding tools — from nix-upstream/modules/development/ai.nix
-{ inputs, ... }:
+{ inputs, config, ... }:
+let
+  tailscaleServeModule = config.aw1cks.modules.home.tailscale-serve;
+in
 {
   aw1cks.modules.home.ai =
     {
@@ -29,6 +32,7 @@
       imports = [
         (import ./_omp-collab.nix { inherit inputs; })
         (import ./_paseo.nix { inherit inputs; })
+        tailscaleServeModule
       ];
 
       options.modules.ai = {
@@ -93,6 +97,7 @@
                 {
                   freeformType = lib.types.attrsOf lib.types.anything;
                   options = {
+
                     extraMcpConfig = lib.mkOption {
                       type = lib.types.nullOr lib.types.path;
                       default = null;
@@ -108,8 +113,8 @@
                         description = ''
                           Run loopback-only user services for native OMP session sharing.
                           The HTTPS hostname comes from hostFacts.tailnetHost.
-                          Tailscale Serve must be configured separately; enabling this
-                          option never changes Tailscale configuration.
+                          Publication is managed by services.tailscale-serve when
+                          enabled; this service itself only opens loopback listeners.
                         '';
                       };
 
@@ -138,13 +143,13 @@
                       webHttpsPort = lib.mkOption {
                         type = lib.types.port;
                         default = 443;
-                        description = "HTTPS port published separately through Tailscale Serve for the browser client.";
+                        description = "Browser HTTPS port published by services.tailscale-serve when enabled.";
                       };
 
                       relayHttpsPort = lib.mkOption {
                         type = lib.types.port;
                         default = 8443;
-                        description = "HTTPS port published separately through Tailscale Serve for the relay.";
+                        description = "Relay HTTPS port published by services.tailscale-serve when enabled.";
                       };
 
                       autoStart = lib.mkOption {

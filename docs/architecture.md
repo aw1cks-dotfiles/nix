@@ -54,6 +54,19 @@ The important parts are:
 
 Downstream repos can keep using `aw1cks.*` as the shared upstream contract while adding their own local namespace for private modules and profiles.
 
+Generic Home Manager networking belongs under `modules/home/networking/`.
+The `aw1cks.modules.home.tailscale-serve` atom exposes the
+`services.tailscale-serve.endpoints` registry without AI dependencies. Feature
+modules such as OMP collab and Paseo contribute entries; the host independently
+opts into the single networking owner.
+The registry is authoritative for the node's complete Serve configuration;
+manual Serve entries are replaced rather than merged or preserved.
+
+The opt-in Darwin `aw1cks.modules.darwin.tailscale-app` atom retains the
+Standalone app and applies declared client preferences at rebuild/login.
+It does not replace the VPN, manage enrollment, or continuously enforce GUI
+preferences. Serve remains independently authoritative.
+
 ## Identity Model
 
 The current identity model is `aw1cks.identities`, not older `aw1cks.user.*` terminology.
