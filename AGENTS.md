@@ -32,7 +32,7 @@ This file applies to the entire public repo.
 
 ## Nix MCP
 
-This repo should use a local MCP server configured in `opencode.jsonc`:
+This repo should use a local MCP server configured in `.omp/mcp.json`:
 
 - server name: `nix`
 - command: `uvx mcp-nixos`
