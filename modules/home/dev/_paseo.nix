@@ -75,7 +75,7 @@ in
     httpsPort = lib.mkOption {
       type = lib.types.port;
       default = 9443;
-      description = "Dedicated Tailscale Serve HTTPS port, published separately without Funnel.";
+      description = "Private HTTPS port published by services.tailscale-serve when enabled.";
     };
     stateDirectory = lib.mkOption {
       type = lib.types.str;
@@ -111,17 +111,11 @@ in
       {
         assertion =
           !collab.enable
-          || (
-            !(builtins.elem cfg.port [
-              collab.webPort
-              collab.relayPort
-            ])
-            && !(builtins.elem cfg.httpsPort [
-              collab.webHttpsPort
-              collab.relayHttpsPort
-            ])
-          );
-        message = "Paseo must use different loopback and Tailscale Serve ports from OMP collab.";
+          || !(builtins.elem cfg.port [
+            collab.webPort
+            collab.relayPort
+          ]);
+        message = "Paseo must use a different loopback port from OMP collab.";
       }
       {
         assertion =
@@ -136,6 +130,10 @@ in
         message = "Paseo's OMP Plugin requires the existing Nix-managed programs.omp to be enabled.";
       }
     ];
+    services.tailscale-serve.endpoints.paseo = {
+      httpsPort = cfg.httpsPort;
+      targetPort = cfg.port;
+    };
     home.packages = [
       cfg.package
       cfg.ompPluginPackage

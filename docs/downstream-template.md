@@ -88,6 +88,206 @@ Delta uses the same palette: `modules/home/vcs/default.nix` declares a `delta "o
 
 After switching, check `bat --list-themes` for `oxocarbon-dark` and launch OMP normally to use its declared dark-theme default.
 
+## Declarative Private Tailscale Serve
+
+The reusable Home Manager export is
+`config.aw1cks.modules.home.tailscale-serve`. Its public interface is
+`services.tailscale-serve`, independent of the AI module and OMP/Paseo schemas.
+For example, a **flake-parts host composition** can expose an unrelated HTTP
+service without importing any AI configuration:
+
+```nix
+{ config, ... }:
+{
+  configurations.home."alex@server".module = {
+    imports = [ config.aw1cks.modules.home.tailscale-serve ];
+    services.tailscale-serve = {
+      enable = true;
+      endpoints.notes = {
+        httpsPort = 10443;
+        targetPort = 3000;
+      };
+    };
+  };
+}
+```
+
+The matching host facts must supply `tailnetHost`. Endpoints proxy private
+HTTPS roots to HTTP on `127.0.0.1`; the backend service has its own lifecycle.
+Endpoint names are Nix composition keys. Different modules contribute entries
+to this registry; set an entry's `enable = false` to omit it without stopping its
+backend. Enabled entries must have distinct HTTPS ports.
+The interface intentionally does not expose public Funnel, raw TCP, or path
+routing options.
+
+The AI module imports this same networking export. Collab registers
+`omp-collab-web` and `omp-collab-relay`; Paseo registers `paseo`, using their
+existing port options only while their feature is enabled. The owner contains
+no AI service list. Registering endpoints does not enable publication:
+`services.tailscale-serve.enable` remains a separate opt-in, enabled for `mbp`.
+
+The existing Tailscale.app daemon is retained on macOS; Linux uses the pinned
+CLI and requires an already-running daemon plus user operator authorization.
+`services.tailscale-serve.executable` selects the absolute CLI path.
+On macOS, `org.nix-community.home.tailscale-serve` runs at login and every
+60 seconds, logging to `~/.tailscale-serve.log`. On Linux,
+`tailscale-serve.timer` invokes a oneshot user service on startup and every
+60 seconds after completion. Run `tailscale-serve-managed` to apply the
+installed declaration immediately.
+
+### What Is Actually Declarative?
+
+Nix renders the **complete raw Serve configuration** from the enabled endpoint
+registry. The managed job reads live state only to skip an already-matching
+configuration, then applies the whole JSON through `tailscale serve set-raw`.
+There is no arbitrary-state merge, per-route ownership journal, adoption logic
+or protection for manually added mappings.
+
+**Nix is the sole source of truth while this module is enabled.** Undeclared
+ports, paths, foreground handlers, TCP forwards, Tailscale Services handlers and
+Funnel configuration are removed. Changed manual values are overwritten, not
+preserved or rejected as ownership conflicts. Do not run another Serve manager
+against the same node. This controls Serve, not Tailscale login, DNS, ACLs or
+account policy.
+
+Normally this is one configuration replacement, without reset/re-add churn.
+Tailscale cannot directly convert an existing HTTP/TCP listener or foreground
+listener into background HTTPS on the same port. For that case, the helper
+first applies the desired configuration without the incompatible ports, then
+the complete desired configuration. Both states come only from Nix; no manual
+state is merged. Unchanged declared ports remain configured. If a write fails,
+the next scheduled apply converges from the resulting live state.
+
+### Apply Capability And Lifecycle
+
+`serve set-raw` is an **undocumented CLI capability**, verified with Tailscale
+1.104.4. It accepts raw `ipn.ServeConfig` JSON on stdin and calls the native
+whole-configuration API
+([source](https://github.com/tailscale/tailscale/blob/v1.104.4/cmd/tailscale/cli/serve_v2.go#L379-L390)).
+The helper fails clearly if this capability is unavailable; it does not fall
+back to `serve reset` or a best-effort series of per-route changes. Tailscale.app
+does not discover the generated file itself: the managed apply step loads it.
+
+One private lifecycle marker remains at
+`~/.local/state/tailscale-serve/managed.json` under the configured XDG state
+directory. It contains only a version and the expected node hostname, **not
+routes or a snapshot of Serve state**. It distinguishes never-enabled homes
+from a managed activation and allows failed disable cleanup to be retried.
+The old `stateDirectory` option and ownership-journal machinery are removed.
+
+An empty enabled registry applies `{}` and clears Serve. Disabling the module
+and switching stops any loaded controller first, applies `{}` if its activation
+marker exists, and removes the marker only after successful cleanup. A
+never-enabled home does not clear an existing manual configuration. If
+Tailscale is offline or the active node identity differs, cleanup fails visibly
+and retains the marker; restore the intended identity/operator access and
+repeat activation. Dry runs do not stop jobs or change Serve.
+
+Stopping only the periodic job does **not** clear persisted Serve state.
+Before removing the networking module/profile entirely or changing node/XDG
+state identity, disable and switch once while cleanup is still available.
+Identity is checked around reads and before writes; separate CLI calls cannot
+make an external profile switch atomic.
+
+Tailscale login, HTTPS certificate enablement and access rules remain
+administrative prerequisites. The helper never elevates privileges or changes
+account policy. Inspect the installed configuration with
+`/Applications/Tailscale.app/Contents/MacOS/Tailscale serve status`.
+
+`packages.tailscale-serve-reconcile` exposes the apply helper with a settings
+JSON argument. `checks.<system>.tailscale-serve` covers private desired state,
+identity guards, idempotence, marker persistence and disable cleanup. Live Mac
+checks exercised removal of undeclared ports/paths, addition/removal of declared
+HTTPS endpoints, and HTTP/TCP/foreground-to-HTTPS transitions while retaining
+the unchanged production endpoints. Full clear-on-disable is unit-tested, not
+performed against the live production endpoints. Linux lifecycle is evaluated,
+not deployed here.
+
+### Community Approaches And Why This Adapter Remains
+
+The pinned nixpkgs
+[NixOS `services.tailscale.serve` module](https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/services/networking/tailscale-serve.nix)
+also renders JSON and uses a systemd apply step:
+`tailscale serve set-config --all`. It targets
+[Tailscale Services configuration](https://tailscale.com/docs/reference/tailscale-services-configuration-file),
+not these existing per-device HTTPS roots, and the configuration-file API has
+a [documented frontend TLS limitation](https://github.com/NixOS/nixpkgs/issues/530174).
+That issue also documents CLI-driven oneshot units as a workaround.
+
+[tsnsrv](https://github.com/boinkor-net/tsnsrv) provides a generic NixOS service
+registry too, but each proxy joins as its own tailnet participant with separate
+identity/state and enrollment credentials. That is useful for service-specific
+hostnames, but would change this Mac's current topology and URLs.
+
+Here, the generic Home Manager registry renders authoritative whole-Serve JSON
+and uses the existing Mac app's raw apply path. It keeps the current hostname
+and private HTTPS topology, but intentionally does not preserve undeclared
+Serve configuration. It is not a drop-in alias for the upstream NixOS option,
+and does not claim to configure the entire Tailscale daemon declaratively.
+
+## Declarative Tailscale.app Preferences on Darwin
+
+Keep the Standalone Tailscale.app for its GUI, exit-node client support and
+macOS VPN integration. The opt-in Darwin atom
+`config.aw1cks.modules.darwin.tailscale-app` configures that existing app; it
+does not install a second daemon or migrate node identity:
+
+```nix
+{ config, ... }:
+{
+  configurations.darwin.mbp.module = {
+    imports = [ config.aw1cks.modules.darwin.tailscale-app ];
+    services.tailscale-app.enable = true;
+  };
+}
+```
+
+The desktop Homebrew configuration already installs `tailscale-app`. Other
+consumers must install the Standalone app themselves. The machine facts must
+provide matching `hostName` and `tailnetHost`; the node name is not repeated in
+the host composition. Only `mbp` enables this preference module here.
+
+`services.tailscale-app` declares `acceptDNS` and `acceptRoutes` (both default
+true), `shieldsUp` (false), `autoUpdate` (false), `checkForUpdates` (true) and
+`startOnLogin` (true). nix-darwin writes the documented Standalone app defaults
+for login startup and Sparkle updates in the primary user's preferences. A
+user-scoped `tailscale-app-preferences` command applies the hostname, DNS,
+routes, shields and update flags through the app's bundled `tailscale set`.
+It refuses to modify an active profile outside the fact-derived tailnet.
+
+The command runs after a rebuild and through the
+`org.nixos.tailscale-app-preferences` LaunchAgent at GUI login, waiting up to
+one minute for the backend to become Running. There is no periodic preference
+enforcement. Inspect `~/.tailscale-app-preferences.log` for login failures, or
+run `tailscale-app-preferences` explicitly after resolving them. A rebuild
+without a GUI session defers CLI preference application until login.
+
+On a fresh machine, launch Tailscale.app, approve its system extension/VPN
+configuration and sign in before expecting the preference command to succeed.
+Authentication and persistent node identity remain app-managed outside the
+Nix store; this module creates no enrollment keys or MDM profiles. Some
+documented app policies are plan-dependent or may require an app restart;
+ordinary defaults are not an MDM-enforced lock. See the upstream
+[macOS preference instructions](https://tailscale.com/docs/integrations/mdm/mac).
+
+Only the declared client preferences converge. Exit-node selection,
+authentication, advertised routes and account policy remain untouched. GUI
+changes to managed settings can persist until the next apply. Disabling the
+module stops reapplication; it does not log out, reset preferences or delete
+app state. Disable and switch once before removing the module import entirely.
+The Homebrew app itself is not version-pinned by Nix.
+
+This is separate from the authoritative whole-Serve owner above: retaining
+interactive app settings never preserves undeclared Serve mappings. Do not
+enable the native `services.tailscale` daemon alongside this module.
+
+Verification exercised the real app CLI preference apply, a generated login
+agent exiting successfully, and the generated disabled-state cleanup unloading
+that agent and removing its plist. A helper built for another tailnet refused
+to apply and preserved the live preferences. The production private endpoints
+and Paseo authentication were checked afterward. GUI controls, login after an
+actual logout/reboot, and selecting a live exit node were not exercised.
+
 ## Self-Hosted OMP Collab Over Tailscale
 
 OMP collab is an opt-in feature of the existing AI module:
@@ -137,29 +337,27 @@ The feature supplies defaults for `collab.webUrl`, `collab.relayUrl`, and
 manual by default. `modules.ai.omp.collab.autoStart = "view"` or `"control"`
 explicitly opts into sharing every interactive session at that access level.
 
-After rebuilding/switching the selected host, publish the services with
-[Tailscale Serve](https://tailscale.com/docs/reference/tailscale-cli/serve):
+On `mbp`, the declarative Serve owner above publishes these services after the
+switch; no separate CLI setup is needed. For a host deliberately keeping that
+owner disabled, the equivalent manual configuration is:
 
 ```sh
 tailscale serve status
-tailscale serve --bg --https=443 http://127.0.0.1:7467
-tailscale serve --bg --https=8443 http://127.0.0.1:7466
+tailscale serve --bg --https=443 --set-path=/ http://127.0.0.1:7467
+tailscale serve --bg --https=8443 --set-path=/ http://127.0.0.1:7466
 ```
 
-Inspect the existing Serve configuration first: these commands claim the root
-endpoint on each specified HTTPS port. If either port is already in use, choose
-different `modules.ai.omp.collab.webHttpsPort` / `relayHttpsPort` values
-and use those ports in the commands. Under the same option group, `webPort`
-(default `7467`) and `relayPort` (default `7466`) control the local listeners.
-All ports must be nonzero; the two local ports must differ, as must the two
-HTTPS ports.
+The manual commands claim the root endpoint on their HTTPS port: inspect
+existing Serve configuration first. Change
+`modules.ai.omp.collab.webHttpsPort` / `relayHttpsPort` in Nix rather than editing
+managed mappings. Under the same option group, `webPort` (default `7467`) and
+`relayPort` (default `7466`) control the local listeners. All ports must be
+nonzero; the two local ports must differ, as must the two HTTPS ports.
 
-The feature deliberately does not modify Tailscale configuration or tailnet
-policy during activation. Both devices need Tailscale, the tailnet needs HTTPS
-certificates enabled, and its access rules must permit the published ports.
-Use **Serve, not Funnel**, to keep access within the tailnet. Serve supplies
-trusted HTTPS/WSS, which the browser's WebCrypto requires; a plain HTTP tailnet
-IP is not sufficient.
+Both devices need Tailscale, HTTPS certificates enabled, and access rules
+permitting the published ports. Use **Serve, not Funnel**. Serve supplies the
+trusted HTTPS/WSS required by browser WebCrypto; plain HTTP to a tailnet IP is
+not sufficient.
 
 Start a new OMP process after switching so it reads the declared URLs, run
 `/collab`, and open its browser link or QR code in Safari on the phone. For an
@@ -185,14 +383,13 @@ On macOS, Home Manager manages launchd agents named
 `omp-collab-web.service` and `omp-collab-relay.service`; inspect them with
 `systemctl --user status` and `journalctl --user -u <unit>`.
 
-Disabling the option removes the managed user services on the next switch, but
-does not remove separately configured Serve endpoints. Remove only the
-endpoints you added (adjust ports if customized), rather than resetting all
-Serve configuration:
+With Serve management enabled, disabling collab omits its endpoints from the
+complete configuration on the next apply. Only in manual mode, remove roots you
+added (adjust customized ports) without resetting all Serve configuration:
 
 ```sh
-tailscale serve --bg --https=443 off
-tailscale serve --bg --https=8443 off
+tailscale serve --bg --https=443 --set-path=/ off
+tailscale serve --bg --https=8443 --set-path=/ off
 ```
 
 The reproducible package is also available with `nix build .#omp-collab`.
@@ -213,6 +410,12 @@ After the host switch, Home Manager starts the daemon automatically through
 launchd on macOS (`org.nix-community.home.paseo`) or a systemd user service on
 Linux (`paseo.service`). It runs as the existing user, not a separate service
 account. Logs are `~/.paseo-service.log` on macOS and the user journal on Linux.
+
+Plugin initialization can take several minutes. The HTTP status endpoint can
+respond before WebSocket connections and the provider catalog are ready;
+startup may temporarily return HTTP 503 or show the provider as Loading. Check
+the service log for the `paseo-omp` plugin-ready event and wait for **OMP Plugin**
+to become available rather than disabling authentication or changing pairing.
 
 Paseo is pinned to upstream **0.15.0**, revision
 `8938fde3c713143f12eacbdd60c11fdfc0be0fb1`, through the shared `paseo` input and
@@ -242,23 +445,22 @@ configuration. Default listeners and private Serve ports are:
 | OMP collab relay | `127.0.0.1:7466` | `8443` |
 | Paseo daemon | `127.0.0.1:6767` | `9443` |
 
-Paseo's `port` and `httpsPort` options must not collide with enabled collab
-listeners/mappings; the module asserts this. It never opens a firewall port or
-modifies Serve on activation. Inspect the current configuration, then add only
-the dedicated Paseo mapping:
+Paseo rejects loopback binding conflicts with collab. The generic Serve registry
+rejects duplicate HTTPS ports across every enabled endpoint, including non-AI
+services. On `mbp`, that owner publishes Paseo's private endpoint. For hosts
+keeping it disabled, inspect existing mappings before the manual equivalent:
 
 ```sh
 tailscale serve status
-tailscale serve --bg --https=9443 http://127.0.0.1:6767
+tailscale serve --bg --https=9443 --set-path=/ http://127.0.0.1:6767
 ```
 
-If that HTTPS root is already occupied, choose another
-`modules.ai.paseo.httpsPort` and matching Serve command. Do not overwrite collab's
-443/8443 mappings, use Funnel, or reset the entire Serve configuration.
-Tailscale HTTPS certificates and access rules permitting the dedicated port
-are required. The managed daemon forcibly disables Paseo's hosted relay and
-optional public service-proxy listeners, including when an older config enabled
-them. Relay enablement cannot be changed through the running daemon.
+Change `modules.ai.paseo.httpsPort` in Nix if occupied. Never overwrite collab's
+443/8443 roots, use Funnel, or reset all Serve configuration. Tailscale HTTPS
+certificates and access rules must permit the dedicated port. The daemon
+forcibly disables Paseo's hosted relay and optional public service-proxy
+listeners, including when an older config enabled them. Relay enablement
+cannot be changed through the running daemon.
 
 On the phone, connect Tailscale and open Paseo:
 
@@ -313,11 +515,12 @@ On Linux use `systemctl --user restart paseo`. Do not start a second daemon with
 Paseo Desktop or `paseo daemon start`; this feature owns the supervisor and its
 security environment.
 
-Disabling the option removes the user service on switch, but preserves its
-password/state. Separately remove only the Serve mapping you added:
+Disabling Paseo and switching removes its user service but preserves password
+and state. The next authoritative Serve apply omits its endpoint. In manual
+mode only, separately remove the root you added:
 
 ```sh
-tailscale serve --bg --https=9443 off
+tailscale serve --bg --https=9443 --set-path=/ off
 ```
 
 ### Verification
@@ -330,9 +533,11 @@ The integration was exercised on aarch64 macOS with temporary user state:
 native daemon startup, unauthenticated/wrong-password rejection, authenticated
 HTTP and WebSocket access through the actual private tailnet HTTPS endpoint,
 **OMP Plugin** reporting Ready with eight models, duplicate-supervisor refusal,
-and restart preservation of the password/hash and user-state marker. No model
-turn or physical iPhone UI was exercised, and no full Home Manager/system switch
-was performed. The temporary Serve mapping was removed after verification.
+and restart preservation of the password/hash and user-state marker. The Mac
+configuration was subsequently switched and the deployed daemon/provider
+verified. No model turn or physical iPhone UI was exercised. Temporary smoke
+routes were removed after verification; normal mappings are now declaratively
+configured from Nix when the Serve layer is enabled.
 
 ## Zed Kubernetes And CRD Schemas
 
