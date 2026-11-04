@@ -21,6 +21,8 @@ jobs:
             runner: macos-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Require reviewed skill input contents
+        run: python3 .github/check-skill-inputs.py
       - uses: samueldr/lix-gha-installer-action@v2026-02-22
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
@@ -46,5 +48,6 @@ jobs:
         run: |
           nix flake check \
             --accept-flake-config \
+            --no-update-lock-file \
             --keep-going \
             --system ${{ matrix.system }}
