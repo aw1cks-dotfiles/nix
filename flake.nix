@@ -40,11 +40,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     import-tree.url = "github:denful/import-tree";
+    intel-performance-skills = {
+      url = "github:intel/intel-performance-skills";
+      flake = false;
+    };
     lazyvim-nix = {
       url = "github:pfassina/lazyvim-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+    low-level-dev-skills = {
+      url = "github:mohitmishra786/low-level-dev-skills";
+      flake = false;
+    };
     lucidglyph = {
       url = "github:maximilionus/lucidglyph";
       flake = false;

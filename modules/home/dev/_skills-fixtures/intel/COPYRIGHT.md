@@ -1,0 +1,1 @@
+Fixture upstream copyright notice.

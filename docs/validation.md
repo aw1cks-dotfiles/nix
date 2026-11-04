@@ -24,6 +24,26 @@ The check builds one synthetic Home Manager activation package per distinct syst
 
 That exercises the Home Manager activation pipeline for the supported systems in the repo, but it is intentionally not a per-host build and does not validate each real host's full closure.
 
+### Agent skills
+
+`checks.<system>.agent-skills` exercises selection layering, `mkForce`, final exclusions, unknown selectors, ID/name collisions, read-only output configuration, and whole-directory replacements.
+It builds real assembled outputs to check frontmatter rejection and preservation of references, executable assets, and licence notices.
+The check is registered for every configured system independently of the repo's public host inventory.
+
+On Linux, `checks.<system>.agent-skills-patches` compiles examples extracted from the assembled upstream skills.
+AddressSanitizer/leak checks exercise coroutine move construction, assignment, self-move, empty handles, and exception lifetime.
+A userspace executable uses actual liburing header helpers to exercise distinct provided-buffer slots, publication, wraparound, and multishot SQE buffer selection without kernel calls.
+No check writes to live `/proc` or enters a kernel debugger.
+The liburing/ASAN check is not registered on Darwin.
+
+```bash
+nix build .#checks.x86_64-linux.agent-skills \
+  .#checks.x86_64-linux.agent-skills-patches
+```
+
+These checks cover assembly contracts and known example defects, not the safety or correctness of every upstream instruction.
+Review skill input changes manually; Renovate keeps updates enabled but disables automerge for both skill-specific updates and mixed lockfile maintenance.
+
 ## What It Also Catches During Evaluation
 
 Constructor assertions still matter even when the final check derivation is small.

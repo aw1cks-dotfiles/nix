@@ -39,8 +39,65 @@ This keeps shared library concerns reusable while giving the downstream repo roo
 
 ## Shared agent skills
 
-`modules.ai.skillsSource` exposes the bundled `context7` and `git-workflow` skill directories for downstream agent harnesses.
-Skill loading stays task-dependent; agent selection remains in the client's configuration rather than a bundled routing policy.
+The shared Home Manager AI module exposes a read-only `modules.ai.skillsSource`: a flat directory of complete, selected skill directories for any compatible agent harness.
+It does not install skills into a harness's home directory; consumers compose or install this output themselves.
+The existing `context7` and `git-workflow` skills remain selected by default.
+
+Two public non-flake inputs supply optional collections, with revisions and content hashes recorded only in `flake.lock`:
+
+- `intel-performance-skills`: [Intel performance skills](https://github.com/intel/intel-performance-skills), exposed as `intel/<name>`
+- `low-level-dev-skills`: [low-level development skills](https://github.com/mohitmishra786/low-level-dev-skills), exposed as `lowlevel/<name>`
+- Bundled skills use `builtin/<name>`; namespace prefixes are selectors, not installed directory names
+
+The low-level scope includes allocators, async I/O, binaries, compiler internals, compilers, computer architecture, debuggers, kernel development, kernel fundamentals, low-level programming, observability, profilers, runtimes, Rust, security, and virtualization.
+Build-system skills are limited to `build-acceleration`, `cmake`, `make`, `ninja`, and `static-analysis`.
+Intel owns the installed `linux-perf` name; the alternative low-level profiler is not exposed.
+Skills are discovered from those input directories, not a separate registry or vendored manifest.
+
+```nix
+{
+  modules.ai.skills = {
+    select = [
+      "intel/*"
+      "lowlevel/*"
+      "-lowlevel/cmake"
+    ];
+    extra."local/team-workflow" = ./skills/team-workflow;
+    # To replace a bundled skill entirely:
+    # extra."builtin/context7" = ./skills/context7;
+  };
+}
+```
+
+Normal module definitions of `select` concatenate with the ordinary `builtin/*` contribution.
+Use `lib.mkForce []` to clear those selections; explicit `extra` entries remain included unless excluded separately.
+Each selector is an exact `namespace/name` or contains at most one `*` per component; `*` never crosses `/`.
+All includes and `extra` IDs are unioned, then all `-` exclusions are subtracted regardless of module order.
+An unknown include fails evaluation; an exclusion matching nothing warns, so removed upstream skills do not break downstream exclusions.
+Exclusions govern this output only, not a consumer's independently installed skills.
+
+`extra` is an attribute set of paths keyed by ID.
+A matching ID replaces the entire bundled directory, including its patch and licence metadata: files from different versions are never merged.
+Conflicting ordinary definitions of the same `extra` ID fail through normal Nix option merging; use a per-key `lib.mkForce` for an intentional override.
+Two selected IDs with the same installed basename fail instead of silently overwriting one another.
+`SKILL.md` frontmatter must be valid YAML and its `name` must equal that basename.
+Consumers that previously assigned `skillsSource` must migrate to `select` and `extra`; it can no longer bypass composition.
+
+Assembly copies references, scripts, executable permissions, and upstream root licence notices into `.upstream-license` within each downloaded skill directory.
+It does not execute upstream scripts.
+Three local patches correct coroutine move ownership, io_uring provided-buffer setup/SQE selection, and unsafe kernel debugger entry guidance.
+They apply during assembly, not evaluation; a patch that no longer applies blocks the build and must be reviewed when updating the input.
+No patched derivation is read during evaluation.
+
+The shared input declarations automatically generate downstream `follows` entries.
+Regenerate downstream `flake.nix` with `nix run .#write-flake` when adopting this contract, then lock the new inputs.
+Update them with `nix flake update intel-performance-skills low-level-dev-skills`; a fork, revision, or local source can be selected through `flake-file.inputs.<name>.url`.
+
+Renovate may propose updates, but this repo requires review for both skill dependencies and the weekly mixed lockfile-maintenance PR.
+Maintenance runs `nix flake update` across inputs, so package-specific rules alone cannot prevent an unreviewed skill update in that PR.
+Independent downstream Renovate configurations must apply the same policy; these rules are not inherited through a flake input.
+Review the upstream content diff as well as CI results: assembly checks do not establish that arbitrary agent instructions are safe.
+Harness loading and consumer-specific precedence remain the consumer's responsibility.
 
 ## AI Model Routing
 

@@ -5,10 +5,9 @@
   ],
   lockFileMaintenance: {
     enabled: true,
-    automerge: true,
-    automergeType: 'pr',
-    // Renovate must observe green CI itself before merging.
-    platformAutomerge: false,
+    // Nix maintenance updates every input, including agent instructions.
+    // Per-package automerge rules cannot protect this mixed update.
+    automerge: false,
     extends: [
       'schedule:weekly',
     ],
@@ -16,4 +15,17 @@
   nix: {
     enabled: true,
   },
+  packageRules: [
+    {
+      matchManagers: ['nix'],
+      matchPackageNames: [
+        'https://github.com/intel/intel-performance-skills',
+        'https://github.com/mohitmishra786/low-level-dev-skills',
+      ],
+      automerge: false,
+      prBodyNotes: [
+        'Review the upstream skill diff: CI checks assembly and known regressions, not instruction safety.',
+      ],
+    },
+  ],
 }

@@ -13,6 +13,7 @@ in
     }:
     let
       cfg = config.modules.ai;
+      skills = import ./_skills.nix { inherit inputs lib pkgs; };
       mkModelTierOption =
         {
           description,
@@ -78,10 +79,23 @@ in
           };
         };
 
+        skills = {
+          select = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [ ];
+            description = "Agent skill IDs or component-local '*' selectors; exclusions prefixed with '-' take precedence.";
+          };
+          extra = lib.mkOption {
+            type = lib.types.attrsOf lib.types.path;
+            default = { };
+            description = "Additional whole skill directories keyed by namespace/name, replacing bundled IDs completely.";
+          };
+        };
+
         skillsSource = lib.mkOption {
           type = lib.types.path;
-          default = ./files/agents/skills;
-          description = "Bundled shared agent skills directory exposed as a stable downstream contract.";
+          readOnly = true;
+          description = "Derived flat directory of selected agent skills, exposed for downstream consumers.";
         };
 
         omp = lib.mkOption {
@@ -446,6 +460,9 @@ in
       };
 
       config = {
+        modules.ai.skills.select = [ "builtin/*" ];
+        modules.ai.skillsSource = skills.build cfg.skills;
+
         home.packages = with pkgs.llm-agents; [
           claude-code
         ];
