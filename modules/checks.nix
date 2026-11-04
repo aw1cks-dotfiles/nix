@@ -102,6 +102,35 @@ let
       value = smokeHome.activationPackage;
     }
   ) homeSystems;
+
+  # Group both skill checks under each system before the existing shallow merge.
+  skillsChecks = map (
+    system:
+    let
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      skills = import ./home/dev/_skills.nix { inherit inputs lib pkgs; };
+    in
+    {
+      ${system} = {
+        agent-skills = import ./home/dev/_skills-checks.nix {
+          inherit inputs lib pkgs;
+          aiModule = config.aw1cks.modules.home.ai;
+        };
+      }
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+        agent-skills-patches = import ./home/dev/_skills-patch-checks.nix {
+          inherit pkgs;
+          skillsSource = skills.build {
+            select = [
+              "lowlevel/cpp-coroutines"
+              "lowlevel/io-uring"
+              "lowlevel/kernel-debugging"
+            ];
+          };
+        };
+      };
+    }
+  ) config.systems;
 in
 {
   config.flake.checks = lib.mkMerge (
@@ -109,6 +138,7 @@ in
       nixosChecks
       darwinChecks
       homeSmokeChecks
+      skillsChecks
     ]
   );
 }

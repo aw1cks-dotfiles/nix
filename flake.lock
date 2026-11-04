@@ -581,6 +581,22 @@
         "type": "github"
       }
     },
+    "intel-performance-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790611058,
+        "narHash": "sha256-zOa4Yfhmx8ERSx8J+qf7YTpwa3CzSrR3plo3CKUtl3s=",
+        "owner": "intel",
+        "repo": "intel-performance-skills",
+        "rev": "3e33aecabb956ec48526b3f842f4f70ae96d98ff",
+        "type": "github"
+      },
+      "original": {
+        "owner": "intel",
+        "repo": "intel-performance-skills",
+        "type": "github"
+      }
+    },
     "lazyvim-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -621,6 +637,22 @@
       "original": {
         "owner": "numtide",
         "repo": "llm-agents.nix",
+        "type": "github"
+      }
+    },
+    "low-level-dev-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782561843,
+        "narHash": "sha256-FdKuzZ6dUl9jPoO+lkGYibYqypxMcVrTKy2HVdJq8gs=",
+        "owner": "mohitmishra786",
+        "repo": "low-level-dev-skills",
+        "rev": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mohitmishra786",
+        "repo": "low-level-dev-skills",
         "type": "github"
       }
     },
@@ -1228,8 +1260,10 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
+        "intel-performance-skills": "intel-performance-skills",
         "lazyvim-nix": "lazyvim-nix",
         "llm-agents": "llm-agents",
+        "low-level-dev-skills": "low-level-dev-skills",
         "lucidglyph": "lucidglyph",
         "mermaid-rs-renderer": "mermaid-rs-renderer",
         "niri": "niri",

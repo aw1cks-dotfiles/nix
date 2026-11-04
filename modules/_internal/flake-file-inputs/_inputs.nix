@@ -26,6 +26,11 @@
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
   };
 
+  intel-performance-skills = {
+    url = lib.mkDefault "github:intel/intel-performance-skills";
+    flake = false;
+  };
+
   lazyvim-nix = {
     url = lib.mkDefault "github:pfassina/lazyvim-nix";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
@@ -70,6 +75,11 @@
   # pkgs either way.
   llm-agents = {
     url = lib.mkDefault "github:numtide/llm-agents.nix";
+  };
+
+  low-level-dev-skills = {
+    url = lib.mkDefault "github:mohitmishra786/low-level-dev-skills";
+    flake = false;
   };
 
   # Consumed directly for its home-manager module (`programs.omp`) and package;
