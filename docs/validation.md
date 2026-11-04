@@ -72,6 +72,13 @@ Examples include:
 
 Those failures usually surface while evaluating the flake outputs, not only while building the final derivations.
 
+### Mutable upstream downloads
+
+The `apple-fonts/sf-pro` input uses Apple's unversioned `SF-Pro.dmg` URL.
+If Apple replaces that download, clean CI runners can report a NAR hash mismatch even when a local store still contains the older file.
+Fetch it with `nix store prefetch-file --refresh --json`, verify the disk image and Apple installer signature, and use `nix hash path` on the downloaded store path to obtain the **NAR** hash rather than the prefetch command's flat file hash.
+Update only the affected lock entry after verification, build the font package, and rerun the locked flake checks; do not disable hash verification or refresh unrelated inputs.
+
 ## What `nix flake check` Does Not Prove
 
 `nix flake check` does not prove:
