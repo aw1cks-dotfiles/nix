@@ -421,6 +421,11 @@ Paseo is pinned to upstream **0.15.0**, revision
 `8938fde3c713143f12eacbdd60c11fdfc0be0fb1`, through the shared `paseo` input and
 the generated flake/lock. Its Nix recipe has a narrow runtime-closure correction
 to retain the plugin compiler worker, TypeScript and native esbuild executable.
+The package sets a 4 GiB Node heap budget during compilation so Metro's web
+bundle does not inherit the smaller RAM-derived default on hosted Darwin
+builders. This flag is not exported by the daemon/CLI wrappers or inherited by
+OMP agents. Fatal Expo bundle errors are flushed synchronously before exit so
+Nix build logs retain the underlying exception.
 The **OMP Plugin 5.2.3** npm archive and published production shrinkwrap are
 integrity-pinned and installed offline by Nix. No global npm install or runtime
 plugin dependency download is required. Update these through Nix, not Paseo's
