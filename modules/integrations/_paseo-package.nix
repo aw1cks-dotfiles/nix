@@ -21,4 +21,14 @@
       resolvedPackageFiles("packages/server/dist/server/server/plugins/compiler-imports.js", "typescript"),
       resolvedPackageFiles("packages/server/dist/server/server/plugins/compiler-esbuild.js", `@esbuild/''${process.platform}-''${process.arch}`),'
   '';
+
+  # Expo's export catch logs through Metro's asynchronous terminal queue and
+  # immediately exits, which can discard the actual bundle error on Darwin.
+  preBuild = (old.preBuild or "") + ''
+    node -e 'console.error("Paseo build resources:", JSON.stringify({memory:require("os").totalmem(),cpus:require("os").availableParallelism(),heapLimit:require("v8").getHeapStatistics().heap_size_limit}))'
+    ulimit -a
+    substituteInPlace node_modules/@expo/cli/build/src/export/exportApp.js \
+      --replace-fail '_log.exception(error);' \
+      'require("node:fs").writeSync(2, String(error.stack || error) + "\n");'
+  '';
 })
