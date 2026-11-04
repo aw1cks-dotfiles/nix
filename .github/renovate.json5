@@ -5,9 +5,10 @@
   ],
   lockFileMaintenance: {
     enabled: true,
-    // Nix maintenance updates every input, including agent instructions.
-    // Per-package automerge rules cannot protect this mixed update.
-    automerge: false,
+    // The host-check job rejects unreviewed skill contents before building.
+    automerge: true,
+    automergeType: 'pr',
+    platformAutomerge: false,
     extends: [
       'schedule:weekly',
     ],
@@ -22,9 +23,11 @@
         'https://github.com/intel/intel-performance-skills',
         'https://github.com/mohitmishra786/low-level-dev-skills',
       ],
-      automerge: false,
+      automerge: true,
+      automergeType: 'pr',
+      platformAutomerge: false,
       prBodyNotes: [
-        'Review the upstream skill diff: CI checks assembly and known regressions, not instruction safety.',
+        'Review the upstream skill diff and update .github/reviewed-skill-inputs.json only after approving the new contents.',
       ],
     },
   ],

@@ -42,7 +42,18 @@ nix build .#checks.x86_64-linux.agent-skills \
 ```
 
 These checks cover assembly contracts and known example defects, not the safety or correctness of every upstream instruction.
-Review skill input changes manually; Renovate keeps updates enabled but disables automerge for both skill-specific updates and mixed lockfile maintenance.
+CI runs `python3 .github/check-skill-inputs.py` before installing Nix or starting any builds.
+It fails closed unless both skill inputs' locked content hashes match the independently reviewed values in `.github/reviewed-skill-inputs.json`.
+Review source changes and update the approved hash in an explicit commit; do not copy new hashes blindly.
+Unchanged skill contents allow ordinary input maintenance to proceed and automerge after green CI.
+
+`checks.<system>.agent-skill-input-gate` runs isolated CLI regression cases for unrelated maintenance, rejected content changes, explicit approval transitions, root/node aliases, and missing or invalid approval data.
+The policy comparison is repo-local CI; the flake check tests its behavior without enforcing this repo's approved inputs on downstream source overrides.
+
+```bash
+python3 .github/check-skill-inputs.py
+nix build .#checks.x86_64-linux.agent-skill-input-gate
+```
 
 ## What It Also Catches During Evaluation
 

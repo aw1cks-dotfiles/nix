@@ -103,7 +103,7 @@ let
     }
   ) homeSystems;
 
-  # Group both skill checks under each system before the existing shallow merge.
+  # Group skill checks under each system before the existing shallow merge.
   skillsChecks = map (
     system:
     let
@@ -116,6 +116,16 @@ let
           inherit inputs lib pkgs;
           aiModule = config.aw1cks.modules.home.ai;
         };
+        agent-skill-input-gate =
+          pkgs.runCommand "agent-skill-input-gate"
+            {
+              nativeBuildInputs = [ pkgs.python3Packages.pytest ];
+            }
+            ''
+              export PYTHONDONTWRITEBYTECODE=1
+              pytest -p no:cacheprovider ${../.github}/test_skill_input_gate.py
+              touch "$out"
+            '';
       }
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         agent-skills-patches = import ./home/dev/_skills-patch-checks.nix {
