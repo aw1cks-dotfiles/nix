@@ -41,7 +41,7 @@ This keeps shared library concerns reusable while giving the downstream repo roo
 
 The shared Home Manager AI module exposes a read-only `modules.ai.skillsSource`: a flat directory of complete, selected skill directories for any compatible agent harness.
 It does not install skills into a harness's home directory; consumers compose or install this output themselves.
-The existing `context7` and `git-workflow` skills remain selected by default.
+Bundled skills, including `context7`, `git-workflow`, and `git-history-hygiene`, are selected by default.
 
 Two public non-flake inputs supply optional collections, with revisions and content hashes recorded only in `flake.lock`:
 

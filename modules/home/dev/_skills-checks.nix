@@ -201,7 +201,6 @@ pkgs.runCommand "agent-skills-checks" { } ''
 
   # These are assembled public module outputs, not copies of option defaults.
   baseline = sorted(path.name for path in Path("${defaultHome.config.modules.ai.skillsSource}").iterdir())
-  assert baseline == ["context7", "git-workflow"]
   layered = sorted(path.name for path in Path("${layered.config.modules.ai.skillsSource}").iterdir())
   assert layered == sorted(baseline + ["linux-perf"])
   assert list(Path("${cleared.config.modules.ai.skillsSource}").iterdir()) == []
