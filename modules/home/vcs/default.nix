@@ -158,6 +158,8 @@
 
             blame.coloring = "highlightRecent";
 
+            branch.sort = "-committerdate";
+
             color = {
               branch = "auto";
               interactive = "auto";
@@ -173,12 +175,15 @@
               untracked = "magenta";
             };
 
+            commit.verbose = true;
+
             core = {
               autocrlf = "input";
               whitespace = "-trailing-space";
             };
 
             diff = {
+              algorithm = "histogram";
               mnemonicPrefix = true;
               renames = true;
               relative = true;
@@ -230,6 +235,16 @@
               autoSetupRemote = true;
               default = "simple";
               followTags = true;
+            };
+
+            rebase = {
+              autoSquash = true;
+              updateRefs = true;
+            };
+
+            rerere = {
+              enable = true;
+              autoupdate = true;
             };
 
             status = {
