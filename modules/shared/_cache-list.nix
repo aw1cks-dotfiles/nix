@@ -8,14 +8,14 @@
   substituters = [
     "https://cache.lantian.pub/lantian" # nix-cachyos-kernel (xddxdd's Hydra CI)
     "https://cache.numtide.com"
-    "https://cuda-maintainers.cachix.org"
+    "https://cache.nixos-cuda.org"
     "https://niri.cachix.org"
     "https://noctalia.cachix.org"
     "https://wezterm.cachix.org"
   ];
   trustedPublicKeys = [
     "lantian:WVGO7vsRMSEN+h7Lp7kv6SAmrkEXgUGbbXm7jMDjBuQ=" # nix-cachyos-kernel
-    "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+    "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
     "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
