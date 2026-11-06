@@ -22,6 +22,11 @@ packagePkgs.stdenvNoCC.mkDerivation {
   inherit (upstream) version bunDeps;
   src = ompInput.outPath;
 
+  # This is upstream's development relay, not its hosted Go server:
+  # https://github.com/can1357/oh-my-pi/pull/8166
+  # Track supported self-hosted packaging before replacing this local build:
+  # https://github.com/can1357/oh-my-pi/issues/3408
+
   patches = [
     ./_omp-collab-loopback.patch
     ./_omp-collab-no-analytics.patch
@@ -71,7 +76,10 @@ packagePkgs.stdenvNoCC.mkDerivation {
     install -m644 relay.js "$out/libexec/omp-collab-relay.js"
     cp -R packages/collab-web/dist/. "$out/share/omp-collab/"
     install -Dm644 LICENSE "$out/share/doc/omp-collab/LICENSE"
-    install -Dm644 THIRD-PARTY-NOTICES.txt "$out/share/doc/omp-collab/THIRD-PARTY-NOTICES.txt"
+    # The CLI notices cover the shared collab-web viewer and JavaScript packages.
+    # We do not bundle the native addon, so its separate notices are not needed.
+    install -Dm644 packages/coding-agent/THIRD-PARTY-NOTICES.txt \
+      "$out/share/doc/omp-collab/THIRD-PARTY-NOTICES.txt"
 
     # Bundled JS needs neither node_modules nor Bun's automatic package install.
     makeWrapper ${lib.getExe bun} "$out/bin/omp-collab-relay" \
