@@ -56,10 +56,9 @@
         url = "github:noctalia-dev/noctalia/legacy-v4";
         inputs.nixpkgs.follows = "nixpkgs-unstable";
       };
-      nixos-images = {
-        url = "github:nix-community/nixos-images";
-        inputs.nixos-unstable.follows = "nixpkgs-unstable";
-      };
+      # Keep the installer image paired with upstream's compatible nixpkgs pin.
+      # Newer nixpkgs can remove options still used by its boot modules.
+      nixos-images.url = "github:nix-community/nixos-images";
       nix-vm-test = {
         url = "github:numtide/nix-vm-test";
         inputs.nixpkgs.follows = "nixpkgs-unstable";

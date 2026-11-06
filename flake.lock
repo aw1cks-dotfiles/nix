@@ -962,9 +962,7 @@
     "nixos-images_2": {
       "inputs": {
         "nixos-stable": "nixos-stable_2",
-        "nixos-unstable": [
-          "nixpkgs-unstable"
-        ]
+        "nixos-unstable": "nixos-unstable"
       },
       "locked": {
         "lastModified": 1791456080,
@@ -1008,6 +1006,23 @@
       },
       "original": {
         "ref": "nixos-26.05",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/NixOS/nixpkgs"
+      }
+    },
+    "nixos-unstable": {
+      "locked": {
+        "lastModified": 1782175435,
+        "narHash": "sha256-EMzXKmnOtBQ2MnvpiNOm7E+kOMvdPrIKaeg52Tip2Uk=",
+        "ref": "nixpkgs-unstable",
+        "rev": "89570f24e97e614aa34aa9ab1c927b6578a43775",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/NixOS/nixpkgs"
+      },
+      "original": {
+        "ref": "nixpkgs-unstable",
         "shallow": true,
         "type": "git",
         "url": "https://github.com/NixOS/nixpkgs"
