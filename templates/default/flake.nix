@@ -16,10 +16,7 @@
   inputs = {
     agenix = {
       url = "github:ryantm/agenix";
-      inputs = {
-        home-manager.follows = "home-manager";
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     apple-fonts = {
       url = "github:Lyndeno/apple-fonts.nix";
@@ -40,8 +37,10 @@
         flake-parts.follows = "flake-parts";
         home-manager.follows = "home-manager";
         import-tree.follows = "import-tree";
+        intel-performance-skills.follows = "intel-performance-skills";
         lazyvim-nix.follows = "lazyvim-nix";
         llm-agents.follows = "llm-agents";
+        low-level-dev-skills.follows = "low-level-dev-skills";
         lucidglyph.follows = "lucidglyph";
         mermaid-rs-renderer.follows = "mermaid-rs-renderer";
         niri.follows = "niri";
@@ -52,7 +51,10 @@
         nixpkgs.follows = "nixpkgs";
         nixpkgs-unstable.follows = "nixpkgs-unstable";
         oh-my-pi.follows = "oh-my-pi";
+        paseo.follows = "paseo";
+        rewrite-rs-skills.follows = "rewrite-rs-skills";
         stylix.follows = "stylix";
+        trailofbits-skills.follows = "trailofbits-skills";
         treefmt-nix.follows = "treefmt-nix";
         zen-browser.follows = "zen-browser";
       };
@@ -71,11 +73,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     import-tree.url = "github:denful/import-tree";
+    intel-performance-skills = {
+      url = "github:intel/intel-performance-skills";
+      flake = false;
+    };
     lazyvim-nix = {
       url = "github:pfassina/lazyvim-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+    low-level-dev-skills = {
+      url = "github:mohitmishra786/low-level-dev-skills";
+      flake = false;
+    };
     lucidglyph = {
       url = "github:maximilionus/lucidglyph";
       flake = false;
@@ -104,9 +114,21 @@
       url = "github:can1357/oh-my-pi";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    paseo = {
+      url = "github:getpaseo/paseo/v0.15.0";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    rewrite-rs-skills = {
+      url = "github:rewrite-rs/skills";
+      flake = false;
+    };
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    trailofbits-skills = {
+      url = "github:trailofbits/skills";
+      flake = false;
     };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";

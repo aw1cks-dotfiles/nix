@@ -8,7 +8,12 @@ from typing import Any
 import pytest
 
 CHECK = Path(__file__).with_name("check-skill-inputs.py")
-INPUTS = ("intel-performance-skills", "low-level-dev-skills")
+INPUTS = (
+    "intel-performance-skills",
+    "low-level-dev-skills",
+    "rewrite-rs-skills",
+    "trailofbits-skills",
+)
 NEW_HASH = "sha256-" + base64.b64encode(bytes([7]) * 32).decode()
 
 

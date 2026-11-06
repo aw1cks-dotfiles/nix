@@ -82,6 +82,16 @@
     flake = false;
   };
 
+  rewrite-rs-skills = {
+    url = lib.mkDefault "github:rewrite-rs/skills";
+    flake = false;
+  };
+
+  trailofbits-skills = {
+    url = lib.mkDefault "github:trailofbits/skills";
+    flake = false;
+  };
+
   # Consumed directly for its home-manager module (`programs.omp`) and package;
   # upstream's package uses the Rust toolchain pinned by OMP itself.
   oh-my-pi = {

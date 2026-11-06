@@ -460,7 +460,7 @@ in
       };
 
       config = {
-        modules.ai.skills.select = [ "builtin/*" ];
+        modules.ai.skills.select = skills.defaultSelect;
         modules.ai.skillsSource = skills.build cfg.skills;
 
         home.packages = with pkgs.llm-agents; [
@@ -468,10 +468,17 @@ in
         ];
 
         programs.mcp = cfg.mcp;
-        programs.omp = builtins.removeAttrs cfg.omp [
-          "collab"
-          "extraMcpConfig"
-          "disabledMcpServers"
+        programs.omp = lib.mkMerge [
+          (builtins.removeAttrs cfg.omp [
+            "collab"
+            "extraMcpConfig"
+            "disabledMcpServers"
+          ])
+          (lib.mkIf config.programs.omp.enable {
+            # OMP scans these alongside native user/project skills. Do not own
+            # ~/.omp/agent/skills: it also contains users' locally authored skills.
+            settings.skills.customDirectories = lib.mkAfter [ (toString cfg.skillsSource) ];
+          })
         ];
         home.file = lib.mkIf cfg.omp.enable (
           {

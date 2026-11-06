@@ -1,4 +1,6 @@
 {
   "intel-performance-skills": "sha256-zOa4Yfhmx8ERSx8J+qf7YTpwa3CzSrR3plo3CKUtl3s=",
-  "low-level-dev-skills": "sha256-FdKuzZ6dUl9jPoO+lkGYibYqypxMcVrTKy2HVdJq8gs="
+  "low-level-dev-skills": "sha256-FdKuzZ6dUl9jPoO+lkGYibYqypxMcVrTKy2HVdJq8gs=",
+  "rewrite-rs-skills": "sha256-yiARqb8bXkCXAtcJ6umS06Mx0EL8a5q5VZSQiLjMb3w=",
+  "trailofbits-skills": "sha256-09WW/E0H6iBwBcKVWtts8u7eIajTsdm7oKyexXqizRk="
 }

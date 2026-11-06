@@ -39,28 +39,41 @@ This keeps shared library concerns reusable while giving the downstream repo roo
 
 ## Shared agent skills
 
-The shared Home Manager AI module exposes a read-only `modules.ai.skillsSource`: a flat directory of complete, selected skill directories for any compatible agent harness.
-It does not install skills into a harness's home directory; consumers compose or install this output themselves.
-Bundled skills, including `context7`, `git-workflow`, and `git-history-hygiene`, are selected by default.
+The shared Home Manager AI module exposes a read-only `modules.ai.skillsSource`: a flat directory of complete, selected skill directories for compatible agent harnesses.
+When `programs.omp.enable` is true, the module appends this output to `programs.omp.settings.skills.customDirectories`.
+OMP discovers these skills alongside native user/project skills; the module does not own or replace `~/.omp/agent/skills`.
+Caller-provided custom directories remain in the list. An explicit `lib.mkForce` on `customDirectories` overrides the normal composition.
+Other harnesses can consume the same `skillsSource` output independently.
 
-Two public non-flake inputs supply optional collections, with revisions and content hashes recorded only in `flake.lock`:
+The default selection includes bundled skills and the curated collections from four public non-flake inputs, with revisions and content hashes recorded in `flake.lock`:
 
-- `intel-performance-skills`: [Intel performance skills](https://github.com/intel/intel-performance-skills), exposed as `intel/<name>`
+- `intel-performance-skills`: [Intel performance skills](https://github.com/intel/intel-performance-skills), exposed as `intel/<name>`; retained rather than also importing duplicate copies from Intel's broader hub
 - `low-level-dev-skills`: [low-level development skills](https://github.com/mohitmishra786/low-level-dev-skills), exposed as `lowlevel/<name>`
-- Bundled skills use `builtin/<name>`; namespace prefixes are selectors, not installed directory names
+- `rewrite-rs-skills`: [Rust engineering skills](https://github.com/rewrite-rs/skills), exposed as `rewrite/<name>`
+- `trailofbits-skills`: [security and testing skills](https://github.com/trailofbits/skills), exposed as `trailofbits/<name>`
+- Bundled skills, including `context7`, `git-workflow`, and `git-history-hygiene`, use `builtin/<name>`; namespace prefixes are selectors, not installed directory names
 
-The low-level scope includes allocators, async I/O, binaries, compiler internals, compilers, computer architecture, debuggers, kernel development, kernel fundamentals, low-level programming, observability, profilers, runtimes, Rust, security, and virtualization.
-Build-system skills are limited to `build-acceleration`, `cmake`, `make`, `ninja`, and `static-analysis`.
-Intel owns the installed `linux-perf` name; the alternative low-level profiler is not exposed.
-Skills are discovered from those input directories, not a separate registry or vendored manifest.
+`modules/home/dev/_skills-policy.nix` is the explicit reviewed inventory for low-level, rewrite-rs, and Trail of Bits skills.
+New upstream siblings do not enter those collections automatically; a missing reviewed path fails evaluation rather than silently reducing coverage.
+The retained low-level inventory covers specialist compiler/build/debugger, binary, architecture, allocator, kernel, I/O, eBPF, runtime, and virtualization workflows.
+Intel owns the installed `linux-perf` name.
+
+The selective cutover replaces `lowlevel/rust-ffi` with `rewrite/rust-ffi`; migrate exact selectors to the new ID.
+Rewrite-rs also supplies ownership, API/error/type design, async correctness, concurrency, performance, documentation, observability, testing, and dependency-security guidance.
+Specialist Rust compiler/Cargo, cross/no-std, debugger/profiler, unsafe/Miri, and async-internals material remains in low-level.
+Trail of Bits supplies `aflpp` and `cargo-fuzz`; generic low-level fuzzing remains because these do not replace its libFuzzer/harness coverage.
+
+Known-error guides are not imported: rewrite-rs `unsafe-rust` incorrectly describes zero as an invalid boolean representation, and Trail of Bits `address-sanitizer` incorrectly recommends skipping macOS.
+The reviewed Trail of Bits `libfuzzer`, `harness-writing`, and `coverage-analysis` guides also remain deferred for correctness issues.
+Full `c-review` and `rust-review` plugins are not flattened into skill directories: they need sibling plugin assets and harness-specific orchestration tools.
+This cutover retains the three existing low-level correctness patches rather than dropping uncovered specialist skills to remove patch maintenance.
 
 ```nix
 {
   modules.ai.skills = {
     select = [
-      "intel/*"
-      "lowlevel/*"
       "-lowlevel/cmake"
+      "-rewrite/rust-docs"
     ];
     extra."local/team-workflow" = ./skills/team-workflow;
     # To replace a bundled skill entirely:
@@ -69,7 +82,7 @@ Skills are discovered from those input directories, not a separate registry or v
 }
 ```
 
-Normal module definitions of `select` concatenate with the ordinary `builtin/*` contribution.
+Normal module definitions of `select` concatenate with the ordinary curated default selection (`builtin/*`, `intel/*`, `lowlevel/*`, `rewrite/*`, and `trailofbits/*`).
 Use `lib.mkForce []` to clear those selections; explicit `extra` entries remain included unless excluded separately.
 Each selector is an exact `namespace/name` or contains at most one `*` per component; `*` never crosses `/`.
 All includes and `extra` IDs are unioned, then all `-` exclusions are subtracted regardless of module order.
@@ -91,11 +104,11 @@ No patched derivation is read during evaluation.
 
 The shared input declarations automatically generate downstream `follows` entries.
 Regenerate downstream `flake.nix` with `nix run .#write-flake` when adopting this contract, then lock the new inputs.
-Update them with `nix flake update intel-performance-skills low-level-dev-skills`; a fork, revision, or local source can be selected through `flake-file.inputs.<name>.url`.
+Update them with `nix flake update intel-performance-skills low-level-dev-skills rewrite-rs-skills trailofbits-skills`; a fork, revision, or local source can be selected through `flake-file.inputs.<name>.url`.
 
 Renovate can automerge skill updates and weekly mixed lockfile maintenance only after CI passes.
 The existing `host-check` jobs run `python3 .github/check-skill-inputs.py` immediately after checkout, before installing Nix or starting builds.
-It compares the two effective locked `narHash` values with `.github/reviewed-skill-inputs.json`, an independent record of reviewed source contents.
+It compares all four effective locked `narHash` values with `.github/reviewed-skill-inputs.json`, an independent record of reviewed source contents.
 A changed hash fails the job, including when the skill update arrives through mixed lockfile maintenance.
 An unrelated input update, or a revision change with identical source contents, does not require new skill approval.
 The subsequent flake check uses `--no-update-lock-file`, so Nix cannot replace the checked inputs while resolving a stale lock.
@@ -107,7 +120,7 @@ Do not regenerate approval hashes without reviewing the contents: passing assemb
 
 This is repository CI policy, not a runtime restriction on consumer forks or local input overrides.
 Independent consumers need an equivalent CI gate or must retain manual merge review; neither this workflow nor its approved hashes are inherited through a flake input.
-Harness loading and consumer-specific precedence remain the consumer's responsibility.
+OMP loading is wired by this module; loading in other harnesses and consumer-specific precedence remain the consumer's responsibility.
 
 ## AI Model Routing
 

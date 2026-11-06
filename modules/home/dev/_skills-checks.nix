@@ -8,18 +8,38 @@ let
   fixtureInputs = inputs // {
     intel-performance-skills = ./_skills-fixtures/intel;
     low-level-dev-skills = ./_skills-fixtures/lowlevel;
+    rewrite-rs-skills = ./_skills-fixtures/rewrite;
+    trailofbits-skills = ./_skills-fixtures/trailofbits;
+  };
+  fixturePolicy = {
+    lowlevel = [
+      "build-systems/cmake"
+      "low-level-programming/cpp-coroutines"
+      "profilers/strace-ltrace"
+    ];
+    rewrite = [ "skills/misc/rust-ffi" ];
+    trailofbits = [ "plugins/testing-handbook-skills/skills/cargo-fuzz" ];
   };
   skills = import ./_skills.nix {
     inputs = fixtureInputs;
     inherit lib pkgs;
+    sourcePolicy = fixturePolicy;
   };
   duplicateSkills = import ./_skills.nix {
     inputs = fixtureInputs // {
-      low-level-dev-skills = ./_skills-fixtures/duplicates;
+      intel-performance-skills = ./_skills-fixtures/duplicates;
     };
     inherit lib pkgs;
+    sourcePolicy = fixturePolicy;
   };
   replacement = ./_skills-fixtures/extra/cpp-coroutines;
+  missingSkills = import ./_skills.nix {
+    inputs = fixtureInputs;
+    inherit lib pkgs;
+    sourcePolicy = fixturePolicy // {
+      rewrite = [ "skills/misc/missing" ];
+    };
+  };
   names = args: builtins.attrNames (skills.resolve args);
   fails = value: !(builtins.tryEval (builtins.deepSeq value true)).success;
   require = label: condition: if condition then true else throw "agent-skills check failed: ${label}";
@@ -49,7 +69,7 @@ let
       ]
       ++ modules;
     };
-  layered = home [ { modules.ai.skills.select = [ "intel/linux-perf" ]; } ];
+  layered = home [ { modules.ai.skills.select = [ "-lowlevel/cmake" ]; } ];
   cleared = home [ { modules.ai.skills.select = lib.mkForce [ ]; } ];
   defaultHome = home [ ];
   conflictingExtras = home [
@@ -62,31 +82,52 @@ let
   ];
   checks = [
     (require "helper selection is opt-in" (names { } == [ ]))
+    (require "missing reviewed skill fails rather than shrinking defaults" (
+      fails (builtins.attrNames missingSkills.catalog)
+    ))
+    (require "replacement sources expose reviewed entries only" (
+      names {
+        select = [
+          "rewrite/*"
+          "trailofbits/*"
+        ];
+      } == [
+        "rewrite/rust-ffi"
+        "trailofbits/cargo-fuzz"
+      ]
+    ))
+    (require "replacement excludes obsolete lowlevel FFI selector" (
+      fails (names {
+        select = [ "lowlevel/rust-ffi" ];
+      })
+    ))
     (require "unselected basename collisions coexist" (
       names { select = [ "intel/*" ]; } == [ "intel/fixture" ]
     ))
     (require "selected basename collision fails" (
       fails (names {
-        select = [ "*/fixture" ];
+        select = [ "intel/*" ];
+        extra."external/fixture" = replacement;
       })
     ))
     (require "exclusion removes collisions before validation" (
       names {
         select = [
-          "-lowlevel/*"
-          "*/fixture"
+          "-external/*"
+          "intel/*"
         ];
+        extra."external/fixture" = replacement;
       } == [ "intel/fixture" ]
     ))
     (require "exclusions win regardless of order" (
       names {
         select = [
           "lowlevel/*"
-          "-lowlevel/fixture"
+          "-lowlevel/cmake"
         ];
       } == names {
         select = [
-          "-lowlevel/fixture"
+          "-lowlevel/cmake"
           "lowlevel/*"
         ];
       }
@@ -131,11 +172,10 @@ let
     (require "duplicate discovered ID fails even when unselected" (
       fails (builtins.attrNames (duplicateSkills.resolve { }))
     ))
-    (require "build whitelist and profiler/category policy apply" (
+    (require "curated inventory excludes unreviewed sibling skills" (
       names { select = [ "lowlevel/*" ]; } == [
         "lowlevel/cmake"
         "lowlevel/cpp-coroutines"
-        "lowlevel/fixture"
         "lowlevel/strace-ltrace"
       ]
     ))
@@ -153,6 +193,8 @@ let
     select = [
       "intel/*"
       "lowlevel/cmake"
+      "rewrite/*"
+      "trailofbits/*"
     ];
   };
   replaced = skills.build { extra."lowlevel/cpp-coroutines" = replacement; };
@@ -181,7 +223,7 @@ pkgs.runCommand "agent-skills-checks" { } ''
   import tempfile
 
   assembled = Path("${assembled}")
-  assert sorted(path.name for path in assembled.iterdir()) == ["cmake", "fixture"]
+  assert sorted(path.name for path in assembled.iterdir()) == ["cargo-fuzz", "cmake", "fixture", "rust-ffi"]
   fixture = assembled / "fixture"
   assert (fixture / "references/note.txt").read_text() == "retained reference\n"
   assert os.access(fixture / "scripts/probe", os.X_OK)
@@ -193,6 +235,10 @@ pkgs.runCommand "agent-skills-checks" { } ''
           Path("${./_skills-fixtures/lowlevel}") / notice
       ).read_bytes()
 
+  for skill, source in [("rust-ffi", "${./_skills-fixtures/rewrite}"), ("cargo-fuzz", "${./_skills-fixtures/trailofbits}")]:
+      assert (assembled / skill / ".upstream-license/LICENSE").read_bytes() == (
+          Path(source) / "LICENSE"
+      ).read_bytes()
   replaced = Path("${replaced}") / "cpp-coroutines"
   assert (replaced / "references/replacement.txt").read_text() == "only replacement reference\n"
   assert not (replaced / "bundled-only.txt").exists()
@@ -202,7 +248,8 @@ pkgs.runCommand "agent-skills-checks" { } ''
   # These are assembled public module outputs, not copies of option defaults.
   baseline = sorted(path.name for path in Path("${defaultHome.config.modules.ai.skillsSource}").iterdir())
   layered = sorted(path.name for path in Path("${layered.config.modules.ai.skillsSource}").iterdir())
-  assert layered == sorted(baseline + ["linux-perf"])
+  assert "cmake" in baseline
+  assert layered == [name for name in baseline if name != "cmake"]
   assert list(Path("${cleared.config.modules.ai.skillsSource}").iterdir()) == []
 
   builders = json.loads(${builtins.toJSON (builtins.toJSON invalidBuilders)})

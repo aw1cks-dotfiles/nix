@@ -116,6 +116,10 @@ let
           inherit inputs lib pkgs;
           aiModule = config.aw1cks.modules.home.ai;
         };
+        agent-omp-skills = import ./home/dev/_omp-skills-checks.nix {
+          inherit inputs lib pkgs;
+          aiModule = config.aw1cks.modules.home.ai;
+        };
         agent-skill-input-gate =
           pkgs.runCommand "agent-skill-input-gate"
             {
