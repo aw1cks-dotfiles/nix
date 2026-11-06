@@ -135,7 +135,10 @@ On systemd, loaded properties, `NeedDaemonReload`, unit files, and manager/servi
 environments are inspected. On launchd, loaded arguments and environment must agree
 with the secure plist; system-domain environments are inspected too. Overrides of
 configuration sources (`NIX_*` other than the standard TLS certificate path, `HOME`,
-or XDG configuration directories) stop provisioning. Unknown or ambiguous launchctl
+or XDG configuration directories) stop provisioning. Artifact-mirror variables that
+the daemon does not read (`NIX_NPM_REGISTRY`) are permitted; add any further
+tooling variable to the reviewed allowlist in `services.py` rather than widening
+the rule. Unknown or ambiguous launchctl
 output fails closed because its diagnostic format is not a stable API.
 
 The validated service is checked again before restart (`nix-daemon.service` on
