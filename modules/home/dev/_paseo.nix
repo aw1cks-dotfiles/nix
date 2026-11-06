@@ -11,17 +11,25 @@ let
   collab = config.modules.ai.omp.collab;
   host = hostFacts.tailnetHost or "";
   settings = (pkgs.formats.json { }).generate "paseo-managed.json" {
-    inherit (cfg) stateDirectory passwordFile port;
-    tailnetHost = host;
-    pluginDirectory = "${cfg.ompPluginPackage}/share/paseo-omp";
-    configModule = "${cfg.package}/lib/paseo/packages/server/dist/server/server/config.js";
-    instanceModule = "${cfg.package}/lib/paseo/packages/server/dist/server/server/daemon-instance.js";
+    version = 1;
+    daemon = {
+      listen = "127.0.0.1:${toString cfg.port}";
+      hostnames = [ host ];
+      relay.enabled = false;
+    };
+    pluginsEnabled = true;
+    plugins.paseo-omp = {
+      source = "directory";
+      path = "${cfg.ompPluginPackage}/share/paseo-omp";
+      enabled = true;
+    };
   };
-  withPassword = import ../../integrations/_paseo-with-password.nix { inherit pkgs; };
   runner = pkgs.writeShellApplication {
     name = "paseo-managed";
     runtimeInputs = [
-      pkgs.nodejs_22
+      pkgs.coreutils
+      pkgs.jq
+      pkgs.openssl
       cfg.package
       config.programs.omp.package
       pkgs.git
@@ -40,11 +48,56 @@ let
       # Suppress optional public service-proxy listeners from old user config.
       export PASEO_SERVICE_PROXY_ENABLED=false
       export PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD=0
-      # Authentication is loaded from private writable storage immediately before exec.
-      node ${./files/paseo/prepare.mjs} ${settings}
-      # Direct supervisor startup takes the PID lock atomically and fails on a
-      # competing instance, rather than silently adopting daemon run's existing one.
-      exec ${lib.getExe withPassword} ${lib.escapeShellArg cfg.passwordFile} ${cfg.package}/bin/paseo-server
+      unset PASEO_PASSWORD
+      status=$(paseo daemon status --home "$PASEO_HOME" --json)
+      if [[ $(jq -r '.localDaemon' <<< "$status") != stopped ]]; then
+        echo "Paseo is already running; stop it before managed startup." >&2
+        exit 1
+      fi
+      mkdir -p -- "$PASEO_HOME"
+      if [[ -L "$PASEO_HOME" || ! -O "$PASEO_HOME" ]]; then
+        echo "Paseo state must be a user-owned directory: $PASEO_HOME" >&2
+        exit 1
+      fi
+      chmod 700 -- "$PASEO_HOME"
+      config_file="$PASEO_HOME/config.json"
+      existing_config='{}'
+      if [[ -e "$config_file" || -L "$config_file" ]]; then
+        existing_config=$(cat -- "$config_file")
+      fi
+      password_file=${lib.escapeShellArg cfg.passwordFile}
+      if [[ ! -e "$password_file" && ! -L "$password_file" ]]; then
+        if jq -e '.daemon.auth.password // false' <<< "$existing_config" >/dev/null; then
+          echo "Provision passwordFile with the existing Paseo password before adoption." >&2
+          exit 1
+        fi
+        mkdir -p -- "$(dirname -- "$password_file")"
+        (set -o noclobber; openssl rand -hex 32 > "$password_file")
+      fi
+      if [[ ! -f "$password_file" || -L "$password_file" || ! -O "$password_file" ]]; then
+        echo "Paseo password must be a private, user-owned regular file: $password_file" >&2
+        exit 1
+      fi
+      mode=$(stat -c %a -- "$password_file")
+      if (( (8#$mode & 077) != 0 )); then
+        echo "Paseo password must not be group/world accessible: $password_file" >&2
+        exit 1
+      fi
+      PASEO_PASSWORD=$(< "$password_file")
+      if [[ "$PASEO_PASSWORD" != *[![:space:]]* || "$PASEO_PASSWORD" == *$'\n'* || "$PASEO_PASSWORD" == *$'\r'* ]]; then
+        echo "Paseo password must contain one nonempty line: $password_file" >&2
+        exit 1
+      fi
+      temporary=$(mktemp "$PASEO_HOME/config.json.XXXXXX")
+      trap 'rm -f -- "$temporary"' EXIT
+      jq --slurpfile managed ${settings} \
+        '. * ($managed[0] | del(.plugins)) | .plugins += $managed[0].plugins' \
+        <<< "$existing_config" > "$temporary"
+      mv -f -- "$temporary" "$config_file"
+      trap - EXIT
+      export PASEO_PASSWORD
+      # The native supervisor takes the PID lock atomically; never adopt another instance.
+      exec ${cfg.package}/bin/paseo-server
     '';
   };
 in
