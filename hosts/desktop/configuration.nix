@@ -13,6 +13,9 @@ let
   };
 in
 {
+  flake.checks.x86_64-linux.desktop-niri-config =
+    config.flake.nixosConfigurations.desktop.config.home-manager.users.alex.xdg.configFile.niri-config.source;
+
   configurations.nixos.desktop = {
     module = {
       imports = [

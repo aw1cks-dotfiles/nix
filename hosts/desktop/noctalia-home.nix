@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   inputs,
@@ -263,6 +264,10 @@ let
         { config.programs.niri.settings = niriSettings; }
       ];
     }).config.programs.niri.config;
+
+  niriConfig = pkgs.callPackage kdl.generator {
+    document = config.programs.niri.config;
+  };
 in
 {
   home.packages = with pkgs; [
@@ -1012,6 +1017,22 @@ in
         wallpaperChangeMode = "random";
       };
     };
+  };
+
+  # Keep rendering and validation at build time: upstream finalConfig reads the
+  # generated Linux file during evaluation, which cannot run on Darwin.
+  xdg.configFile.niri-config = lib.mkForce {
+    enable = config.programs.niri.config != null;
+    target = "niri/config.kdl";
+    source =
+      pkgs.runCommand "validated-niri-config.kdl"
+        {
+          nativeBuildInputs = [ config.programs.niri.package ];
+        }
+        ''
+          niri validate -c ${niriConfig}
+          cp ${niriConfig} "$out"
+        '';
   };
 
   programs.niri.settings = niriSettings;
