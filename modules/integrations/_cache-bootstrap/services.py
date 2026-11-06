@@ -107,11 +107,17 @@ def systemd_definition(path: Path) -> object:
     return tuple(links), str(current), secure_file(current)
 
 
+# Reviewed NIX_* variables that only parameterise build tooling (the corporate
+# artifact mirrors) and are not read by the daemon, so they cannot change store,
+# trust, or configuration semantics. Every other NIX_* remains rejected.
+ALLOWED_NIX_ENVIRONMENT = frozenset({"NIX_SSL_CERT_FILE", "NIX_NPM_REGISTRY"})
+
+
 def environment(values: dict[str, str]) -> None:
     for key, value in values.items():
         if (key in {"HOME", "XDG_CONFIG_HOME", "XDG_CONFIG_DIRS", "ENV", "BASH_ENV"}
                 or key.startswith(("LD_", "DYLD_"))
-                or (key.startswith("NIX_") and key != "NIX_SSL_CERT_FILE")):
+                or (key.startswith("NIX_") and key not in ALLOWED_NIX_ENVIRONMENT)):
             raise RuntimeError(f"Unsupported daemon configuration environment: {key}")
         if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key) or "\n" in value:
             raise RuntimeError("Ambiguous service environment")

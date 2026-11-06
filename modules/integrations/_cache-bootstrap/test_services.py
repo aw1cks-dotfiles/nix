@@ -239,6 +239,18 @@ class SystemdTests(unittest.TestCase):
                         services.SystemdService().validate()
         self.assertEqual(self.restarts, 0)
 
+    def test_reviewed_tooling_environment_variables_are_accepted(self) -> None:
+        # Corporate artifact mirrors live in the daemon environment; they do not
+        # change Nix policy, so they must not block provisioning.
+        self.props["Environment"] = "GOPROXY=https://mirror.invalid NIX_NPM_REGISTRY=https://mirror.invalid"
+        self.manager = "NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt\n"
+        self.assertEqual(services.SystemdService().validate(), NIX)
+        for name in ("NIX_CONFIG", "NIX_USER_CONF_FILES", "NIX_REMOTE", "NIX_STORE_DIR", "NIX_PATH"):
+            with self.subTest(name=name):
+                self.manager = f"{name}=/tmp/alternate\n"
+                with self.assertRaises(RuntimeError):
+                    services.SystemdService().validate()
+
     def test_config_environment_in_manager_and_service(self) -> None:
         for name in ("HOME", "XDG_CONFIG_HOME", "XDG_CONFIG_DIRS", "NIX_CONFIG",
                      "NIX_CONF_DIR", "NIX_USER_CONF_FILES", "NIX_REMOTE", "NIX_FUTURE_OVERRIDE", "LD_PRELOAD"):
