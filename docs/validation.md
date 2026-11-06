@@ -6,6 +6,30 @@ The authoritative implementation is `modules/checks.nix`.
 
 ## What `nix flake check` Covers
 
+### Full native host evaluation
+
+`checks.<system>.host-derivations` evaluates every real host targeting that system:
+
+| Configuration | Evaluated root |
+| --- | --- |
+| NixOS | `config.system.build.toplevel.drvPath` |
+| nix-darwin | `system.drvPath` |
+| Standalone Home Manager | `activationPackage.drvPath` |
+
+This forces final package selection, assertions, file generation definitions, and activation derivations rather than only selected metadata.
+Foreign-system final derivations are not forced by this check.
+The result is a small JSON manifest; derivation-path string contexts are removed after evaluation so building the manifest does **not** build or retain the host closures.
+
+CI first runs `nix eval .#checks.<system>.host-derivations.drvPath` to catch full-host evaluation failures before expensive check builds.
+Evaluation can still fetch or realize import-from-derivation prerequisites, such as Stylix's packaged theme files.
+This deliberately uses the normal evaluator: `nix flake check --no-build` uses read-only evaluation and can fail on a clean store when those prerequisite derivations have not been written yet.
+The subsequent normal flake check builds the manifests and existing behavioral checks, not full host systems.
+
+```bash
+nix build .#checks.aarch64-darwin.host-derivations --no-link
+nix eval .#checks.x86_64-linux.host-derivations.drvPath --raw
+```
+
 ### NixOS
 
 For each entry in `flake.nixosConfigurations`, the check evaluates key resolved values and writes them into a tiny text derivation.
@@ -26,7 +50,8 @@ That confirms constructor assembly and important defaults, but it does not build
 
 The check builds one synthetic Home Manager activation package per distinct system present in `configurations.home`.
 
-That exercises the Home Manager activation pipeline for the supported systems in the repo, but it is intentionally not a per-host build and does not validate each real host's full closure.
+That exercises the Home Manager activation pipeline without building a real host's full closure.
+The separate `host-derivations` check evaluates every native real activation package, but does not build it.
 
 ### Agent skills
 
@@ -89,6 +114,47 @@ The `apple-fonts/sf-pro` input uses Apple's unversioned `SF-Pro.dmg` URL.
 If Apple replaces that download, clean CI runners can report a NAR hash mismatch even when a local store still contains the older file.
 Fetch it with `nix store prefetch-file --refresh --json`, verify the disk image and Apple installer signature, and use `nix hash path` on the downloaded store path to obtain the **NAR** hash rather than the prefetch command's flat file hash.
 Update only the affected lock entry after verification, build the font package, and rerun the locked flake checks; do not disable hash verification or refresh unrelated inputs.
+
+## CI binary cache
+
+CI consumes the public `aw1cks-nix` Cachix cache on both Linux and Darwin.
+The Cachix action is read-only: pull requests and build steps never receive a publishing token.
+Only successful pushes to this repository's `main` branch publish, using the cache-scoped `CACHIX_AUTH_TOKEN` GitHub Actions secret in the final upload step.
+Superseded pull-request runs are cancelled, but running `main` jobs are allowed to finish seeding the cache.
+There is no `pull_request_target` job.
+
+`packages.<system>.ci-cache` is the explicit upload root: the exact upstream OMP package used by the skill-discovery check, its native library, and its reusable native dependency artifacts.
+The build-only artifacts are included deliberately because they are absent from OMP's final runtime closure.
+No real host closure or arbitrary store scan is uploaded.
+The small GitHub Actions store cache remains a separate acceleration layer; its garbage collection does not replace Cachix retention.
+
+Initial setup:
+
+1. Create the public `aw1cks-nix` cache at Cachix with managed signing.
+2. Generate a write token restricted to that cache.
+3. Store it without putting it in source or chat:
+
+   ```bash
+   gh secret set CACHIX_AUTH_TOKEN --repo aw1cks-dotfiles/nix
+   ```
+
+The first trusted `main` run seeds each architecture; a Renovate update can still require a cold build when its derivations change.
+Unchanged binaries and native artifacts are reused while retained by the cache.
+The shared cache list pins the public `aw1cks-nix` substituter and signing key for host Nix settings and the bootstrap cache configuration.
+Existing hosts receive that configuration on their next rebuild; for immediate local use, `cachix use aw1cks-nix` configures the same public cache.
+
+To inspect or build the same upload root without publishing:
+
+```bash
+nix build .#ci-cache --no-link --print-out-paths
+```
+
+The shell publishing app captures the single `ci-cache` output with `nix build --print-out-paths` and passes it to Cachix as one quoted argument.
+It unsets publishing credentials inside the build subshell, leaving them available only to Cachix:
+
+```bash
+nix run .#publish-ci-cache -- aw1cks-nix
+```
 
 ## What `nix flake check` Does Not Prove
 

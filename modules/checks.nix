@@ -103,6 +103,44 @@ let
     }
   ) homeSystems;
 
+  # Resolve target systems without forcing foreign hosts' final derivations.
+  hostDerivations =
+    lib.mapAttrsToList (name: nixos: {
+      inherit name;
+      kind = "nixos";
+      system = nixos.config.nixpkgs.hostPlatform.system;
+      drvPath = nixos.config.system.build.toplevel.drvPath;
+    }) config.flake.nixosConfigurations
+    ++ lib.mapAttrsToList (name: darwin: {
+      inherit name;
+      kind = "darwin";
+      system = darwin.config.nixpkgs.hostPlatform.system;
+      drvPath = darwin.system.drvPath;
+    }) config.flake.darwinConfigurations
+    ++ lib.mapAttrsToList (name: home: {
+      inherit name;
+      kind = "home";
+      system = home.pkgs.stdenv.hostPlatform.system;
+      drvPath = home.activationPackage.drvPath;
+    }) config.flake.homeConfigurations;
+
+  hostDerivationChecks = map (
+    system:
+    let
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      nativeHosts = builtins.filter (host: host.system == system) hostDerivations;
+    in
+    mkPerSystemCheck {
+      inherit system;
+      name = "host-derivations";
+      # Force the native derivations, then discard their contexts so the manifest
+      # does not build or retain host closures.
+      value = pkgs.writeText "host-derivations.json" (
+        builtins.unsafeDiscardStringContext (builtins.toJSON nativeHosts)
+      );
+    }
+  ) config.systems;
+
   # Group skill checks under each system before the existing shallow merge.
   skillsChecks = map (
     system:
@@ -152,6 +190,7 @@ in
       nixosChecks
       darwinChecks
       homeSmokeChecks
+      hostDerivationChecks
       skillsChecks
     ]
   );
