@@ -6,6 +6,7 @@
 # bootstrap). Edit only this file to change the cache list.
 {
   substituters = [
+    "https://aw1cks-nix.cachix.org"
     "https://cache.lantian.pub/lantian" # nix-cachyos-kernel (xddxdd's Hydra CI)
     "https://cache.numtide.com"
     "https://cache.nixos-cuda.org"
@@ -14,6 +15,7 @@
     "https://wezterm.cachix.org"
   ];
   trustedPublicKeys = [
+    "aw1cks-nix.cachix.org-1:Vv+PsqnPJFoOqNDH+neA4vSN1FHTGOL0D5TI6l06GXE="
     "lantian:WVGO7vsRMSEN+h7Lp7kv6SAmrkEXgUGbbXm7jMDjBuQ=" # nix-cachyos-kernel
     "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
