@@ -12,6 +12,10 @@ For each entry in `flake.nixosConfigurations`, the check evaluates key resolved 
 
 That confirms constructor assembly, resolved host identity/user wiring, and selected shared defaults without building full system closures in CI.
 
+`checks.x86_64-linux.desktop-niri-config` builds the desktop's actual rendered KDL file and validates it with the configured Niri binary.
+Rendering and validation happen at build time, not through `builtins.readFile` during evaluation, so the desktop system derivation remains evaluable on Darwin without a Linux builder.
+This check does not build the desktop system closure.
+
 ### nix-darwin
 
 For each entry in `flake.darwinConfigurations`, the check evaluates key resolved values and writes them into a tiny text derivation.
@@ -133,6 +137,6 @@ Provisioning-specific note:
 - keep `nix-vm-test` following `nixpkgs-unstable`; this avoids the removed `python3Packages` alias behavior that broke the disposable SSH-target rehearsal
 - upstream `nix-vm-test` now supplies the required memory/CPU options and current `nixos-test-driver` configuration, so the repo consumes it directly without a source patch
 - keep the repo-local `nixos-images` input on its own upstream nixpkgs lock rather than making `nixos-unstable` follow the repo's rolling package set; its boot modules can still use options removed from newer nixpkgs (for example, `boot.initrd.systemd.enable`)
-- after changing that input, evaluate `packages.x86_64-linux.install-host-kexec-test.drvPath` on Linux; on Darwin, the target host can require Linux import-from-derivation builds, so evaluate the image itself with `nix eval --impure --raw --expr '(builtins.getFlake (toString ./.)).inputs.nixos-images.packages.x86_64-linux.kexec-installer-nixos-unstable-noninteractive.drvPath'` and leave the complete rehearsal evaluation to Linux CI
+- after changing that input, evaluate `packages.x86_64-linux.install-host-kexec-test.drvPath`; this is also supported on Darwin, but building and running the rehearsal requires Linux
 
 If a change affects generated flake output, update `modules/flake-file.nix` and regenerate with `nix run .#write-flake` before validating.
