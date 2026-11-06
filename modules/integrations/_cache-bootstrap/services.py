@@ -235,6 +235,13 @@ PROPERTIES = (
     "LoadState", "NeedDaemonReload", "FragmentPath", "DropInPaths", "ExecStart",
     "Environment", "User", "Group", "DynamicUser", "WorkingDirectory", "ProtectHome", "PrivateUsers",
 ) + EMPTY_PROPERTIES
+# systemctl omits some settings entirely when they are unset instead of
+# reporting them empty, even with --all. Absence there means "unset", not
+# "manager does not know the property", so it cannot be used as a version probe.
+ABSENT_IS_EMPTY = frozenset({
+    "EnvironmentFiles", "ExecCondition", "ExecStartPre", "ExecStartPost",
+    "ExecStop", "ExecStopPost", "ExtensionDirectories",
+})
 
 
 class SystemdService(Service):
@@ -247,8 +254,12 @@ class SystemdService(Service):
             if not sep or key in props or key not in PROPERTIES:
                 raise RuntimeError("Ambiguous systemd service properties")
             props[key] = value
-        if set(props) != set(PROPERTIES):
-            raise RuntimeError("Missing systemd safety properties")
+        missing = set(PROPERTIES) - set(props)
+        unexplained = missing - ABSENT_IS_EMPTY
+        if unexplained:
+            raise RuntimeError("Missing systemd safety properties: " + " ".join(sorted(unexplained)))
+        for key in missing:
+            props[key] = ""
         if props["LoadState"] != "loaded" or props["NeedDaemonReload"] != "no":
             raise RuntimeError("Daemon definition is unloaded or differs from disk; review and reload it first")
         if (any(props[key] for key in EMPTY_PROPERTIES)

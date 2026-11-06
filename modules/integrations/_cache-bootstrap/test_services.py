@@ -270,7 +270,7 @@ class SystemdTests(unittest.TestCase):
                 self.props = original.copy()
                 self.extra = ""
                 if mutation == "missing":
-                    del self.props["EnvironmentFiles"]
+                    del self.props["ProtectHome"]
                 elif mutation == "unknown":
                     self.extra = "FuturePolicy=override\n"
                 elif mutation == "duplicate":
@@ -279,6 +279,23 @@ class SystemdTests(unittest.TestCase):
                     self.props["ExecStart"] += " ; second command"
                 with self.assertRaises(RuntimeError):
                     services.SystemdService().validate()
+
+    def test_unset_exec_properties_omitted_by_the_manager_are_accepted(self) -> None:
+        # systemctl omits these instead of reporting them empty, even with
+        # --all; absence must not be read as an unsupported manager.
+        for key in services.ABSENT_IS_EMPTY:
+            del self.props[key]
+        service = services.SystemdService()
+        self.assertEqual(service.validate(), NIX)
+        service.restart()
+        self.assertEqual(self.restarts, 1)
+
+    def test_omitted_exec_property_with_a_value_is_still_enforced(self) -> None:
+        for key in services.ABSENT_IS_EMPTY:
+            del self.props[key]
+        self.props["ExtensionDirectories"] = "/tmp/untrusted"
+        with self.assertRaises(RuntimeError):
+            services.SystemdService().validate()
 
     def test_independent_daemon_installation_selects_matching_parser(self) -> None:
         self.props["ExecStart"] = exec_start(OTHER_DAEMON, OTHER_DAEMON)
