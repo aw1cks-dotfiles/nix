@@ -153,13 +153,31 @@ class InterpreterIsolationTests(IsolatedTests):
         executed = self.root / "executed"
         script = self.root / "approved-helper.py"
         script.write_text(f"from pathlib import Path\nPath({str(executed)!r}).touch()\n")
-        # Do not invoke sudo: exercise the real child interpreter under the
-        # sanitized environment as the test user, never a host provisioner.
-        with mock.patch.object(bootstrap.os, "geteuid", return_value=0), \
-                mock.patch.object(bootstrap.sys, "executable", interpreter):
-            bootstrap.privileged_python(script, policy="")
+        # -I alone runs the hooks; -S is what suppresses them.
+        subprocess.run([interpreter, "-I", "-S", str(script)], env=self.env, check=True)
         self.assertTrue(executed.exists())
         self.assertFalse(hook.exists())
+        # Sandboxed builds report store files as the unmapped overflow uid, so
+        # the administrator-owned gate cannot be observed there. Simulate the
+        # ownership and assert the sanitized command that would be elevated:
+        # /usr/bin/env does not exist inside a Nix build sandbox, so executing
+        # it is not possible in that environment.
+        resolved = Path(interpreter).resolve()
+        real_stat = Path.stat
+
+        def root_owned(path: Path, **kwargs):
+            metadata = list(real_stat(path, **kwargs))
+            if Path(path) == resolved:
+                metadata[4] = 0
+            return os.stat_result(metadata)
+
+        # Do not invoke sudo: never reach a host provisioner from a test.
+        with mock.patch.object(bootstrap.os, "geteuid", return_value=0), \
+                mock.patch.object(bootstrap.sys, "executable", interpreter), \
+                mock.patch.object(Path, "stat", root_owned), \
+                mock.patch.object(bootstrap, "privileged") as elevated:
+            bootstrap.privileged_python(script, policy="")
+        elevated.assert_called_once_with([str(resolved), "-I", "-S", str(script)], policy="")
 
     def test_user_writable_interpreter_is_rejected_before_execution(self) -> None:
         interpreter = self.root / "python"
