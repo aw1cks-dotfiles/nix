@@ -14,9 +14,10 @@ let
     inherit (cfg) stateDirectory passwordFile port;
     tailnetHost = host;
     pluginDirectory = "${cfg.ompPluginPackage}/share/paseo-omp";
-    authModule = "${cfg.package}/lib/paseo/packages/server/dist/server/server/auth.js";
+    configModule = "${cfg.package}/lib/paseo/packages/server/dist/server/server/config.js";
     instanceModule = "${cfg.package}/lib/paseo/packages/server/dist/server/server/daemon-instance.js";
   };
+  withPassword = import ../../integrations/_paseo-with-password.nix { inherit pkgs; };
   runner = pkgs.writeShellApplication {
     name = "paseo-managed";
     runtimeInputs = [
@@ -39,13 +40,11 @@ let
       # Suppress optional public service-proxy listeners from old user config.
       export PASEO_SERVICE_PROXY_ENABLED=false
       export PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD=0
-      # Authentication comes from the private file's bcrypt hash in user state,
-      # not a plaintext environment variable inherited by agents or plugins.
-      unset PASEO_PASSWORD
+      # Authentication is loaded from private writable storage immediately before exec.
       node ${./files/paseo/prepare.mjs} ${settings}
       # Direct supervisor startup takes the PID lock atomically and fails on a
       # competing instance, rather than silently adopting daemon run's existing one.
-      exec ${cfg.package}/bin/paseo-server
+      exec ${lib.getExe withPassword} ${lib.escapeShellArg cfg.passwordFile} ${cfg.package}/bin/paseo-server
     '';
   };
 in
@@ -89,6 +88,7 @@ in
         Private user-owned regular plaintext password file outside the Nix store.
         The service creates it once with a random password and mode 0600 if missing,
         preserves it across rebuilds, and refuses empty or group/world-readable files.
+        Loaded as PASEO_PASSWORD at startup; inherited by daemon child processes.
         Read this file locally to enter the password in the phone app.
       '';
     };

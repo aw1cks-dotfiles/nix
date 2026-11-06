@@ -560,8 +560,22 @@ in a user-owned `0600` regular file. Read that file locally to enter the passwor
 in the app; do not paste it into configuration, logs, or a URL. An existing custom
 password file must be a private user-owned regular file, not a symlink, containing
 one nonempty line. Empty, symlinked or group/world-accessible files stop startup.
-The service writes only a bcrypt hash to its private writable `config.json`;
-the plaintext is not placed in the store or exported to agent processes.
+
+The exec wrapper reads this file as data, exports `PASEO_PASSWORD`, and starts
+the native supervisor. Paseo hashes the password in memory; the wrapper does not
+create or update a bcrypt hash in `config.json`. The plaintext stays outside the
+Nix store and command-line arguments, but **is present in the daemon environment
+and can be inherited by child processes**, including plugins and agents.
+This is a same-user coding-agent service, not a secret-isolated runtime.
+
+The same loader is used on launchd and systemd to preserve the existing raw
+`passwordFile` format without sourcing shell code or maintaining a second secret
+file. For a **fresh instance**, it can also initialize the file without starting
+the daemon:
+
+```sh
+nix run .#paseo-with-password -- "$HOME/.config/paseo/password" true
+```
 
 If an existing Paseo config already has a password but the managed file is
 missing, startup refuses to replace it: provision `passwordFile` with the
@@ -570,10 +584,15 @@ adoption. The wrapper refuses an existing supervisor before modifying state,
 and the native supervisor takes its PID lock atomically; an unmanaged running
 daemon is never silently accepted as an authenticated managed instance.
 
-Rebuilds/restarts retain the password, matching bcrypt hash, sessions,
-`plugin-settings`, `plugin-data`, daemon identity and other user state. Only
-managed listen/hostname/auth/relay policy and the pinned OMP plugin registration
-are reconciled in `config.json`; other settings and plugin registrations remain.
+Existing managed installations reuse their password file unchanged. Any existing
+bcrypt hash in `config.json` is preserved, but the startup environment takes
+precedence; rotating the file does not update that older hash. Always start the
+managed service rather than bypassing its password loader.
+
+Rebuilds/restarts retain the password, sessions, `plugin-settings`, `plugin-data`,
+daemon identity and other user state. Only managed listen/hostname/relay policy
+and the pinned OMP plugin registration are reconciled in `config.json`, through
+Paseo's own configuration API; other settings and plugin registrations remain.
 There are no Home Manager store symlinks replacing the mutable state tree.
 
 To rotate the password, replace the private file securely and restart the
@@ -597,9 +616,11 @@ tailscale serve --bg --https=9443 --set-path=/ off
 
 ### Verification
 
-`checks.<system>.paseo-state` checks password/hash preservation, private-file
-rejection, existing-password adoption and password-file rotation against the
-real pinned daemon's bcrypt implementation.
+`checks.<system>.paseo-state` checks password preservation, private-file rejection,
+existing-password adoption, environment-over-config authentication precedence,
+password-file rotation, literal file loading and upstream-supported BOM configs.
+It runs the packaged password loader against the pinned daemon's real
+configuration resolver and bcrypt implementation.
 
 The integration was exercised on aarch64 macOS with temporary user state:
 native daemon startup, unauthenticated/wrong-password rejection, authenticated
@@ -610,6 +631,14 @@ configuration was subsequently switched and the deployed daemon/provider
 verified. No model turn or physical iPhone UI was exercised. Temporary smoke
 routes were removed after verification; normal mappings are now declaratively
 configured from Nix when the Serve layer is enabled.
+
+The environment-based startup path was separately exercised on aarch64 macOS
+with temporary state: fresh native daemon startup rejected missing, wrong and
+inherited passwords, accepted the file password, retained password/configuration
+and a user-state marker across restart, and rejected the old password after
+rotation. No managed hash was persisted. The rendered Home Manager launcher and
+the six state/authentication checks were built; this change was not switched
+onto the live host or validated from a downstream consumer.
 
 ## Zed Kubernetes And CRD Schemas
 

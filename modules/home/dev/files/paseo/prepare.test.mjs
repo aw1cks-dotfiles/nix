@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { randomBytes } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import {
   chmodSync,
   existsSync,
@@ -17,14 +17,24 @@ import { test } from "node:test";
 import { pathToFileURL } from "node:url";
 import { prepare } from "./prepare.mjs";
 
-const authModule = process.env.PASEO_AUTH_MODULE;
-assert.ok(
-  authModule,
-  "PASEO_AUTH_MODULE must name the pinned daemon's real auth implementation",
-);
+const serverDirectory = process.env.PASEO_SERVER_DIRECTORY;
+const passwordCommand = process.env.PASEO_PASSWORD_COMMAND;
+assert.ok(serverDirectory, "PASEO_SERVER_DIRECTORY must name the pinned daemon");
+assert.ok(passwordCommand, "PASEO_PASSWORD_COMMAND must name the built launcher");
 const { hashDaemonPassword, isBearerTokenValidAsync } = await import(
-  pathToFileURL(authModule).href
+  pathToFileURL(path.join(serverDirectory, "auth.js")).href
 );
+
+// Exercise the real daemon's environment-over-config authentication precedence.
+const resolveAuthentication = `
+  const { readPersistedConfig, resolveConfigFromPersisted } = await import(
+    ${JSON.stringify(pathToFileURL(path.join(serverDirectory, "config.js")).href)}
+  );
+  const config = resolveConfigFromPersisted(
+    process.env.PASEO_HOME, readPersistedConfig(process.env.PASEO_HOME)
+  );
+  console.log(JSON.stringify(config.auth));
+`;
 
 function fixture(t) {
   const root = mkdtempSync(path.join(os.tmpdir(), "paseo-state-test-"));
@@ -35,8 +45,8 @@ function fixture(t) {
     pluginDirectory: "/nix/store/pinned-plugin/share/paseo-omp",
     tailnetHost: "machine.example.ts.net",
     port: 6767,
-    authModule,
-    instanceModule: path.join(path.dirname(authModule), "daemon-instance.js"),
+    configModule: path.join(serverDirectory, "config.js"),
+    instanceModule: path.join(serverDirectory, "daemon-instance.js"),
   };
   mkdirSync(settings.stateDirectory, { mode: 0o700 });
   return {
@@ -45,11 +55,34 @@ function fixture(t) {
   };
 }
 
-function privatePassword(filename, contents) {
-  writeFileSync(filename, contents, { mode: 0o600 });
+function launch(settings) {
+  return spawnSync(
+    passwordCommand,
+    [
+      settings.passwordFile,
+      process.execPath,
+      "--input-type=module",
+      "-e",
+      resolveAuthentication,
+    ],
+    {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PASEO_HOME: settings.stateDirectory,
+        PASEO_PASSWORD: "inherited-value-must-not-win",
+      },
+    },
+  );
 }
 
-test("restart preserves password, authentication hash, user settings and plugin state", async (t) => {
+function authentication(settings) {
+  const result = launch(settings);
+  assert.equal(result.status, 0, result.stderr || String(result.error));
+  return JSON.parse(result.stdout);
+}
+
+test("restart preserves the password and user state without persisting a managed hash", async (t) => {
   const { settings, config } = fixture(t);
   const marker = path.join(settings.stateDirectory, "plugin-settings-marker");
   writeFileSync(marker, "persistent plugin settings");
@@ -69,54 +102,59 @@ test("restart preserves password, authentication hash, user settings and plugin 
     }),
   );
   await prepare(settings);
+  const firstAuth = authentication(settings);
   const password = readFileSync(settings.passwordFile, "utf8");
   const first = readFileSync(config, "utf8");
-  const parsed = JSON.parse(first);
   assert.equal(
-    await isBearerTokenValidAsync({
-      password: parsed.daemon.auth.password,
-      token: password.trim(),
-    }),
+    await isBearerTokenValidAsync({ ...firstAuth, token: password.trim() }),
     true,
   );
   assert.equal(
-    await isBearerTokenValidAsync({
-      password: parsed.daemon.auth.password,
-      token: "incorrect",
-    }),
+    await isBearerTokenValidAsync({ ...firstAuth, token: "incorrect" }),
     false,
   );
+  assert.equal(JSON.parse(first).daemon.auth, undefined);
   assert.equal(first.includes(password.trim()), false);
   assert.equal(statSync(settings.passwordFile).mode & 0o777, 0o600);
   assert.equal(statSync(config).mode & 0o777, 0o600);
   await prepare(settings);
+  const nextAuth = authentication(settings);
+  assert.equal(
+    await isBearerTokenValidAsync({ ...nextAuth, token: password.trim() }),
+    true,
+  );
   assert.equal(readFileSync(settings.passwordFile, "utf8"), password);
   assert.equal(readFileSync(config, "utf8"), first);
   assert.equal(readFileSync(marker, "utf8"), "persistent plugin settings");
+  const parsed = JSON.parse(first);
   assert.equal(parsed.agents.idleRuntimeCleanup, false);
   assert.equal(parsed.worktrees.root, "/home/user/worktrees");
   assert.equal(parsed.plugins.other.enabled, false);
 });
 
-test("unsafe or empty password files fail without replacing existing config", async (t) => {
-  const { settings, config } = fixture(t);
-  const original = JSON.stringify({
-    version: 1,
-    agents: { idleRuntimeCleanup: false },
-  });
-  writeFileSync(config, original);
-  privatePassword(settings.passwordFile, "private-secret\n");
+test("unsafe, empty and multiline password files refuse startup", (t) => {
+  const { settings } = fixture(t);
+  writeFileSync(settings.passwordFile, "private-secret\n", { mode: 0o600 });
   chmodSync(settings.passwordFile, 0o644);
-  await assert.rejects(prepare(settings), /private, user-owned regular file/);
-  assert.equal(readFileSync(config, "utf8"), original);
+  let result = launch(settings);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /private, user-owned regular file/);
   chmodSync(settings.passwordFile, 0o600);
-  writeFileSync(settings.passwordFile, "\n");
-  await assert.rejects(prepare(settings), /one nonempty line/);
-  assert.equal(readFileSync(config, "utf8"), original);
+  for (const contents of ["\n", " \t\n", "first\nsecond\n"]) {
+    writeFileSync(settings.passwordFile, contents);
+    result = launch(settings);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /one nonempty line/);
+    assert.equal(readFileSync(settings.passwordFile, "utf8"), contents);
+  }
   rmSync(settings.passwordFile);
-  symlinkSync(config, settings.passwordFile);
-  await assert.rejects(prepare(settings));
-  assert.equal(readFileSync(config, "utf8"), original);
+  const target = path.join(settings.stateDirectory, "secret");
+  writeFileSync(target, "private-secret\n", { mode: 0o600 });
+  symlinkSync(target, settings.passwordFile);
+  result = launch(settings);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /private, user-owned regular file/);
+  assert.equal(readFileSync(target, "utf8"), "private-secret\n");
 });
 
 test("adopting an existing password requires explicit secret provisioning", async (t) => {
@@ -131,20 +169,66 @@ test("adopting an existing password requires explicit secret provisioning", asyn
   assert.equal(readFileSync(config, "utf8"), original);
 });
 
-test("password-file rotation changes authentication without replacing other state", async (t) => {
+test("password-file rotation overrides an existing persisted hash", async (t) => {
   const { settings, config } = fixture(t);
+  const previousHash = hashDaemonPassword("existing-password");
+  writeFileSync(
+    config,
+    JSON.stringify({
+      version: 1,
+      daemon: { auth: { password: previousHash } },
+      worktrees: { root: "/home/user/worktrees" },
+    }),
+  );
+  writeFileSync(settings.passwordFile, "existing-password\n", { mode: 0o600 });
   await prepare(settings);
-  const previous = readFileSync(settings.passwordFile, "utf8").trim();
-  const replacement = randomBytes(32).toString("base64url");
-  privatePassword(settings.passwordFile, replacement);
-  await prepare(settings);
-  const hash = JSON.parse(readFileSync(config, "utf8")).daemon.auth.password;
+  const before = authentication(settings);
   assert.equal(
-    await isBearerTokenValidAsync({ password: hash, token: previous }),
+    await isBearerTokenValidAsync({ ...before, token: "existing-password" }),
+    true,
+  );
+  writeFileSync(settings.passwordFile, "replacement-password\n");
+  const after = authentication(settings);
+  assert.equal(
+    await isBearerTokenValidAsync({ ...after, token: "existing-password" }),
     false,
   );
   assert.equal(
-    await isBearerTokenValidAsync({ password: hash, token: replacement }),
+    await isBearerTokenValidAsync({ ...after, token: "replacement-password" }),
     true,
   );
+  const parsed = JSON.parse(readFileSync(config, "utf8"));
+  assert.equal(parsed.daemon.auth.password, previousHash);
+  assert.equal(parsed.worktrees.root, "/home/user/worktrees");
+});
+
+test("configuration reconciliation accepts upstream-supported UTF-8 BOM files", async (t) => {
+  const { settings, config } = fixture(t);
+  writeFileSync(
+    config,
+    "\uFEFF" +
+      JSON.stringify({
+        version: 1,
+        worktrees: { root: "/home/user/worktrees" },
+      }),
+  );
+  await prepare(settings);
+  assert.equal(
+    JSON.parse(readFileSync(config, "utf8")).worktrees.root,
+    "/home/user/worktrees",
+  );
+});
+
+test("password file contents are data rather than executable shell syntax", async (t) => {
+  const { settings } = fixture(t);
+  await prepare(settings);
+  const marker = path.join(settings.stateDirectory, "must-not-exist");
+  const password = `literal-$(touch '${marker}')`;
+  writeFileSync(settings.passwordFile, `${password}\n`, { mode: 0o600 });
+  const auth = authentication(settings);
+  assert.equal(
+    await isBearerTokenValidAsync({ ...auth, token: password }),
+    true,
+  );
+  assert.equal(existsSync(marker), false);
 });
