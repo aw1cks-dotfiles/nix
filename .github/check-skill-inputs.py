@@ -4,7 +4,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
-SKILL_INPUTS = ("intel-performance-skills", "low-level-dev-skills")
+SKILL_INPUTS = (
+    "intel-performance-skills",
+    "low-level-dev-skills",
+    "rewrite-rs-skills",
+    "trailofbits-skills",
+)
 APPROVALS = Path(".github/reviewed-skill-inputs.json")
 
 

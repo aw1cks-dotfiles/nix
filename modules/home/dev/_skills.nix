@@ -2,34 +2,10 @@
   inputs,
   lib,
   pkgs,
+  sourcePolicy ? import ./_skills-policy.nix,
 }:
 let
-  lowlevelCategories = [
-    "allocators"
-    "async-io"
-    "binaries"
-    "build-systems"
-    "compiler-internals"
-    "compilers"
-    "computer-architecture"
-    "debuggers"
-    "kernel-dev"
-    "kernel"
-    "low-level-programming"
-    "observability"
-    "profilers"
-    "runtimes"
-    "rust"
-    "security"
-    "virtualization"
-  ];
-  buildSystems = [
-    "build-acceleration"
-    "cmake"
-    "make"
-    "ninja"
-    "static-analysis"
-  ];
+  policy = sourcePolicy;
   patches = {
     cpp-coroutines = ./files/agents/patches/cpp-coroutines.patch;
     io-uring = ./files/agents/patches/io-uring.patch;
@@ -75,21 +51,27 @@ let
       lib.concatMap (name: discover namespace license (root + "/${name}")) (directories root);
   intelRoot = inputs.intel-performance-skills.outPath or inputs.intel-performance-skills;
   lowlevelRoot = inputs.low-level-dev-skills.outPath or inputs.low-level-dev-skills;
-  lowlevelSkills = lowlevelRoot + "/skills";
-  lowlevelEntries = lib.concatMap (
-    category:
+  rewriteRoot = inputs.rewrite-rs-skills.outPath or inputs.rewrite-rs-skills;
+  trailofbitsRoot = inputs.trailofbits-skills.outPath or inputs.trailofbits-skills;
+  curated =
+    namespace: root: paths:
     lib.concatMap (
-      name:
-      lib.optionals (
-        (category != "build-systems" || builtins.elem name buildSystems)
-        && (category != "profilers" || name != "linux-perf")
-      ) (discover "lowlevel" (notices lowlevelRoot) (lowlevelSkills + "/${category}/${name}"))
-    ) (directories (lowlevelSkills + "/${category}"))
-  ) (lib.filter (category: builtins.pathExists (lowlevelSkills + "/${category}")) lowlevelCategories);
+      path:
+      let
+        source = root + "/${path}";
+      in
+      # An allowlisted directory is a single skill, never a discovery root.
+      if builtins.pathExists (source + "/SKILL.md") then
+        discover namespace (notices root) source
+      else
+        throw "Missing reviewed agent skill '${namespace}/${path}/SKILL.md'."
+    ) paths;
   entries =
     discover "builtin" null ./files/agents/skills
     ++ discover "intel" (notices intelRoot) (intelRoot + "/skills")
-    ++ lowlevelEntries;
+    ++ curated "lowlevel" lowlevelRoot (map (path: "skills/${path}") policy.lowlevel)
+    ++ curated "rewrite" rewriteRoot policy.rewrite
+    ++ curated "trailofbits" trailofbitsRoot policy.trailofbits;
   catalog = builtins.foldl' (
     acc: entry:
     if builtins.hasAttr entry.name acc then
@@ -232,4 +214,11 @@ let
 in
 {
   inherit catalog resolve build;
+  defaultSelect = [
+    "builtin/*"
+    "intel/*"
+    "lowlevel/*"
+    "rewrite/*"
+    "trailofbits/*"
+  ];
 }

@@ -30,6 +30,12 @@ That exercises the Home Manager activation pipeline for the supported systems in
 It builds real assembled outputs to check frontmatter rejection and preservation of references, executable assets, and licence notices.
 The check is registered for every configured system independently of the repo's public host inventory.
 
+`checks.<system>.agent-omp-skills` runs the pinned OMP CLI against the actual Home Manager `ompConfig` activation output in temporary homes.
+It exercises default/custom/excluded/empty selections, whole-directory extras, retained caller discovery directories and native user skills, and preserved unrelated settings.
+It also checks that disabling OMP does not inject its discovery path or configuration activation.
+The check invokes `omp skill list <project> --json`, which uses the same skill discovery as a session; it does not merely inspect registry installation metadata.
+No check activates the user's real home.
+
 On Linux, `checks.<system>.agent-skills-patches` compiles examples extracted from the assembled upstream skills.
 AddressSanitizer/leak checks exercise coroutine move construction, assignment, self-move, empty handles, and exception lifetime.
 A userspace executable uses actual liburing header helpers to exercise distinct provided-buffer slots, publication, wraparound, and multishot SQE buffer selection without kernel calls.
@@ -39,11 +45,12 @@ The liburing/ASAN check is not registered on Darwin.
 ```bash
 nix build .#checks.x86_64-linux.agent-skills \
   .#checks.x86_64-linux.agent-skills-patches
+nix build .#checks.aarch64-darwin.agent-omp-skills
 ```
 
 These checks cover assembly contracts and known example defects, not the safety or correctness of every upstream instruction.
 CI runs `python3 .github/check-skill-inputs.py` before installing Nix or starting any builds.
-It fails closed unless both skill inputs' locked content hashes match the independently reviewed values in `.github/reviewed-skill-inputs.json`.
+It fails closed unless all skill inputs' locked content hashes match the independently reviewed values in `.github/reviewed-skill-inputs.json`.
 Review source changes and update the approved hash in an explicit commit; do not copy new hashes blindly.
 Unchanged skill contents allow ordinary input maintenance to proceed and automerge after green CI.
 

@@ -1250,6 +1250,22 @@
         "type": "github"
       }
     },
+    "rewrite-rs-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786899218,
+        "narHash": "sha256-yiARqb8bXkCXAtcJ6umS06Mx0EL8a5q5VZSQiLjMb3w=",
+        "owner": "rewrite-rs",
+        "repo": "skills",
+        "rev": "ae0fd62485d071437ae5e6c4036c986b0dd122a0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rewrite-rs",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -1279,7 +1295,9 @@
         "noctalia": "noctalia",
         "oh-my-pi": "oh-my-pi",
         "paseo": "paseo",
+        "rewrite-rs-skills": "rewrite-rs-skills",
         "stylix": "stylix",
+        "trailofbits-skills": "trailofbits-skills",
         "treefmt-nix": "treefmt-nix_6",
         "zen-browser": "zen-browser"
       }
@@ -1589,6 +1607,22 @@
       "original": {
         "owner": "tinted-theming",
         "repo": "base16-zed",
+        "type": "github"
+      }
+    },
+    "trailofbits-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793812025,
+        "narHash": "sha256-09WW/E0H6iBwBcKVWtts8u7eIajTsdm7oKyexXqizRk=",
+        "owner": "trailofbits",
+        "repo": "skills",
+        "rev": "470419e16f97e112d01fc32f4898aea1755015d9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "trailofbits",
+        "repo": "skills",
         "type": "github"
       }
     },

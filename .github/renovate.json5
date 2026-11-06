@@ -22,6 +22,8 @@
       matchPackageNames: [
         'https://github.com/intel/intel-performance-skills',
         'https://github.com/mohitmishra786/low-level-dev-skills',
+        'https://github.com/rewrite-rs/skills',
+        'https://github.com/trailofbits/skills',
       ],
       automerge: true,
       automergeType: 'pr',

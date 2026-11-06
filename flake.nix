@@ -101,9 +101,17 @@
       url = "github:getpaseo/paseo/v0.15.0";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    rewrite-rs-skills = {
+      url = "github:rewrite-rs/skills";
+      flake = false;
+    };
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    trailofbits-skills = {
+      url = "github:trailofbits/skills";
+      flake = false;
     };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
