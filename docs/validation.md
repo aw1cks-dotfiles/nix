@@ -132,5 +132,7 @@ Provisioning-specific note:
 - for the current disposable SSH-target rehearsal, the narrowest useful validation is `nix run .#install-host-kexec-test`, which builds the repo-local Ubuntu-backed kexec test derived from `nixos-anywhere`'s own upstream test fixture
 - keep `nix-vm-test` following `nixpkgs-unstable`; this avoids the removed `python3Packages` alias behavior that broke the disposable SSH-target rehearsal
 - upstream `nix-vm-test` now supplies the required memory/CPU options and current `nixos-test-driver` configuration, so the repo consumes it directly without a source patch
+- keep the repo-local `nixos-images` input on its own upstream nixpkgs lock rather than making `nixos-unstable` follow the repo's rolling package set; its boot modules can still use options removed from newer nixpkgs (for example, `boot.initrd.systemd.enable`)
+- after changing that input, evaluate `packages.x86_64-linux.install-host-kexec-test.drvPath` on Linux; on Darwin, the target host can require Linux import-from-derivation builds, so evaluate the image itself with `nix eval --impure --raw --expr '(builtins.getFlake (toString ./.)).inputs.nixos-images.packages.x86_64-linux.kexec-installer-nixos-unstable-noninteractive.drvPath'` and leave the complete rehearsal evaluation to Linux CI
 
 If a change affects generated flake output, update `modules/flake-file.nix` and regenerate with `nix run .#write-flake` before validating.

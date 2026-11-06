@@ -83,10 +83,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
-    nixos-images = {
-      url = "github:nix-community/nixos-images";
-      inputs.nixos-unstable.follows = "nixpkgs-unstable";
-    };
+    nixos-images.url = "github:nix-community/nixos-images";
     nixpkgs.url = "github:NixOS/nixpkgs/release-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     noctalia = {
