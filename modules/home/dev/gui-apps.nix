@@ -9,7 +9,9 @@
           gitkraken
           meld
           slack
-          vscode
+          # Stable still uses the pre-ASAR Darwin ripgrep path.
+          # https://github.com/NixOS/nixpkgs/pull/543899
+          (if pkgs.stdenv.hostPlatform.isDarwin then unstable.vscode else vscode)
           wireshark
         ]
         ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [ zeal ]
