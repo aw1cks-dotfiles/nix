@@ -54,6 +54,7 @@
           statix
 
           # linters
+          ktlint
           shellcheck
           shellharden
           yamlfmt
