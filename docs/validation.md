@@ -191,6 +191,11 @@ Use the narrowest useful validation first.
 - host-behavior changes: the relevant rebuild command or narrower host-specific build path, because `nix flake check` intentionally avoids full NixOS closures
 - reusable downstream contract changes: downstream validation with a local override when practical
 
+Darwin GUI package note:
+
+- `dev-gui-apps` takes VS Code from the existing pinned `pkgs.unstable` package set because the stable recipe still uses the old macOS ripgrep path instead of the ASAR-unpacked `ripgrep-universal` layout. Linux retains the stable package.
+- Verify this selection with a full `just rebuild` followed by `code --version`; host-derivation evaluation alone cannot catch unpack or patch-phase failures. The upstream packaging fix is [nixpkgs#543899](https://github.com/NixOS/nixpkgs/pull/543899).
+
 Constructor-owned package-set note:
 
 - constructor changes now include shared `pkgs` wiring for `allowUnfree`, NVIDIA license acceptance, `pkgs.unstable`, and `pkgs.llm-agents`
