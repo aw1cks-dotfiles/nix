@@ -22,6 +22,26 @@ The source of truth is `modules/flake-file.nix`, which:
 
 The hidden `modules/_internal/flake-file-inputs/default.nix` file is the reusable downstream `flake-file.inputs.*` contract. Runtime consumers of those inputs live in visible modules under `modules/integrations/`.
 
+### Operational entry points
+
+Shared flake apps are the canonical interface: `nix run .#rebuild`,
+`nix run .#update -- [inputs...]`, `nix run .#clean -- [days]`, and `nix run .`
+for the default rebuild app. Update forwards input names and flags to
+`nix flake update` (except checkout-changing `--flake`) and
+regenerates the flake at the repository root, then archives all input sources
+into the local store. Only update performs best-effort GitHub authentication;
+rebuild does not inject credentials into NH. Clean defaults to 7 days and accepts
+`--gc-only` or `--optimise-only` for the separate operations. The root and template
+justfiles are full copies providing optional sugar; their drift gate compares
+the recipe surfaces reported by `just --list --unsorted`.
+
+Initial cache bootstrap and break-glass recovery are deliberately source-based:
+`python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py` runs from a
+reviewed library source checkout without first evaluating the flake or building
+an app. The downstream template does not bundle this Python implementation.
+See [cache bootstrap](./cache-bootstrap.md).
+
+
 ## Repo Layout
 
 - `modules/schema/`: option schemas for shared namespaces and constructor contracts

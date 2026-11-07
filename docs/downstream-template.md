@@ -25,6 +25,45 @@ That means the public library's reusable transitive flake inputs come from this 
 
 Downstream repos should treat that exported module as authoritative unless they are intentionally overriding part of the contract.
 
+## Canonical Commands
+
+Downstream consumers inherit `nix run .#rebuild` and its default-app alias
+`nix run .`, `nix run .#update -- [inputs...]`, and
+`nix run .#clean -- [days]`. Update forwards input names and flags to
+`nix flake update` (except `--flake`) and regenerates the
+flake at the repository root, then fetches all input sources into the local
+store. Update uses best-effort GitHub authentication; rebuild does not inject
+credentials into NH. Cold-store rebuilds may still hit rate limits.
+Clean defaults to 7 days; use
+`nix run .#clean -- --gc-only [days]` for garbage collection only or
+`nix run .#clean -- --optimise-only` for store optimisation only.
+
+Update operates on the enclosing checkout. For a selective upgrade use
+`nix run .#update -- nixpkgs`; for local integration testing use ordinary CLI
+overrides such as `nix flake check --override-input dendritic-lib path:/path/to/library`.
+
+The template's `justfile` is a full copy of the root justfile, not a reduced
+downstream variant. The upstream justfile drift gate compares both recipe lists.
+Copy the full root file after edits. `just` is optional sugar: `default`, `rebuild`, `update`, and `clean`
+alias the corresponding apps; `gc` and `optimise` alias clean's mode flags.
+
+Initial cache setup and break-glass recovery deliberately bypass apps. The
+template does **not** bundle `modules/integrations/_cache-bootstrap/bootstrap.py`.
+Use a reviewed library source checkout and run from that checkout:
+
+```sh
+python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py bootstrap standalone-hm '/path/to/consumer#user@host'
+python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py --recovery bootstrap standalone-hm '/path/to/consumer#user@host'
+```
+
+Select the actual owner (`nixos`, `darwin`, or `standalone-hm`) and output name.
+These source commands can repair cache policy when the flake cannot evaluate;
+activation still requires a working target flake afterward. The copied
+`bootstrap`, `bootstrap-cache`, `recover`, `sync-caches`, `check-caches`, and
+`probe-cache` recipes require that source path in the consumer checkout; copying
+the justfile does not supply it. See [cache bootstrap](./cache-bootstrap.md).
+
+
 ## Layering Model
 
 The template demonstrates a simple split:
@@ -725,6 +764,7 @@ Hosts can then select that identity through `hostFacts.identity`, or the downstr
 - example host declarations in `templates/default/hosts/examples.nix`
 - an example private namespace in `templates/default/modules/org/`
 - a generated top-level `templates/default/flake.nix`
+- a full root justfile copy in `templates/default/justfile`, guarded against upstream drift
 
 ## What It Does Not Include
 
@@ -741,3 +781,4 @@ If a downstream repo adds one, keep it separate from facts and composition roots
 3. Replace the example identities, domains, and certificate paths.
 4. Uncomment and adapt the example host facts and host declarations.
 5. Regenerate the generated flake with `nix run .#write-flake` after editing the downstream `modules/flake-file.nix`.
+6. For normal operation, use `nix run .#rebuild`, `nix run .#update -- [inputs...]`, and `nix run .#clean -- [days]`; `nix run .` is the default rebuild alias. For first activation or recovery, follow the source-checkout procedure above instead of requiring an app.
