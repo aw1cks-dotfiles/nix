@@ -204,6 +204,7 @@ Unknown role names fail constructor assertions during evaluation.
 - the `user` segment must match the resolved constructor user
 - `nvidia.enable` and `nvidia.pinFile` provide the shared standalone Linux NVIDIA contract
 - Linux hosts get `targets.genericLinux.enable` plus `/nix/var/nix/profiles/default/bin` on `home.sessionPath`, because the `nix.sh` that `genericLinux` sources only exports the per-user profile and leaves a daemon-installed Nix or Lix client off `PATH`
+- Generic Linux homes default `systemd.user.systemctlPath` to `/usr/bin/systemctl` with `lib.mkDefault`. The distro client can fall back to the user D-Bus connection when the private systemd socket is stale or refuses connections; hosts can override the path normally.
 
 `configurations.nixos` is for NixOS systems.
 
