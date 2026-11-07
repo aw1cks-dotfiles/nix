@@ -164,12 +164,15 @@
             docker-compose-language-service
             dockerfile-language-server
             cargo
+            csharpier
             curl
             fd
             dotnet-sdk
+            fantomas
             fsautocomplete
             fzf
             findutils
+            fish
             gh
             git
             go
@@ -177,10 +180,13 @@
             gopls
             gofumpt
             gomodifytags
+            gotools
             gradle
             gnused
             gnutar
+            ghostscript
             hadolint
+            hclfmt
             helm-ls
             impl
             imagemagick
@@ -195,8 +201,11 @@
             mmdcWrapper
             mercurial
             nixd
+            nixfmt
             nodejs
+            netcoredbg
             omnisharp-roslyn
+            prettier
             python3
             python3Packages.ruff
             ripgrep
@@ -205,6 +214,7 @@
             shellcheck
             shfmt
             sqlite
+            sqls
             sqlfluff
             statix
             stylua
