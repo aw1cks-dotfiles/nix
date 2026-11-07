@@ -257,6 +257,7 @@ in
                         enabled = lib.mkDefault false;
                         autoTarget = lib.mkDefault "@task";
                       };
+                      bash.allowCompoundCommands = lib.mkDefault true;
                       # Keep privilege escalation gated, including in yolo
                       # sessions. Auto-approve only explicit, read-only Git
                       # forms; broad subcommands such as `git branch *` also
