@@ -48,7 +48,6 @@
               pkgs.lix
               pkgs.diffutils
               pkgs.gitMinimal
-              pkgs.just
             ];
           }
           ''
@@ -64,7 +63,6 @@
               "$XDG_CACHE_HOME" "$XDG_STATE_HOME"
             directory=${source}/modules/integrations/_cache-bootstrap
             export PYTHONDONTWRITEBYTECODE=1
-            just --justfile ${../../justfile} --list >/dev/null
             python3 -m unittest discover --start-directory "$directory" --pattern 'test_*.py' --verbose
             # Exercise the source CLI, including explicit function application.
             # Its standard-install guard rejects the sandbox's NIX_CONF_DIR. The

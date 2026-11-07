@@ -8,8 +8,8 @@ is needed to render the cache policy.
 
 The implementation is a draft. Python transaction tests use service doubles;
 first NixOS/nix-darwin/HM activation and launchd behaviour still require disposable
-host validation. Do not treat the available recipes as a completed cross-platform
-certification.
+host validation. Do not treat the available entry points as a completed
+cross-platform certification.
 
 Install a security-supported Python build through the host's approved provisioning
 mechanism before starting. Python 3.9 is the language compatibility floor, not a
@@ -18,8 +18,7 @@ maintained by the OS/vendor. The source entry point uses only the standard libra
 and never fetches an interpreter through Nix. The packaged `bootstrap-cache` app
 supplies pinned Python after bootstrap; both entry points execute the same Python
 code. Normal operations use `nix run .#rebuild` (also `nix run .`),
-`nix run .#update -- [inputs...]`, and `nix run .#clean -- [days]`; `just` is
-optional sugar.
+`nix run .#update -- [inputs...]`, and `nix run .#clean -- [days]`.
 
 **Initial setup and break-glass recovery must not depend on those apps.** Run
 `python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py` from a reviewed
@@ -27,8 +26,8 @@ library source checkout: it can render and repair cache policy even when the
 flake cannot evaluate. The target activation still needs a working target flake
 after cache repair. A downstream template does not bundle this Python source;
 obtain a reviewed checkout of this library and pass the downstream flake's local
-directory plus `#name` as the target. Source-based `just` recipes likewise require
-that source path in the working checkout; copying the justfile alone is not enough.
+directory plus `#name` as the target. There are no wrapper recipes to copy: the
+`python3` invocation is the interface.
 
 ## Select the configuration owner
 
@@ -66,16 +65,16 @@ python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py bootstrap darwi
 python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py bootstrap standalone-hm '.#user@host'
 ```
 
-In a checkout containing the source helper, `just bootstrap OWNER TARGET` is
-optional sugar for the same command. For a downstream flake, replace `'.#name'`
-with `'/path/to/consumer#name'`; do not assume the starter template contains
-`modules/integrations/_cache-bootstrap/bootstrap.py`.
+In a checkout containing the source helper those `python3` invocations are the
+full interface; there are no wrapper recipes. For a downstream flake, replace
+`'.#name'` with `'/path/to/consumer#name'`; do not assume the starter template
+contains `modules/integrations/_cache-bootstrap/bootstrap.py`.
 
 Use a real output name; the macOS/HM names above are illustrative. Run standalone
 HM bootstrap as the intended user, **not** with `sudo` around the whole command.
 The helper requests sudo only for daemon provisioning. System activation uses an
 explicit elevated environment; it does not forward arbitrary caller `NIX_CONFIG`
-or use `sudo -E`. Ordinary apps and their `just` aliases preserve the caller's config.
+or use `sudo -E`. The ordinary apps preserve the caller's config.
 Private-input credentials and proxy settings from the user's environment are not
 forwarded across sudo. Any required elevated access must already be configured
 through approved system/root-owned settings; this helper is not a credential bridge.
@@ -199,9 +198,8 @@ source path even if the flake cannot evaluate:
 python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py --recovery bootstrap nixos '.#desktop'
 ```
 
-`just recover nixos '.#desktop'` remains optional source-based sugar in a checkout
-containing the helper. For downstream recovery, run the Python command from the
-library checkout with the consumer's explicit local target instead.
+That `--recovery` invocation is the recovery interface. For a downstream flake,
+run it from the library checkout with the consumer's explicit local target instead.
 
 This deliberately replaces `substituters` and `trusted-public-keys` with the
 official cache URL and its key, rejects flake-supplied configuration, and avoids
@@ -253,7 +251,7 @@ wiring an include. The new standalone installer refuses to proceed while that
 legacy file exists. Inspect whether any active file includes it, remove/migrate
 only a recognized repository-owned include, and then remove the recognized legacy
 file. Unknown contents require manual review; do not delete unrelated settings.
-The old recipe name now requires an explicit owner and target.
+The `bootstrap-cache` app name now requires an explicit owner and target.
 
 When transferring a standalone host to NixOS/nix-darwin, first ensure its
 declarative settings supply the policy, then remove the marked standalone include
@@ -291,7 +289,7 @@ Renderer and transaction tests require installed Lix and are skipped when unavai
 Extended-attribute preservation is checked where Python and the filesystem expose it;
 the implementation does not promise macOS ACL preservation beyond standard-library
 capabilities. The flake check supplies Python, Lix and Git, discovers all Python regressions,
-validates the justfile, and compares source rendering with the packaged configuration.
+and compares source rendering with the packaged configuration.
 Existing CI runs flake checks on Linux and macOS.
 
 The opt-in VM test serves an HTTPS cache with disposable test keys and exercises

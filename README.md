@@ -55,8 +55,8 @@ changes, so run the app in the checkout you want to update. Normal local input
 overrides remain available for integration testing, for example
 `nix flake check --override-input dendritic-lib path:/path/to/library`.
 
-`just` is optional sugar for these apps. First activation and cache recovery are
-different: use the reviewed source checkout's
+First activation and cache recovery deliberately bypass these apps: use the
+reviewed source checkout's
 `python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py` entry point,
 which does not need the flake to evaluate or an app to build. See
 [cache bootstrap](./docs/cache-bootstrap.md) before the first activation.

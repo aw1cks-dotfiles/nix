@@ -42,10 +42,9 @@ Update operates on the enclosing checkout. For a selective upgrade use
 `nix run .#update -- nixpkgs`; for local integration testing use ordinary CLI
 overrides such as `nix flake check --override-input dendritic-lib path:/path/to/library`.
 
-The template's `justfile` is a full copy of the root justfile, not a reduced
-downstream variant. The upstream justfile drift gate compares both recipe lists.
-Copy the full root file after edits. `just` is optional sugar: `default`, `rebuild`, `update`, and `clean`
-alias the corresponding apps; `gc` and `optimise` alias clean's mode flags.
+Neither the library nor the template ships a justfile, so there is nothing to keep
+in sync and no wrapper recipe to drift from the apps. Consumers that want
+`just`-style shortcuts can add their own thin aliases over the apps.
 
 Initial cache setup and break-glass recovery deliberately bypass apps. The
 template does **not** bundle `modules/integrations/_cache-bootstrap/bootstrap.py`.
@@ -58,10 +57,9 @@ python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py --recovery boot
 
 Select the actual owner (`nixos`, `darwin`, or `standalone-hm`) and output name.
 These source commands can repair cache policy when the flake cannot evaluate;
-activation still requires a working target flake afterward. The copied
-`bootstrap`, `bootstrap-cache`, `recover`, `sync-caches`, `check-caches`, and
-`probe-cache` recipes require that source path in the consumer checkout; copying
-the justfile does not supply it. See [cache bootstrap](./cache-bootstrap.md).
+activation still requires a working target flake afterward. Run them from the
+library checkout; no recipe or wrapper supplies that path.
+See [cache bootstrap](./cache-bootstrap.md).
 
 
 ## Layering Model
@@ -764,7 +762,6 @@ Hosts can then select that identity through `hostFacts.identity`, or the downstr
 - example host declarations in `templates/default/hosts/examples.nix`
 - an example private namespace in `templates/default/modules/org/`
 - a generated top-level `templates/default/flake.nix`
-- a full root justfile copy in `templates/default/justfile`, guarded against upstream drift
 
 ## What It Does Not Include
 

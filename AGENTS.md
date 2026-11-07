@@ -10,7 +10,7 @@ This file applies to the entire public repo.
 - Other flakes may consume this repo as an input, including a separate private corporate repo that layers corporate modules and work hosts on top of the shared library.
 - Authoritative human docs live in `docs/architecture.md`, `docs/adding-a-host.md`, `docs/adding-a-role.md`, `docs/validation.md`, `docs/downstream-template.md`, and `docs/secret-management.md`.
 - `flake.nix` is generated. Do not edit it directly; regenerate with `nix run .#write-flake` when needed.
-- Canonical workflows are `nix run .#rebuild`, `nix run .#update`, `nix run .#clean`, and `nix run .` (the default workflow). `just` is optional sugar, not a prerequisite.
+- Canonical workflows are `nix run .#rebuild`, `nix run .#update`, `nix run .#clean`, and `nix run .` (the default workflow). There is no justfile; `just` is not a dependency of this repo.
 - Repo-supported automation should be exposed through flake `apps` or `packages`. Avoid introducing raw `scripts/*` entrypoints as the primary interface when the command should be reproducible and discoverable through the flake.
 - First activation and cache recovery deliberately use the source entry point `python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py`; they must remain usable without evaluating the flake or building an app. Downstream consumers need a reviewed source checkout for that path.
 - Standalone Home Manager NVIDIA hosts use the shared `configurations.home.<name>.nvidia` contract with host-local JSON pin files such as `hosts/<host>/nvidia.json`.
