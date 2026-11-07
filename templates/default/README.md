@@ -13,7 +13,6 @@ It is intentionally reference-oriented rather than ready to evaluate unchanged: 
 - `modules/org/git.nix`: example of layering repo-local git behavior on top of the shared identity model
 - `modules/org/certificates/ssl.nix`: example of layering an internal CA bundle on top of the shared home-manager stack
 - `modules/org/profiles/home/work.nix`: example downstream profile composed from repo-local modules
-- `justfile`: full copy of the library root justfile, with recipe-surface parity checked upstream
 
 ## Example Layering Pattern
 
@@ -48,12 +47,10 @@ Use `nix run .#update -- nixpkgs` for a single input. Run the app in a different
 checkout to update that checkout; use normal `--override-input` flags on
 `nix flake check` for local library integration testing.
 
-`just` is optional sugar. Recipes `default`, `rebuild`, `update`, and `clean`
-alias the matching shared apps; `gc` and `optimise` alias the clean app with
-`--gc-only` and `--optimise-only`. The upstream root/template justfile drift gate
-compares recipe lists; copy the full root file after edits, not a reduced subset.
+This template ships no justfile: the apps above are the only operational
+interface, so there is no wrapper copy to keep in sync or drift from them.
 
-Bootstrap/recovery recipes are intentionally source-based rather than app
+Bootstrap and recovery are intentionally source-based rather than app
 aliases: first activation and recovery must not require an evaluating flake or a
 built app. **This template does not bundle the Python helper.** Obtain a reviewed
 library source checkout and run, from that checkout:
@@ -64,8 +61,8 @@ python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py --recovery boot
 ```
 
 Choose the actual owner (`nixos`, `darwin`, or `standalone-hm`) and output name.
-The copied `bootstrap`, `bootstrap-cache`, `recover`, `sync-caches`, `check-caches`,
-and `probe-cache` recipes require that source path in the consumer checkout;
-they are not standalone template commands. See the library's
+`sync-caches`, `check-caches`, and `probe` are further verbs of the same helper;
+run them from the library checkout, since no recipe or wrapper supplies that path.
+See the library's
 [`cache bootstrap guide`](https://github.com/aw1cks/nix/blob/main/docs/cache-bootstrap.md)
 for prerequisites and recovery limitations.

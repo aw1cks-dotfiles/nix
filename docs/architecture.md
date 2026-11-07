@@ -31,9 +31,9 @@ for the default rebuild app. Update forwards input names and flags to
 regenerates the flake at the repository root, then archives all input sources
 into the local store. Only update performs best-effort GitHub authentication;
 rebuild does not inject credentials into NH. Clean defaults to 7 days and accepts
-`--gc-only` or `--optimise-only` for the separate operations. The root and template
-justfiles are full copies providing optional sugar; their drift gate compares
-the recipe surfaces reported by `just --list --unsorted`.
+`--gc-only` or `--optimise-only` for the separate operations. There is no
+justfile: the apps are the only operational interface, so nothing duplicates
+their logic outside Nix.
 
 Initial cache bootstrap and break-glass recovery are deliberately source-based:
 `python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py` runs from a

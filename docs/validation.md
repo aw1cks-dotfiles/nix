@@ -64,12 +64,12 @@ Only update injects a GitHub token, when available; failed lookup must still
 execute Nix. Rebuild must not acquire or inject credentials into NH.
 Clean defaults to 7 days; `--gc-only` and `--optimise-only`
 preserve the separate garbage-collection and store-optimisation workflows.
-`just` is optional sugar, not a required runtime dependency.
+There is no justfile and `just` is not a runtime dependency.
 
-The root `justfile` and `templates/default/justfile` are full copies. The
-justfile drift gate compares their `just --list --unsorted` recipe surfaces.
-Copy the full root file after edits. Bootstrap and recovery recipes remain source-level commands,
-not app aliases, so initial setup can work before flake evaluation succeeds.
+Bootstrap and recovery remain source-level `python3 -I -S
+modules/integrations/_cache-bootstrap/bootstrap.py` commands, not app aliases, so
+initial setup can work before flake evaluation succeeds. No wrapper recipes exist,
+so there is no second copy of that interface to drift.
 
 
 ### OMP collaboration package
