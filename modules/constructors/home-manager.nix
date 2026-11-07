@@ -244,6 +244,13 @@ in
           (lib.mkIf (lib.hasSuffix "-linux" resolvedSystem) {
             targets.genericLinux.enable = true;
 
+            # Activation reloads units only when `systemctl --user
+            # is-system-running` succeeds. Nix's systemctl uses only
+            # $XDG_RUNTIME_DIR/systemd/private, which can be stale or refused
+            # with an older distro user manager. The distro client falls back
+            # to the D-Bus user bus; otherwise every switch can skip reload.
+            systemd.user.systemctlPath = lib.mkDefault "/usr/bin/systemctl";
+
             # genericLinux sources ${nix.package}/etc/profile.d/nix.sh, which
             # only exports the per-user profile. On daemon installs the
             # default profile holds the nix/lix client itself, so without this
