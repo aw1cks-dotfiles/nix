@@ -154,6 +154,10 @@ These tier values feed the shared default model-role assignments. A downstream m
 
 Shared OMP defaults (theme, status line, approval mode, onboarding markers, task isolation/delegation guards, and bash-interception safety policy) are declared per-key with `lib.mkDefault` under `modules.ai.omp.settings`, so a downstream `settings` attrset merges key-by-key instead of replacing the shared block. Downstream modules only declare the deltas — typically model routing and provider policy. Nested defaults are per-subkey (`task.maxRecursionDepth`, `task.agentModelOverrides`) for the same reason: a downstream `task.isolation.*` assignment merges with, rather than replaces, the shared delegation guard.
 
+Compound Bash commands are enabled by default with `bash.allowCompoundCommands = true`.
+OMP evaluates literal `&&` chains per command; unmatched commands still use the normal Bash approval policy and mode.
+Set `modules.ai.omp.settings.bash.allowCompoundCommands = false` to opt out.
+
 ### Oxocarbon themes
 
 The shared AI module installs `~/.omp/agent/themes/oxocarbon-dark.json` when OMP is enabled and defaults `modules.ai.omp.settings.theme.dark` to `oxocarbon-dark`.
