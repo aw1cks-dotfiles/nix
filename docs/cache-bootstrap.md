@@ -15,9 +15,20 @@ Install a security-supported Python build through the host's approved provisioni
 mechanism before starting. Python 3.9 is the language compatibility floor, not a
 recommendation to install an unsupported upstream release; older versions must be
 maintained by the OS/vendor. The source entry point uses only the standard library
-and never fetches an interpreter through Nix. The packaged app supplies pinned
-Python after bootstrap. The former shell implementation has been removed; both
-entry points execute the same Python code.
+and never fetches an interpreter through Nix. The packaged `bootstrap-cache` app
+supplies pinned Python after bootstrap; both entry points execute the same Python
+code. Normal operations use `nix run .#rebuild` (also `nix run .`),
+`nix run .#update -- [inputs...]`, and `nix run .#clean -- [days]`; `just` is
+optional sugar.
+
+**Initial setup and break-glass recovery must not depend on those apps.** Run
+`python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py` from a reviewed
+library source checkout: it can render and repair cache policy even when the
+flake cannot evaluate. The target activation still needs a working target flake
+after cache repair. A downstream template does not bundle this Python source;
+obtain a reviewed checkout of this library and pass the downstream flake's local
+directory plus `#name` as the target. Source-based `just` recipes likewise require
+that source path in the working checkout; copying the justfile alone is not enough.
 
 ## Select the configuration owner
 
@@ -44,15 +55,10 @@ configuration files before bootstrap. Non-Git flakes retain normal path-source
 semantics, including all files in their directory. Spaces, Unicode, and literal
 `%`, `?`, and `#` in checkout names are supported; the final `#` separates the output name.
 
-## First activation, with or without just
+## First activation from source
 
-```sh
-just bootstrap nixos '.#desktop'
-just bootstrap darwin '.#macbook'
-just bootstrap standalone-hm '.#user@host'
-```
-
-Exactly the same source-level entry point works without `just`:
+Run these commands from the reviewed library source checkout, without first
+building an app:
 
 ```sh
 python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py bootstrap nixos '.#desktop'
@@ -60,11 +66,16 @@ python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py bootstrap darwi
 python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py bootstrap standalone-hm '.#user@host'
 ```
 
+In a checkout containing the source helper, `just bootstrap OWNER TARGET` is
+optional sugar for the same command. For a downstream flake, replace `'.#name'`
+with `'/path/to/consumer#name'`; do not assume the starter template contains
+`modules/integrations/_cache-bootstrap/bootstrap.py`.
+
 Use a real output name; the macOS/HM names above are illustrative. Run standalone
 HM bootstrap as the intended user, **not** with `sudo` around the whole command.
 The helper requests sudo only for daemon provisioning. System activation uses an
 explicit elevated environment; it does not forward arbitrary caller `NIX_CONFIG`
-or use `sudo -E`. Ordinary `just` commands no longer replace the caller's config.
+or use `sudo -E`. Ordinary apps and their `just` aliases preserve the caller's config.
 Private-input credentials and proxy settings from the user's environment are not
 forwarded across sudo. Any required elevated access must already be configured
 through approved system/root-owned settings; this helper is not a credential bridge.
@@ -171,8 +182,7 @@ system Lix daemon merely because HM selects `pkgs.lix` for the client.
 After a cache URL or signing-key change, standalone hosts need an explicit sync:
 
 ```sh
-just sync-caches
-# Without just:
+# From the reviewed library source checkout (no flake evaluation required):
 python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py sync-caches
 ```
 
@@ -182,13 +192,16 @@ a conflict instead of a false claim that trust was revoked. Replacing a key does
 not purge or revalidate objects already in the store. Review root/user overrides
 and other configuration owners as part of security-sensitive rotations.
 
-For system bootstrap blocked by an inherited dead cache:
+For system bootstrap blocked by an inherited dead cache, use the break-glass
+source path even if the flake cannot evaluate:
 
 ```sh
-just recover nixos '.#desktop'
-# Without just:
 python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py --recovery bootstrap nixos '.#desktop'
 ```
+
+`just recover nixos '.#desktop'` remains optional source-based sugar in a checkout
+containing the helper. For downstream recovery, run the Python command from the
+library checkout with the consumer's explicit local target instead.
 
 This deliberately replaces `substituters` and `trusted-public-keys` with the
 official cache URL and its key, rejects flake-supplied configuration, and avoids
@@ -202,7 +215,7 @@ to erase arbitrary other daemon policy on standalone hosts.
 ## Verification: do not confuse checks with cache hits
 
 ```sh
-just check-caches
+python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py check-caches
 python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py probe /nix/store/HASH-NAME
 ```
 
@@ -221,7 +234,8 @@ server request logs for a conclusive integration test; an arbitrary public cache
 has no promise of retaining an old path. `HASH-NAME` above is a placeholder, not a
 runnable fixture.
 
-After bootstrap, the packaged entry point is also available:
+After bootstrap, when the flake evaluates normally, the packaged entry point is
+also available. It is not a prerequisite for initial setup or recovery:
 
 ```sh
 nix run .#bootstrap-cache -- check-caches

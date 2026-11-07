@@ -269,7 +269,7 @@ version. Helm rendering and remote-base fetching retain the network caveats abov
 
 ## Applying and validation
 
-The source of truth is the Nix module. `just rebuild` applies settings, tasks,
+The source of truth is the Nix module. `nix run .#rebuild` applies settings, tasks,
 extension requests, and the expanded GUI wrapper PATH through Home Manager.
 Editing only `~/.config/zed/*.json` is not a durable change. Restart Zed after
 adding extension requests: version 1.17.2 checks `auto_install_extensions` at

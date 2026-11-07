@@ -53,6 +53,25 @@ The check builds one synthetic Home Manager activation package per distinct syst
 That exercises the Home Manager activation pipeline without building a real host's full closure.
 The separate `host-derivations` check evaluates every native real activation package, but does not build it.
 
+### Operational command and template contracts
+
+The canonical operational entry points are `nix run .#rebuild`,
+`nix run .#update -- [inputs...]`, `nix run .#clean -- [days]`, and `nix run .`
+(the default rebuild app). Update forwards input names and flags to
+`nix flake update`, rejects `--flake` before changes, and regenerates at the
+repository root, then fetches all input sources with `nix flake archive`.
+Only update injects a GitHub token, when available; failed lookup must still
+execute Nix. Rebuild must not acquire or inject credentials into NH.
+Clean defaults to 7 days; `--gc-only` and `--optimise-only`
+preserve the separate garbage-collection and store-optimisation workflows.
+`just` is optional sugar, not a required runtime dependency.
+
+The root `justfile` and `templates/default/justfile` are full copies. The
+justfile drift gate compares their `just --list --unsorted` recipe surfaces.
+Copy the full root file after edits. Bootstrap and recovery recipes remain source-level commands,
+not app aliases, so initial setup can work before flake evaluation succeeds.
+
+
 ### OMP collaboration package
 
 `checks.<system>.omp-collab` builds the same derivation as `packages.<system>.omp-collab`.
@@ -188,13 +207,13 @@ Use the narrowest useful validation first.
 
 - shared docs or non-evaluated text changes: static inspection is enough
 - constructor, schema, or reusable module changes: `nix flake check`
-- host-behavior changes: the relevant rebuild command or narrower host-specific build path, because `nix flake check` intentionally avoids full NixOS closures
+- host-behavior changes: `nix run .#rebuild` or a narrower host-specific build path, because `nix flake check` intentionally avoids full NixOS closures
 - reusable downstream contract changes: downstream validation with a local override when practical
 
 Darwin GUI package note:
 
 - `dev-gui-apps` takes VS Code from the existing pinned `pkgs.unstable` package set because the stable recipe still uses the old macOS ripgrep path instead of the ASAR-unpacked `ripgrep-universal` layout. Linux retains the stable package.
-- Verify this selection with a full `just rebuild` followed by `code --version`; host-derivation evaluation alone cannot catch unpack or patch-phase failures. The upstream packaging fix is [nixpkgs#543899](https://github.com/NixOS/nixpkgs/pull/543899).
+- Verify this selection with a full `nix run .#rebuild` followed by `code --version`; host-derivation evaluation alone cannot catch unpack or patch-phase failures. The upstream packaging fix is [nixpkgs#543899](https://github.com/NixOS/nixpkgs/pull/543899).
 
 Constructor-owned package-set note:
 

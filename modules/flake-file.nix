@@ -43,6 +43,35 @@
       }
     '';
 
+    # Repo-local only: consumers of flakeModules.default need no templates tree.
+    check-files = [
+      "flake.nix"
+      "flake.lock"
+      "justfile"
+      "templates/default/justfile"
+    ];
+    check-hooks = [
+      {
+        index = 110;
+        program =
+          pkgs:
+          pkgs.writeShellApplication {
+            name = "check-justfile-parity";
+            runtimeInputs = [
+              pkgs.just
+              pkgs.diffutils
+            ];
+            text = ''
+              root_recipes=$(just --justfile "$1/justfile" --list --unsorted)
+              template_recipes=$(just --justfile "$1/templates/default/justfile" --list --unsorted)
+              diff -u --label justfile --label templates/default/justfile \
+                <(printf '%s\n' "$root_recipes") \
+                <(printf '%s\n' "$template_recipes")
+            '';
+          };
+      }
+    ];
+
     inputs = {
       # Keep only the repo bootstrap inputs here.
       # Reusable downstream contract inputs live in ./_internal/flake-file-inputs.

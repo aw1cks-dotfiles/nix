@@ -10,8 +10,9 @@ This file applies to the entire public repo.
 - Other flakes may consume this repo as an input, including a separate private corporate repo that layers corporate modules and work hosts on top of the shared library.
 - Authoritative human docs live in `docs/architecture.md`, `docs/adding-a-host.md`, `docs/adding-a-role.md`, `docs/validation.md`, `docs/downstream-template.md`, and `docs/secret-management.md`.
 - `flake.nix` is generated. Do not edit it directly; regenerate with `nix run .#write-flake` when needed.
-- Common workflows are exposed through `just`, especially `just rebuild` and `just update`.
+- Canonical workflows are `nix run .#rebuild`, `nix run .#update`, `nix run .#clean`, and `nix run .` (the default workflow). `just` is optional sugar, not a prerequisite.
 - Repo-supported automation should be exposed through flake `apps` or `packages`. Avoid introducing raw `scripts/*` entrypoints as the primary interface when the command should be reproducible and discoverable through the flake.
+- First activation and cache recovery deliberately use the source entry point `python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py`; they must remain usable without evaluating the flake or building an app. Downstream consumers need a reviewed source checkout for that path.
 - Standalone Home Manager NVIDIA hosts use the shared `configurations.home.<name>.nvidia` contract with host-local JSON pin files such as `hosts/<host>/nvidia.json`.
 
 ## Load Skills When Relevant
@@ -79,7 +80,7 @@ Use the Nix MCP first for Nix package, option, flake-input, and cache lookups be
 - For configuration changes, prefer the narrowest useful validation first.
 - Before running validation for changes that add new Nix files or change generated flake inputs, stage the relevant new files first so evaluation sees the intended source tree.
 - Use `nix flake check` when it meaningfully covers the change.
-- Use `just rebuild` or a narrower target-specific command only when the change affects actual configuration behavior.
-- Use `just update` when inputs changed.
+- Use `nix run .#rebuild` or a narrower target-specific command only when the change affects actual configuration behavior.
+- Use `nix run .#update -- <inputs...>` when inputs changed; input names and flags are forwarded to `nix flake update` except `--flake`, which is rejected before changes. The enclosing checkout's generated flake is refreshed and all input sources are archived locally. Best-effort GitHub authentication belongs only in update, never in NH's rebuild environment.
 - When changing shared exports or configuration contracts, mention whether downstream consumer validation was performed.
 - Mention clearly if a change was validated only by static inspection and not by a switch/build.

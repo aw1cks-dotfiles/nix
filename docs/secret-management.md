@@ -513,8 +513,8 @@ If this repo later adds an enrollment helper for this flow, expose it through th
 
 Once the machine's public key is in the recipient set and secrets are re-keyed, rebuild normally:
 
-- `just rebuild` for the current darwin machine
-- `just rebuild` for standalone Home Manager on non-NixOS Linux
+- `nix run .#rebuild` for the current darwin machine
+- `nix run .#rebuild` for standalone Home Manager on non-NixOS Linux
 
 ---
 

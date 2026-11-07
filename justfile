@@ -2,29 +2,11 @@
 # narrowly scoped policy and does not require just to be installed.
 set export
 
-is_wsl := path_exists("/proc/sys/fs/binfmt_misc/WSLInterop")
-is_nixos := path_exists("/run/current-system/nixos-version")
-
-nh_app := "nix run .#nh -- "
-nh := if os() == "macos" {
-  nh_app + "darwin"
-} else if os() == "linux" {
-  if is_wsl == "true" {
-    error("WSL is not supported yet")
-  } else if is_nixos == "true" {
-    nh_app + "os"
-  } else {
-    nh_app + "home"
-  }
-} else {
-  error("Unsupported OS: " + os())
-}
-
 default:
-  @just --list --unsorted
+  nix run .#default
 
 rebuild target=".":
-  {{nh}} switch {{target}}
+  nix run .#rebuild -- {{quote(target)}}
 
 fix-nix-daemon:
   @set -e; \
@@ -59,23 +41,15 @@ check-caches:
 probe-cache store_path:
   python3 -I -S modules/integrations/_cache-bootstrap/bootstrap.py probe {{quote(store_path)}}
 
-update:
-  nix flake update
-
-nix_sudo := if os() == "macos" { "sudo -H nix" } else { "nix" }
-gc_command := if os() == "macos" {
-  "sudo -H nix-env --profile /nix/var/nix/profiles/system --delete-generations"
-} else {
-  "nix profile wipe-history"
-}
-gc_day0_value := if os() == "macos" { "old" } else { "" }
+[positional-arguments]
+update *args:
+  nix run .#update -- "$@"
 
 gc days="7":
-  {{gc_command}} \
-    {{ if days == "0" { gc_day0_value } else { if os() == "macos" {"+" + days} else {"--older-than " + days + "d"} } }}
-  {{nix_sudo}} store gc
+  nix run .#clean -- --gc-only {{quote(days)}}
 
 optimise:
-  {{nix_sudo}} store optimise
+  nix run .#clean -- --optimise-only
 
-clean days="7": (gc days) optimise
+clean days="7":
+  nix run .#clean -- {{quote(days)}}
