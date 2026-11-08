@@ -31,7 +31,7 @@ This keeps shared library concerns reusable while allowing local repos to add or
 2. Update `aw1cks.identities.work` in `modules/org/meta.nix` with real values, or remove it if you only need the default identity.
 3. Add any internal CA certificates and point `org.ssl.extraCertificateFiles` at them.
 4. Uncomment and adapt the example entries in `hosts/facts.nix` and `hosts/examples.nix`.
-5. Regenerate the top-level `flake.nix` with `nix run .#write-flake` after changing `modules/flake-file.nix`.
+5. Run `nix run .#write-flake` and `nix flake lock` to synchronize the generated inputs with the selected library version. Repeat after changing `modules/flake-file.nix`.
 
 ## Commands
 
@@ -46,6 +46,11 @@ defaults to 7 days; `--gc-only` and `--optimise-only` select either operation.
 Use `nix run .#update -- nixpkgs` for a single input. Run the app in a different
 checkout to update that checkout; use normal `--override-input` flags on
 `nix flake check` for local library integration testing.
+
+Shared agent skill inputs default to the reviewed revisions in the selected
+library's lockfile; copying that lockfile is not required. Use
+`nix run .#update -- dendritic-lib` to adopt its next reviewed skill versions.
+Explicit `flake-file.inputs.<name>.url` definitions can override those defaults.
 
 This template ships no justfile: the apps above are the only operational
 interface, so there is no wrapper copy to keep in sync or drift from them.

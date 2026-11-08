@@ -131,7 +131,8 @@ OMP discovers these skills alongside native user/project skills; the module does
 Caller-provided custom directories remain in the list. An explicit `lib.mkForce` on `customDirectories` overrides the normal composition.
 Other harnesses can consume the same `skillsSource` output independently.
 
-The default selection includes bundled skills and the curated collections from four public non-flake inputs, with revisions and content hashes recorded in `flake.lock`:
+The default selection includes bundled skills and the curated collections from four public non-flake inputs.
+The library records their revisions and content hashes in its own `flake.lock` and exports those exact revisions as downstream input URL defaults:
 
 - `intel-performance-skills`: [Intel performance skills](https://github.com/intel/intel-performance-skills), exposed as `intel/<name>`; retained rather than also importing duplicate copies from Intel's broader hub
 - `low-level-dev-skills`: [low-level development skills](https://github.com/mohitmishra786/low-level-dev-skills), exposed as `lowlevel/<name>`
@@ -189,10 +190,18 @@ They apply during assembly, not evaluation; a patch that no longer applies block
 No patched derivation is read during evaluation.
 
 The shared input declarations automatically generate downstream `follows` entries.
-Regenerate downstream `flake.nix` with `nix run .#write-flake` when adopting this contract, then lock the new inputs.
-Update them with `nix flake update intel-performance-skills low-level-dev-skills rewrite-rs-skills trailofbits-skills`; a fork, revision, or local source can be selected through `flake-file.inputs.<name>.url`.
+The downstream export projects the skill revisions from the library checkout's `flake.lock` into revision-pinned URLs; downstreams do not need to copy that lockfile.
+Their own lockfile records the resolved sources, and `dendritic-lib` follows those top-level inputs.
+The library's root URLs remain floating so Renovate can continue updating its lockfile.
 
-Renovate can automerge skill updates and weekly mixed lockfile maintenance only after CI passes.
+Adopt reviewed skill updates downstream with `nix run .#update -- dendritic-lib`.
+This updates the library, regenerates downstream `flake.nix` with its skill revisions, and archives the inputs, refreshing the downstream lock as needed.
+For manual adoption, update `dendritic-lib`, run `nix run .#write-flake`, then run `nix flake lock`.
+Updating only downstream skill lock nodes cannot advance revision-pinned URLs.
+A fork, revision, or local source can still be selected explicitly through `flake-file.inputs.<name>.url`; ordinary caller definitions override the shared pinned defaults.
+Such overrides are intentional departures from the library's reviewed versions, not independently approved content.
+
+In the library repo, Renovate can automerge skill updates and weekly mixed lockfile maintenance only after CI passes.
 The existing `host-check` jobs run `python3 .github/check-skill-inputs.py` immediately after checkout, before installing Nix or starting builds.
 It compares all four effective locked `narHash` values with `.github/reviewed-skill-inputs.json`, an independent record of reviewed source contents.
 A changed hash fails the job, including when the skill update arrives through mixed lockfile maintenance.
@@ -202,6 +211,7 @@ The subsequent flake check uses `--no-update-lock-file`, so Nix cannot replace t
 After reviewing an upstream skill diff, update that input's approved hash in `.github/reviewed-skill-inputs.json` and commit the approval alongside the lock change.
 The checker never rewrites this file, and Renovate's Nix manager does not update it.
 Do not regenerate approval hashes without reviewing the contents: passing assembly checks does not establish instruction safety.
+This GitHub CI approval gate is not inherited by importing the Nix modules; downstream pinning supplies reviewed defaults, not runtime enforcement against explicit overrides.
 `platformAutomerge: false` makes Renovate itself observe green CI before merging.
 
 This is repository CI policy, not a runtime restriction on consumer forks or local input overrides.

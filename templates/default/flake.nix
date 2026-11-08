@@ -74,7 +74,7 @@
     };
     import-tree.url = "github:denful/import-tree";
     intel-performance-skills = {
-      url = "github:intel/intel-performance-skills";
+      url = "github:intel/intel-performance-skills/3e33aecabb956ec48526b3f842f4f70ae96d98ff";
       flake = false;
     };
     lazyvim-nix = {
@@ -83,7 +83,7 @@
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
     low-level-dev-skills = {
-      url = "github:mohitmishra786/low-level-dev-skills";
+      url = "github:mohitmishra786/low-level-dev-skills/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608";
       flake = false;
     };
     lucidglyph = {
@@ -119,7 +119,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     rewrite-rs-skills = {
-      url = "github:rewrite-rs/skills";
+      url = "github:rewrite-rs/skills/ae0fd62485d071437ae5e6c4036c986b0dd122a0";
       flake = false;
     };
     stylix = {
@@ -127,7 +127,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     trailofbits-skills = {
-      url = "github:trailofbits/skills";
+      url = "github:trailofbits/skills/470419e16f97e112d01fc32f4898aea1755015d9";
       flake = false;
     };
     treefmt-nix = {
