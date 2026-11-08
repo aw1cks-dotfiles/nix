@@ -4,7 +4,6 @@
     { config, pkgs, ... }:
     let
       configDir = ./files;
-      configDirString = toString configDir;
       mermaidRendererPackage =
         inputs.mermaid-rs-renderer.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
           {
@@ -40,41 +39,25 @@
         omp = "${config.programs.omp.package}/bin/omp";
         ompAcpConfig = ompAcpConfig;
       };
-      ftpluginFiles = builtins.filter (
-        file:
-        let
-          relativePath = lib.removePrefix "${configDirString}/" (toString file);
-        in
-        lib.hasPrefix "ftplugin/" relativePath && lib.hasSuffix ".lua" relativePath
-      ) (lib.filesystem.listFilesRecursive configDir);
-      queryFiles = builtins.filter (
-        file:
-        let
-          relativePath = lib.removePrefix "${configDirString}/" (toString file);
-        in
-        lib.hasPrefix "queries/" relativePath && lib.hasSuffix ".scm" relativePath
-      ) (lib.filesystem.listFilesRecursive configDir);
-      ftpluginLinks = lib.listToAttrs (
-        map (
-          file:
-          let
-            relativePath = lib.removePrefix "${configDirString}/" (toString file);
-          in
-          lib.nameValuePair "nvim/${relativePath}" { source = file; }
-        ) ftpluginFiles
-      );
-      queryLinks = lib.listToAttrs (
-        map (
-          file:
-          let
-            relativePath = lib.removePrefix "${configDirString}/" (toString file);
-          in
-          lib.nameValuePair "nvim/${relativePath}" { source = file; }
-        ) queryFiles
-      );
+      # Keep validation independent of upstream's module; see docs/neovim.md.
+      treesitterQueryCheck =
+        pkgs.runCommand "neovim-treesitter-query-check"
+          { nativeBuildInputs = [ config.programs.neovim.package ]; }
+          ''
+            export HOME="$TMPDIR"
+            mkdir -p "$TMPDIR/site"
+            ln -s ${
+              config.xdg.dataFile."${config.programs.lazyvim.appName}/site/parser".source
+            } "$TMPDIR/site/parser"
+            ln -s ${
+              config.xdg.dataFile."${config.programs.lazyvim.appName}/site/queries".source
+            } "$TMPDIR/site/queries"
+            nvim --clean -l ${./_treesitter-query-check.lua} "$TMPDIR/site"
+            touch "$out"
+          '';
     in
     {
-      imports = [ (import ../../../_internal/neovim/lazyvim-nix-module.nix { inherit inputs; }) ];
+      imports = [ inputs.lazyvim-nix.homeManagerModules.default ];
 
       config = {
         programs.neovim = {
@@ -82,6 +65,10 @@
           viAlias = true;
           vimAlias = true;
         };
+
+        home.checks = lib.optionals (
+          config.programs.lazyvim.enable && pkgs.stdenv.buildPlatform.canExecute pkgs.stdenv.hostPlatform
+        ) [ treesitterQueryCheck ];
 
         home.sessionVariables = {
           # We use an absolute path for SUDO_EDITOR.
@@ -97,6 +84,56 @@
           appName = "nvim";
           configFiles = configDir;
           pluginSource = "latest";
+
+          # Upstream still scans installed HOME instead of configFiles and misses
+          # implicit completion dependencies (#109). Provision only the gaps;
+          # optional fragments must not enable plugins the Lua profile removed.
+          # Keep native Avante/Blink packaging from nixpkgs. See docs/neovim.md.
+          plugins.nix-managed = inputs.lazyvim-nix.lib.lazyConfig (
+            map
+              (
+                spec:
+                {
+                  dev = false;
+                  pin = true;
+                  optional = true;
+                }
+                // spec
+              )
+              [
+                {
+                  plugin = "yetone/avante.nvim";
+                  dir = "${pkgs.vimPlugins.avante-nvim}";
+                }
+                {
+                  plugin = "nyoom-engineering/oxocarbon.nvim";
+                  dir = "${pkgs.vimPlugins.oxocarbon-nvim}";
+                }
+                {
+                  plugin = "sindrets/diffview.nvim";
+                  dir = "${pkgs.vimPlugins.diffview-nvim}";
+                }
+                {
+                  plugin = "stevearc/dressing.nvim";
+                  dir = "${pkgs.vimPlugins.dressing-nvim}";
+                  lazy = true;
+                }
+                {
+                  plugin = "HakonHarnes/img-clip.nvim";
+                  dir = "${pkgs.vimPlugins.img-clip-nvim}";
+                  lazy = true;
+                }
+                {
+                  plugin = "saghen/blink.cmp";
+                  dir = "${pkgs.vimPlugins.blink-cmp}";
+                }
+                {
+                  plugin = "rafamadriz/friendly-snippets";
+                  dir = "${pkgs.vimPlugins.friendly-snippets}";
+                  lazy = true;
+                }
+              ]
+          );
 
           extras = {
             coding."mini-surround".enable = true;
@@ -264,12 +301,33 @@
           ];
         };
 
-        xdg.configFile =
-          ftpluginLinks
-          // queryLinks
-          // {
-            "nvim/lua/plugins/avante.lua".source = lib.mkForce avanteConfig;
-          };
+        xdg.configFile."nvim/lua/plugins/avante.lua".source = lib.mkForce avanteConfig;
       };
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      checks.neovim-plugin-loading =
+        pkgs.runCommand "neovim-plugin-loading" { nativeBuildInputs = [ pkgs.neovim-unwrapped ]; }
+          ''
+            export HOME="$TMPDIR"
+            export XDG_DATA_HOME="$TMPDIR/data"
+            export XDG_STATE_HOME="$TMPDIR/state"
+            export XDG_CACHE_HOME="$TMPDIR/cache"
+            export LAZY_PLUGIN=${pkgs.vimPlugins.lazy-nvim}
+            export COMPAT_FILE=${./files/plugins/000-lazy-bootstrap.lua}
+            mkdir -p "$TMPDIR/dev"
+            ln -s ${pkgs.vimPlugins.trouble-nvim} "$TMPDIR/dev/folke--trouble.nvim"
+            export PLUGIN_DIR="$TMPDIR/dev/folke--trouble.nvim"
+            export RESULT_FILE="$TMPDIR/dev-path-result"
+            nvim --headless -u ${./_lazy-plugin-check.lua}
+            test -s "$RESULT_FILE"
+            export PLUGIN_DIR=${pkgs.vimPlugins.trouble-nvim}
+            export RESULT_FILE="$TMPDIR/store-path-result"
+            nvim --headless -u ${./_lazy-plugin-check.lua}
+            test -s "$RESULT_FILE"
+            touch "$out"
+          '';
     };
 }
