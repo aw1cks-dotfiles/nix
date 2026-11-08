@@ -14,6 +14,7 @@ in
     let
       cfg = config.modules.ai;
       skills = import ./_skills.nix { inherit inputs lib pkgs; };
+      lspDefaults = import ./files/agents/omp/_lsp.nix;
       mkModelTierOption =
         {
           description,
@@ -122,6 +123,17 @@ in
                       default = [ ];
                       description = "MCP server names written to disabledServers in ~/.omp/agent/mcp.json.";
                     };
+                    lspServers = lib.mkOption {
+                      type = lib.types.attrsOf lib.types.anything;
+                      default = { };
+                      description = ''
+                        OMP LSP server definitions merged per server name over the
+                        shared defaults in files/agents/omp/_lsp.nix and written to
+                        ~/.omp/agent/lsp.json. Keys override individual fields of
+                        an entry; set `disabled = true` to suppress one, including
+                        built-in servers.
+                      '';
+                    };
                     collab = {
                       enable = lib.mkEnableOption "the self-hosted OMP collab relay and browser client" // {
                         description = ''
@@ -224,6 +236,17 @@ in
                       tools.xdevDocs = lib.mkDefault "builtins";
                       github.enabled = lib.mkDefault true;
                       astGrep.enabled = lib.mkDefault true;
+
+                      # The lsp tool's per-call deadline is
+                      # max(20, lsp.requestTimeout); rust-analyzer needs more than
+                      # the 20s floor on a cold, large workspace. Measured on this
+                      # checkout: warm hover ~6s, cold symbols ~35s. The value is
+                      # also the ceiling for post-edit diagnostics, but the write
+                      # path does not block on it: a healthy server returns in
+                      # ~3s, and a server that never reports costs the same at 10
+                      # and 60 because a 25s floor dominates. Per-call `timeout=`
+                      # still overrides this in either direction.
+                      lsp.requestTimeout = lib.mkDefault 60;
 
                       # Use OMP's built-in 10-rule DEFAULT_BASH_INTERCEPTOR_RULES
                       # (cat/head/tail, grep/rg, find/fd, sed -i, perl -i, awk, echo >, nohup).
@@ -474,6 +497,7 @@ in
             "collab"
             "extraMcpConfig"
             "disabledMcpServers"
+            "lspServers"
           ])
           (lib.mkIf config.programs.omp.enable {
             # OMP scans these alongside native user/project skills. Do not own
@@ -484,6 +508,15 @@ in
         home.file = lib.mkIf cfg.omp.enable (
           {
             ".omp/agent/themes/oxocarbon-dark.json".source = ./files/agents/omp/themes/oxocarbon-dark.json;
+            ".omp/agent/lsp.json".source =
+              let
+                # OMP merges each server as `{ ...builtin, ...override }`: keys are
+                # shallow-merged and arrays replaced wholesale. Mirror that here so
+                # the generated file and OMP's own merge can never disagree.
+                merged = lib.mapAttrs (name: override: (lspDefaults.${name} or { }) // override) cfg.omp.lspServers;
+                servers = lspDefaults // merged;
+              in
+              pkgs.writeText "omp-lsp.json" (builtins.toJSON { inherit servers; });
           }
           //
             lib.optionalAttrs

@@ -64,6 +64,11 @@ Home Manager's user environment; `aw1cks.profiles.home.developer` includes it.
 Neovim reuses the same package list in its private wrapper PATH without requiring
 the developer profile. Server configuration and discovery remain client-owned.
 
+OMP additionally needs a generated `~/.omp/agent/lsp.json`, because its built-in
+definitions do not match several nixpkgs server names and omit others;
+`aw1cks.modules.home.ai` owns that file. See
+[shared language-server packages](./neovim.md#shared-language-server-packages).
+
 ## Shared Namespaces
 
 The public reusable namespace in this repo is `aw1cks.*`.
