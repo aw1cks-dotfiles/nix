@@ -87,6 +87,15 @@ nix build .#checks.aarch64-darwin.omp-collab --no-link
 nix build .#checks.x86_64-linux.omp-collab --no-link
 ```
 
+### Neovim plugin loading
+
+`checks.<system>.neovim-plugin-loading` exercises require-triggered activation of
+real Trouble modules from collision-safe dev paths and direct Nix package paths.
+It catches missing runtimepath/configuration registration, including Trouble's
+symbol source used by lualine. The actual host's native `home.checks` separately
+validate its installed Treesitter parser/query pairs.
+See [Neovim integration decisions](./neovim.md) for scope and retained workarounds.
+
 ### Agent skills
 
 `checks.<system>.agent-skills` exercises selection layering, `mkForce`, final exclusions, unknown selectors, ID/name collisions, read-only output configuration, and whole-directory replacements.
