@@ -36,13 +36,60 @@ not provision every project's toolchain or dependencies.
 
 OMP uses its native definitions and supported project-local bin directories
 before PATH; missing executables are skipped rather than installed. Startup root
-markers are checked in the current working directory, not ancestors. Merely
-providing executables does not register new OMP servers: the pinned definitions
-do not cover our Docker Compose, F#, Kotlin, SQL, or TOML servers. OMP's Kotlin
-definition expects the different `kotlin-lsp` implementation; its C# definition
-expects lowercase `omnisharp`, whereas our package provides `OmniSharp`.
-No aliases, command overrides, or generated OMP LSP configuration bridge these
-differences.
+markers are checked in the current working directory, not ancestors.
+
+Providing executables alone does not register an OMP server, so
+`aw1cks.modules.home.ai` writes `~/.omp/agent/lsp.json` from
+`modules/home/dev/files/agents/omp/_lsp.nix`. That file restates the entries the
+pinned definitions cannot use as shipped: nixpkgs ships `OmniSharp` where OMP
+expects `omnisharp`; OMP's `kotlin-lsp` entry targets the newer JetBrains server
+and passes `--stdio`, which makes our `kotlin-language-server` exit; and the F#
+and TOML servers are absent from the built-in set.
+
+Docker Compose uses `yamlls` for both YAML syntax and compose-schema diagnostics.
+Its root markers include the four Compose basenames as well as `.git`, so
+standalone Compose directories work without a Git repository. There is no
+dedicated OMP Compose server; the package stays installed because Neovim
+configures `docker_compose_language_service` itself.
+
+OMP merges each server as `{ ...builtin, ...override }`, so overrides are shallow
+and arrays replace wholesale. Set `modules.ai.omp.lspServers.<name>` to change one
+server, or `disabled = true` to suppress it. The generated file preserves that
+marker so OMP suppresses built-in servers as well as added servers, rather than
+falling back to a built-in definition when an override is omitted.
+
+Coverage is still per-project: `fsautocomplete` needs a restored project. Its
+`initOptions.AutomaticWorkspaceInit = true` lets it load projects without
+F#-specific workspace-selection requests from OMP.
+
+Root markers are matched in the working directory only, never in ancestors and
+never against the queried file's own directory. Start OMP in the repository or
+crate root; a monorepo whose marker sits in `python/` or `rust/<crate>/` is
+invisible from the repository root no matter what the file path is.
+
+`lsp.requestTimeout` is raised to 60s. The lsp tool's per-call deadline is
+`max(20, requestTimeout)`, and the pinned `tsc` is 5.9.3, which rejects `--lsp`,
+so OMP drops its `typescript-native` definition and `typescript-language-server`
+is installed instead.
+
+`sqls` is not in the shared defaults even though the package is installed. It
+advertises no `diagnosticProvider`, and without a configured database it never
+pushes diagnostics, so OMP's `diagnostics` action waits indefinitely instead of
+returning an empty result. Opt in per consumer with `lspServers.sqls` where that
+trade is acceptable.
+
+Write-time LSP hooks do not start a server. `lsp.formatOnWrite` and
+`lsp.diagnosticsOnWrite` only act on an already-running client, so the first write
+to a file in a fresh project gets neither formatting nor diagnostics; the same
+write succeeds once any LSP request or edit has warmed the client. Treat the first
+edit after opening a repository as unchecked.
+
+OMP also loads `lsp.json` from the working directory and from `~/.omp/agent`
+without a trust prompt, and spawns whatever those files name. A cloned repository
+can therefore execute commands as you. Keep those files out of untrusted
+checkouts, and review `lsp.json` in a repository before running OMP inside it.
+Home Manager owns `~/.omp/agent/lsp.json` on hosts with this module enabled, so
+add servers through the module rather than editing that file.
 
 This shares binaries, not running server processes or Neovim's server settings.
 Terminal OMP needs the HM profile on PATH; managed Paseo already adds it, and

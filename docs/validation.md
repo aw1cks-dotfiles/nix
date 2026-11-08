@@ -236,6 +236,53 @@ service. See [server ownership and coverage limits](./neovim.md#shared-language-
 Validate Linux evaluation and the real downstream consumer separately when
 available; Darwin execution does not prove Linux runtime behavior.
 
+### Generated OMP LSP configuration
+
+`checks.<system>.agent-omp-lsp` checks the generated `~/.omp/agent/lsp.json`
+merge contract: shared defaults, per-key overrides, whole-array replacement, and
+new entries. It also runs the pinned OMP config loader against the generated
+default and disabled configurations in temporary homes. With real binaries and
+matching project markers, Rust (built-in) and TOML (added) must be eligible by
+default and absent when disabled. Standalone Compose variants must select
+yamlls without `.git`; ordinary standalone YAML must remain ineligible. The
+check does not start language servers or prove that each server responds.
+Successful runs print only the regression summaries; failures retain the
+captured OMP output for diagnosis.
+
+For an installed end-to-end check, rebuild the current host first, then run the
+installed clients in temporary project directories with the real `HOME`:
+
+```sh
+nix run .#rebuild -- . -H mbp
+```
+
+Use the appropriate local host instead of `mbp` on another machine. Require a
+real response per server rather than discovery status.
+
+Project layout matters: root markers are matched in the working directory only,
+so create a directory per server and start OMP inside it. Expect C# (`symbols`),
+Kotlin (`symbols`), F# (`symbols` after a restore, using the shared
+`AutomaticWorkspaceInit` setting), TOML (`symbols`), TypeScript (`diagnostics`,
+`TS2322`), Bash (`hover`; that server does not implement `symbols`), and Rust
+(`symbols`). Compose files are covered by `yamlls` rather than a dedicated
+server: without `.git`, check all four Compose basenames for schema diagnostics
+and a malformed file for YAML syntax diagnostics.
+
+Also disable Rust via `lspServers` and confirm that OMP no longer selects its
+built-in definition. Do not add `sqls` to a probe: it never answers
+`diagnostics`, which is why it is not a shared default.
+
+When timing server startup, use the real `HOME`. Overriding `HOME` breaks
+`RUSTUP_HOME`, so `cargo metadata` fails and rust-analyzer answers nothing even
+though it reports `ready`; that failure looks like a timeout but is a toolchain
+problem. Per-call latency can also be raised with the lsp tool's `timeout`
+argument instead of changing configuration.
+
+Exercise the write-time hooks in a project whose servers have never started: no
+formatting or diagnostics may appear on the first write, and both must appear
+after a warm request. Re-check the project-`lsp.json` spawn path in a throwaway
+directory, since OMP runs those commands without a trust prompt.
+
 ## Recommended Workflow
 
 Use the narrowest useful validation first.

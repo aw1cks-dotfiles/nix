@@ -158,6 +158,10 @@ let
           inherit inputs lib pkgs;
           aiModule = config.aw1cks.modules.home.ai;
         };
+        agent-omp-lsp = import ./home/dev/_omp-lsp-checks.nix {
+          inherit inputs lib pkgs;
+          aiModule = config.aw1cks.modules.home.ai;
+        };
         agent-skill-input-gate =
           pkgs.runCommand "agent-skill-input-gate"
             {
