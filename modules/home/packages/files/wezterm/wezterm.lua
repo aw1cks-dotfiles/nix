@@ -14,16 +14,38 @@ require("binds").apply(config, settings)
 -- returned. It receives `(config, settings)`, so a consumer can add key
 -- bindings or override settings without forking this file.
 --
--- The hook is optional, so a host without `user.lua` is unaffected. A `user.lua`
--- that exists but fails to load, or that does not expose an
--- `apply(config, settings)` function, is reported through `wezterm.log_error`
--- instead of failing the whole configuration silently.
-local has_user, user = pcall(require, "user")
-if has_user then
-	if type(user) == "table" and type(user.apply) == "function" then
-		user.apply(config, settings)
+-- Existence is resolved first with `package.searchpath`, so an *absent* module
+-- stays silent (the hook is optional) while a module that exists but fails to
+-- load — syntax error, missing dependency, error thrown from its body — is
+-- reported. A single `pcall` around `require` cannot tell those apart, which
+-- would make a broken user.lua indistinguishable from no user.lua at all: the
+-- shared config would load with the consumer's overrides quietly missing.
+--
+-- The `apply` call is deliberately *not* wrapped, for the same reason. If the
+-- hook itself raises, wezterm should surface it rather than silently continue.
+local module_name = "user"
+local module_path = package.searchpath(module_name, package.path)
+
+if module_path ~= nil then
+	local loaded, user = pcall(require, module_name)
+
+	if not loaded then
+		wezterm.log_error(
+			string.format(
+				"wezterm: %s exists but failed to load, so its overrides are NOT applied: %s",
+				module_path,
+				tostring(user)
+			)
+		)
+	elseif type(user) ~= "table" or type(user.apply) ~= "function" then
+		wezterm.log_error(
+			string.format(
+				"wezterm: %s must return a table with an apply(config, settings) function, so its overrides are NOT applied",
+				module_path
+			)
+		)
 	else
-		wezterm.log_error("wezterm user.lua must return a table with an apply(config, settings) function")
+		user.apply(config, settings)
 	end
 end
 
