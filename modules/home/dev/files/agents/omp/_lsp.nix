@@ -20,6 +20,19 @@
     args = [ ];
   };
 
+  # Built-in, but its markers miss a repository whose build files sit below the
+  # root. `.git` lets clangd attach there; the command and flags stay OMP's.
+  clangd = {
+    rootMarkers = [
+      "compile_commands.json"
+      "CMakeLists.txt"
+      ".clangd"
+      ".clang-format"
+      "Makefile"
+      ".git"
+    ];
+  };
+
   # yamlls provides YAML syntax and compose-spec schema diagnostics. Its
   # built-in .git marker misses standalone Compose directories, so retain it
   # and add only Compose basenames; ordinary YAML still needs a Git root.

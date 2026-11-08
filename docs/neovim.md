@@ -78,6 +78,39 @@ pushes diagnostics, so OMP's `diagnostics` action waits indefinitely instead of
 returning an empty result. Opt in per consumer with `lspServers.sqls` where that
 trade is acceptable.
 
+## clangd
+
+C and C++ are served by `clangd` from `clang-tools`, which is the only nixpkgs
+source of the binary; its closure is roughly 2.1 GB because it pulls clang and
+llvm. Both clients use it: `neovim/files/plugins/clangd.lua` sets the server for
+Neovim, and the OMP entry only widens `rootMarkers` with `.git`.
+
+The language-server atom installs the policy at clangd's native user path:
+`~/Library/Preferences/clangd/config.yaml` on Darwin and
+`$XDG_CONFIG_HOME/clangd/config.yaml` (normally `~/.config/clangd/config.yaml`) on
+Linux. Darwin does not use the XDG copy. User config has higher precedence than
+the nearest project `.clangd`, then ancestors; projects cannot undo the shared
+removals. The policy strips selected GCC-only flags and `-Werror=*`, adds
+`-Wall`, and enables unused-include diagnostics.
+
+Language standards and header languages stay project-owned through compilation
+databases or `.clangd`. The user policy never adds `-std`: doing so overrides a
+project's C++23 command, while treating every `.h` as C breaks C++ headers.
+Neovim uses portable clangd flags; `--malloc-trim` is not supported by the pinned
+Darwin binary.
+
+No client passes `--compile-commands-dir`. clangd searches parent directories and
+`build/` itself, and pinning the flag would defeat a project's own
+`CompilationDatabase:` redirect. Root markers name `build` as a bare directory,
+because a nested path such as `build/compile_commands.json` resolves the root to
+`build/` rather than the project.
+
+Without a compilation database clangd falls back to a generic command line, so
+diagnostics still appear but include paths are missing. On this workstation none
+of the C/C++ repositories ship `compile_commands.json`, `compile_flags.txt`, or
+`.clangd`, so expect include-resolution errors until a project generates a
+database.
+
 Write-time LSP hooks do not start a server. `lsp.formatOnWrite` and
 `lsp.diagnosticsOnWrite` only act on an already-running client, so the first write
 to a file in a fresh project gets neither formatting nor diagnostics; the same

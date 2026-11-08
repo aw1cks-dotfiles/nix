@@ -283,6 +283,36 @@ formatting or diagnostics may appear on the first write, and both must appear
 after a warm request. Re-check the project-`lsp.json` spawn path in a throwaway
 directory, since OMP runs those commands without a trust prompt.
 
+### clangd
+
+`checks.<system>.clangd-policy` runs pinned clangd against the rendered Home
+Manager files. It proves C++23 settings survive both compilation databases and
+project `.clangd`, C++ `.h` files parse correctly, and the native user config
+enables a warning absent from an unconfigured control.
+
+After activation, verify the actual client surface:
+
+- Native policy: Darwin must own `~/Library/Preferences/clangd/config.yaml`,
+  with no stale managed XDG copy. Linux uses `$XDG_CONFIG_HOME/clangd/config.yaml`.
+  Run with the real `HOME`; setting only `XDG_CONFIG_HOME` does not redirect
+  Darwin's lookup.
+- Project flags: C++23 source and C++ headers must remain clean using their
+  project commands; a deliberately unused C variable must produce
+  `-Wunused-variable` through the installed policy. Do not require globally
+  injected `-std` flags.
+- Root resolution: in a project whose only database is `build/compile_commands.json`,
+  the attached client's `root_dir` must be the project root, not `build/`. A
+  nested root marker such as `build/compile_commands.json` produces the latter.
+- Neovim: load the installed init file, not a handcrafted LSP setup. `-l` alone
+  does not exercise normal startup, so use `--headless -u ~/.config/nvim/init.lua`
+  with a script loaded via `-c 'luafile ...'`. `vim.wait` for clangd attachment and
+  published diagnostics. Confirm real C errors, clean C++23/header cases, and
+  that the command starts without unsupported platform flags.
+
+With no compilation database, diagnostics still appear through clangd's generic
+fallback but include paths are absent, so `file not found` errors are expected and
+do not indicate a broken setup.
+
 ## Recommended Workflow
 
 Use the narrowest useful validation first.
