@@ -210,6 +210,32 @@ nix run .#publish-ci-cache -- aw1cks-nix
 - that secrets decrypt correctly at runtime
 - that downstream consumers still evaluate unless you test them
 
+## Shared language-server smoke checks
+
+Server provisioning needs runtime checks beyond host-derivation evaluation.
+For the native Darwin developer host, build the actual user environment and
+wrapped editor without activation:
+
+```sh
+nix build --no-link .#darwinConfigurations.mbp.config.home-manager.users.alex.home.path
+nix build --no-link .#darwinConfigurations.mbp.config.home-manager.users.alex.programs.neovim.finalPackage
+```
+
+Check that `rust-analyzer` resolves to the standalone Nix package while `cargo`
+and `rustc` still resolve to rustup. Run the pinned OMP LSP tool in temporary
+Nix, Go, and Python projects with the generated profile on PATH; require a
+correct definition or hover response, not discovery status alone. Also exercise
+a supported project-local server launcher and missing-server discovery.
+Run wrapped Neovim with a minimal external PATH to check server availability
+and a real LSP request independently of shell setup.
+
+Use fresh HOME/config/state directories and do not activate the real home.
+These are manual acceptance checks, not a permanent cross-language test suite;
+they do not establish coverage for every language, ACP client, GUI launcher, or
+service. See [server ownership and coverage limits](./neovim.md#shared-language-server-packages).
+Validate Linux evaluation and the real downstream consumer separately when
+available; Darwin execution does not prove Linux runtime behavior.
+
 ## Recommended Workflow
 
 Use the narrowest useful validation first.
