@@ -1,52 +1,41 @@
 local wezterm = require("wezterm")
 local settings = require("settings")
 
-local config = wezterm.config_builder()
-config:set_strict_mode(true)
+-- Home Manager wraps native extraConfig in `extend`, preserving both direct
+-- config mutations and returned-table overrides without replacing this layer.
+return function(extend, initial_config)
+	local config = wezterm.config_builder()
+	config:set_strict_mode(true)
 
-require("appearance").apply(config, settings)
-require("binds").apply(config, settings)
+	require("appearance").apply(config, settings)
+	require("binds").apply(config, settings)
 
--- Extension point for a downstream configuration.
---
--- If `wezterm/user.lua` exists on the Lua module path it is applied to `config`
--- here: after the shared appearance and bindings, before the config is
--- returned. It receives `(config, settings)`, so a consumer can add key
--- bindings or override settings without forking this file.
---
--- Existence is resolved first with `package.searchpath`, so an *absent* module
--- stays silent (the hook is optional) while a module that exists but fails to
--- load — syntax error, missing dependency, error thrown from its body — is
--- reported. A single `pcall` around `require` cannot tell those apart, which
--- would make a broken user.lua indistinguishable from no user.lua at all: the
--- shared config would load with the consumer's overrides quietly missing.
---
--- The `apply` call is deliberately *not* wrapped, for the same reason. If the
--- hook itself raises, wezterm should surface it rather than silently continue.
-local module_name = "user"
-local module_path = package.searchpath(module_name, package.path)
+	-- Native Home Manager settings override shared defaults before extraConfig.
+	for key, value in pairs(initial_config or {}) do
+		config[key] = value
+	end
 
-if module_path ~= nil then
-	local loaded, user = pcall(require, module_name)
+	local extra = extend(config)
+	if type(extra) == "table" then
+		for key, value in pairs(extra) do
+			config[key] = value
+		end
+	end
 
-	if not loaded then
-		wezterm.log_error(
-			string.format(
-				"wezterm: %s exists but failed to load, so its overrides are NOT applied: %s",
-				module_path,
-				tostring(user)
-			)
+	-- The optional downstream hook runs last, after shared and native config.
+	-- Resolve existence separately: missing is silent, but syntax, dependency,
+	-- shape and apply errors must fail configuration rather than drop overrides.
+	local module_name = "user"
+	local module_path = package.searchpath(module_name, package.path)
+
+	if module_path ~= nil then
+		local user = require(module_name)
+		assert(
+			type(user) == "table" and type(user.apply) == "function",
+			string.format("wezterm: %s must return a table with an apply(config, settings) function", module_path)
 		)
-	elseif type(user) ~= "table" or type(user.apply) ~= "function" then
-		wezterm.log_error(
-			string.format(
-				"wezterm: %s must return a table with an apply(config, settings) function, so its overrides are NOT applied",
-				module_path
-			)
-		)
-	else
 		user.apply(config, settings)
 	end
-end
 
-return config
+	return config
+end

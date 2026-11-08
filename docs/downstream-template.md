@@ -74,6 +74,55 @@ The template demonstrates a simple split:
 
 This keeps shared library concerns reusable while giving the downstream repo room for private certificates, private git settings, internal package sources, and site-specific policies.
 
+## WezTerm configuration
+
+The shared WezTerm module lets Home Manager generate `wezterm.lua`; it no longer
+overrides that file with an explicit `.source` that discards
+`programs.wezterm.extraConfig`. Shared Lua lives in `defaults.lua`,
+`appearance.lua`, `binds.lua`, and generated `settings.lua`.
+
+Configuration precedence is shared defaults → `programs.wezterm.settings` →
+`programs.wezterm.extraConfig` → optional `wezterm/user.lua`.
+Native settings and returned Lua tables use shallow overrides: assigning `keys`
+replaces the entire shared key list. To append bindings, mutate the shared
+`config.keys` in `extraConfig`; `wezterm` and `config` are already in scope:
+
+```nix
+{
+  programs.wezterm.extraConfig = ''
+    table.insert(config.keys, {
+      key = "Enter",
+      mods = "SHIFT",
+      action = wezterm.action.SendString("\x1b\r"),
+    })
+  '';
+}
+```
+
+This opt-in Shift+Enter convention sends ESC CR for applications that support it;
+it is not a universal terminal newline protocol. A `return { ... }` is optional.
+Ordinary Lua fragments, including `lib.mkBefore`/`lib.mkAfter` contributions,
+run inside the shared extension callback. `lib.mkForce` on `extraConfig` instead
+replaces the complete entrypoint, opting out of shared configuration.
+
+The existing `xdg.configFile."wezterm/user.lua".source` hook remains supported:
+return a table with `apply(config, settings)`. An absent hook is ignored; syntax,
+dependency, invalid-interface, and apply errors fail configuration loading.
+Do not fork the entrypoint to extend it.
+
+Tab selection uses physical number-row keys: Ctrl+Shift+1–8 select those tabs,
+and Ctrl+Shift+9 selects the last tab. Cmd+1–9 has the same physical behavior on
+macOS. Pane-split bracket keys and Shift+T tab creation also use physical US-key
+positions, without globally changing character-based editing shortcuts.
+This handles British Shift+2 (`"`) and Shift+3 (`£`) as well as other layouts.
+
+When adopting this change downstream, update the `dendritic-lib` input first.
+Remove layout-specific tab-binding patches; move application-specific bindings
+such as Shift+Enter to native `extraConfig` if desired. Once migrated off
+`user.lua`, remove its installation and any source-text hook assertion: scanning
+the old entrypoint is not a stable capability check.
+
+
 ## Shared agent skills
 
 The shared Home Manager AI module exposes a read-only `modules.ai.skillsSource`: a flat directory of complete, selected skill directories for compatible agent harnesses.

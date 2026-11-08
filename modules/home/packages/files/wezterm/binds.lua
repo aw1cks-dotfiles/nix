@@ -18,14 +18,14 @@ function M.apply(config, settings)
 	local secondary_modifier = primary_modifier .. "|SHIFT"
 	config.keys = {
 		{
-			key = "[",
+			key = "phys:LeftBracket",
 			mods = primary_modifier,
 			action = wezterm.action({
 				SplitHorizontal = { domain = "CurrentPaneDomain" },
 			}),
 		},
 		{
-			key = "]",
+			key = "phys:RightBracket",
 			mods = primary_modifier,
 			action = wezterm.action({
 				SplitVertical = { domain = "CurrentPaneDomain" },
@@ -88,7 +88,7 @@ function M.apply(config, settings)
 			}),
 		},
 		{
-			key = "t",
+			key = "phys:T",
 			mods = secondary_modifier,
 			action = wezterm.action({
 				SpawnTab = "CurrentPaneDomain",
@@ -123,6 +123,25 @@ function M.apply(config, settings)
 			}),
 		},
 	}
+
+	-- Bind positions, not US shifted symbols: gb produces " / £ for Shift+2 / 3.
+	-- Preserve WezTerm's convention that 9 selects the last tab.
+	for i = 1, 9 do
+		local action = wezterm.action.ActivateTab(i == 9 and -1 or i - 1)
+		table.insert(config.keys, {
+			key = "phys:" .. tostring(i),
+			mods = "CTRL|SHIFT",
+			action = action,
+		})
+
+		if settings.platform == "darwin" then
+			table.insert(config.keys, {
+				key = "phys:" .. tostring(i),
+				mods = "SUPER",
+				action = action,
+			})
+		end
+	end
 end
 
 return M
