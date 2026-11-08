@@ -1,4 +1,4 @@
-# Auto-generate the `dendritic-lib` flake input for downstream consumers.
+# Auto-generate downstream `dendritic-lib` follows and reviewed skill defaults.
 #
 # Only imported via `flake.flakeModules.downstream-flake-file`. Never loaded by
 # upstream's own flake (it cannot declare itself as an input).
@@ -12,9 +12,9 @@
 #   - a small bootstrap list every downstream flake-file source declares
 #     directly (flake-file, flake-parts, import-tree, nixpkgs)
 #
-# All values use `lib.mkDefault`, so a downstream can override the URL or
-# extend the follows set (for example, to follow inputs that live only in
-# dendritic-lib's own flake-file like `nixos-anywhere`):
+# The library URL and follows use `lib.mkDefault`, so a downstream can override
+# them or extend the follows set (for example, to follow inputs that live only
+# in dendritic-lib's own flake-file like `nixos-anywhere`):
 #
 #   flake-file.inputs.dendritic-lib = {
 #     url = "path:/abs/path/to/local/checkout";   # local override
@@ -23,6 +23,23 @@
 { lib, ... }:
 let
   sharedInputs = import ./flake-file-inputs/_inputs.nix { inherit lib; };
+
+  # Project this checkout's reviewed lock into downstream declarations only.
+  # Root URLs stay floating so Renovate can continue proposing lock updates.
+  lock = builtins.fromJSON (builtins.readFile ../../flake.lock);
+  skillInputs = builtins.attrNames (
+    builtins.fromJSON (builtins.readFile ../../.github/reviewed-skill-inputs.json)
+  );
+  skillDefaults = lib.genAttrs skillInputs (
+    name:
+    let
+      locked = lock.nodes.${lock.nodes.${lock.root}.inputs.${name}}.locked;
+    in
+    {
+      # Beat the shared floating mkDefault (1000), not caller definitions (100).
+      url = lib.mkOverride 900 "github:${locked.owner}/${locked.repo}/${locked.rev}";
+    }
+  );
 
   # Inputs every downstream flake-file source is expected to declare directly.
   # Keeping this list narrow avoids generating follows that would fail to
@@ -42,8 +59,10 @@ let
   };
 in
 {
-  flake-file.inputs.dendritic-lib = {
-    url = lib.mkDefault "github:aw1cks-dotfiles/nix";
-    inputs = builtins.listToAttrs (map mkFollow followNames);
+  flake-file.inputs = skillDefaults // {
+    dendritic-lib = {
+      url = lib.mkDefault "github:aw1cks-dotfiles/nix";
+      inputs = builtins.listToAttrs (map mkFollow followNames);
+    };
   };
 }
