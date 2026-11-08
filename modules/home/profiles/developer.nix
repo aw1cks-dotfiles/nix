@@ -11,6 +11,7 @@ in
       modules.home.dev-tools
       modules.home.java
       modules.home.kubernetes
+      modules.home.language-servers
       modules.home.rust
     ];
   };

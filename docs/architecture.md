@@ -59,6 +59,11 @@ See [cache bootstrap](./cache-bootstrap.md).
 The reusable Neovim module configures Avante.nvim to use OMP through ACP; see
 [Avante.nvim with OMP ACP](./avante-omp.md) for its operational contract.
 
+`aw1cks.modules.home.language-servers` provisions the shared server packages in
+Home Manager's user environment; `aw1cks.profiles.home.developer` includes it.
+Neovim reuses the same package list in its private wrapper PATH without requiring
+the developer profile. Server configuration and discovery remain client-owned.
+
 ## Shared Namespaces
 
 The public reusable namespace in this repo is `aw1cks.*`.

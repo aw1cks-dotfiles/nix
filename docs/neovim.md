@@ -18,6 +18,38 @@ pin bump is insufficient. This cutover is validated against `30f8896`; the old
 `nix flake check --no-write-lock-file` during review so validation cannot silently
 refresh unrelated inputs.
 
+## Shared language-server packages
+
+`modules/home/dev/_language-servers.nix` owns the server package selection used by
+both this module's `programs.lazyvim.extraPackages` and the independent
+`aw1cks.modules.home.language-servers` atom. The developer profile imports that
+atom to expose servers through `home.packages`, including on editorless hosts.
+Neovim keeps its wrapper PATH so standalone and GUI-launched editors retain the
+same executables. Importing Neovim alone does not install the servers globally.
+
+Only the standalone Rust analyzer has higher package priority, to beat rustup's
+`rust-analyzer` proxy when both enter the user environment. Rustup still owns its
+compiler and Cargo proxies. Existing editor runtimes, formatters, debuggers, and
+upstream automatic extra dependencies remain unchanged; repeated references to
+the same store output are not separate installations. The server atom alone does
+not provision every project's toolchain or dependencies.
+
+OMP uses its native definitions and supported project-local bin directories
+before PATH; missing executables are skipped rather than installed. Startup root
+markers are checked in the current working directory, not ancestors. Merely
+providing executables does not register new OMP servers: the pinned definitions
+do not cover our Docker Compose, F#, Kotlin, SQL, or TOML servers. OMP's Kotlin
+definition expects the different `kotlin-lsp` implementation; its C# definition
+expects lowercase `omnisharp`, whereas our package provides `OmniSharp`.
+No aliases, command overrides, or generated OMP LSP configuration bridge these
+differences.
+
+This shares binaries, not running server processes or Neovim's server settings.
+Terminal OMP needs the HM profile on PATH; managed Paseo already adds it, and
+Avante ACP inherits Neovim's wrapper environment. Other GUI launchers, services,
+and ACP clients need their own environment setup. Zed remains independently
+configured. Package provisioning is not a blanket offline guarantee.
+
 ## Why seven supplemental package specs remain
 
 `programs.lazyvim.configFiles = ./files` installs our source-tree configuration,
