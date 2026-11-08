@@ -24,6 +24,12 @@
           defaultProfiles = [
             "high-quality"
           ];
+          bindings = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+            WHEEL_LEFT = "ignore";
+            WHEEL_RIGHT = "ignore";
+            # WHEEL_UP = "ignore";
+            # WHEEL_DOWN = "ignore";
+          };
           config = {
             hwdec = "yes";
 

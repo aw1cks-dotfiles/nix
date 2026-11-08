@@ -257,6 +257,10 @@ Disabling removes the cask from the managed Brewfile. The desktop profile's
 existing `homebrew.onActivation.cleanup = "zap"` policy can uninstall it and
 remove application data on the next activation.
 
+The shared Home Manager `multimedia-apps` module disables mpv's horizontal
+swipe/wheel seeking on macOS through `programs.mpv.bindings`. Vertical volume
+scrolling and keyboard controls remain enabled; Linux bindings are unchanged.
+
 ## Validation
 
 Validation is intentionally narrower than a full switch or deployment.
