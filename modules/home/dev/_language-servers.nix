@@ -2,6 +2,9 @@
 with pkgs;
 [
   bash-language-server
+  # nixpkgs has no standalone clangd; the server ships in clang-tools, whose
+  # closure is ~2.1 GB because it pulls clang and llvm.
+  clang-tools
   # Neovim configures docker_compose_language_service explicitly; OMP does not
   # (yamlls covers compose there).
   docker-compose-language-service

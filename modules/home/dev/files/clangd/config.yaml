@@ -1,0 +1,8 @@
+CompileFlags:
+  # gcc-generated compile databases carry flags clangd cannot use or that turn
+  # warnings into errors inside the editor.
+  Remove: [-fconcepts-diagnostics-depth=*, -flarge-source-files, -Werror=*]
+  Add: [-Wall]
+  # Projects own -std and the language of headers through their CDB or .clangd.
+Diagnostics:
+  UnusedIncludes: Strict
