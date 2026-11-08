@@ -248,12 +248,23 @@
           enable = true;
           package = cfg.package;
           inherit (cfg) colorSchemes;
+          # Home Manager owns the entrypoint. Native extraConfig runs with the
+          # shared config in scope; returned tables are shallow overrides.
+          # Keep ordinary mkBefore/mkAfter contributions inside this callback.
+          extraConfig = lib.mkMerge [
+            (lib.mkOrder 0 ''
+              return require("defaults")(function(config)
+            '')
+            (lib.mkOrder 2000 ''
+              end, config)
+            '')
+          ];
         };
 
         xdg.configFile = {
           "wezterm/appearance.lua".source = ./files/wezterm/appearance.lua;
           "wezterm/binds.lua".source = ./files/wezterm/binds.lua;
-          "wezterm/wezterm.lua".source = ./files/wezterm/wezterm.lua;
+          "wezterm/defaults.lua".source = ./files/wezterm/wezterm.lua;
           "wezterm/settings.lua".text = weztermSettings;
         };
       };
