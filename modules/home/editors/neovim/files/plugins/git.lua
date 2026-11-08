@@ -1,5 +1,3 @@
-local Util = require("lazyvim.util")
-
 return {
 	{
 		"sindrets/diffview.nvim",
@@ -22,7 +20,8 @@ return {
 			{
 				"<leader>ul",
 				function()
-					Util.toggle_number()
+					-- Reuse LazyVim's toggle so off/on restores the number modes.
+					Snacks.toggle.get("line_number"):toggle()
 					vim.cmd("Gitsigns toggle_signs")
 				end,
 				desc = "Toggle Line Numbers",
