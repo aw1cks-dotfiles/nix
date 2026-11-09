@@ -43,7 +43,7 @@
       <key>name</key>
       <string>Variables and Plain Text</string>
       <key>scope</key>
-      <string>text, source, variable, variable.other, variable.other.readwrite, variable.other.member, variable.parameter, variable.language, support.variable</string>
+      <string>text, source, variable, variable.other, variable.other.readwrite, variable.other.constant.js, variable.other.constant.ts, variable.other.property.js, variable.other.property.ts, variable.other.member.go, variable.other.member.declaration.go, variable.parameter, variable.language, support.variable, support.type.object.console, meta.function-call.arguments, meta.function.call.rust variable.other.rust, meta.function.definition.rust variable.other.rust, meta.annotation.parameters.rust, entity.other.attribute-name.multipart.nix, entity.other.attribute-name.single.nix</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -71,7 +71,7 @@
       <key>name</key>
       <string>Punctuation</string>
       <key>scope</key>
-      <string>punctuation, punctuation.section, punctuation.separator, punctuation.terminator, punctuation.definition.parameters, punctuation.definition.arguments, punctuation.definition.array, punctuation.definition.block, punctuation.definition.generic, punctuation.definition.typeparameters, meta.brace</string>
+      <string>punctuation, punctuation.section, punctuation.separator, punctuation.terminator, punctuation.accessor, punctuation.accessor.dot, punctuation.brackets, punctuation.brackets.angle.rust, punctuation.definition.parameters, punctuation.definition.arguments, punctuation.definition.array, punctuation.definition.block, punctuation.definition.generic, punctuation.definition.typeparameters, punctuation.definition.anchor.yaml, punctuation.definition.alias.yaml, punctuation.section.document.begin.yaml, punctuation.section.document.end.yaml, entity.other.document.begin.yaml, meta.brace, meta.function.return-type.rust punctuation, meta.function.parameters.rust punctuation, meta.compound.conditional.shell punctuation</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -84,7 +84,7 @@
       <key>name</key>
       <string>Keywords and Storage</string>
       <key>scope</key>
-      <string>keyword, keyword.control, keyword.other, storage, storage.type, storage.modifier, punctuation.definition.keyword</string>
+      <string>keyword, keyword.control, keyword.control.import, keyword.control.import.include, keyword.other, storage, storage.type, storage.modifier, punctuation.definition.keyword, storage.type.module.rust, storage.modifier.rust, storage.type.struct.rust, storage.type.enum.rust, storage.type.trait.rust, storage.type.union.rust, storage.type.impl.rust, storage.type.type.rust, storage.modifier.lifetime.rust, entity.name.type.lifetime, keyword.declaration.function.async.python, storage.modifier.async</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -97,7 +97,7 @@
       <key>name</key>
       <string>Function Declaration Keywords</string>
       <key>scope</key>
-      <string>storage.type.function, keyword.declaration.function, keyword.other.fn, storage.type.function.arrow</string>
+      <string>storage.type.function, storage.type.function.rust, storage.type.function.python, storage.type.keyword.function.go, keyword.declaration.function, keyword.function.go, keyword.other.fn</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -110,7 +110,7 @@
       <key>name</key>
       <string>Exceptions and Labels</string>
       <key>scope</key>
-      <string>keyword.control.exception, keyword.control.trycatch, entity.name.label</string>
+      <string>keyword.control.exception, keyword.control.trycatch, entity.name.label, entity.name.type.anchor.yaml, entity.name.other.anchor.yaml, variable.other.alias.yaml</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -123,11 +123,24 @@
       <key>name</key>
       <string>Operators</string>
       <key>scope</key>
-      <string>keyword.operator, punctuation.accessor</string>
+      <string>keyword.operator, punctuation.separator.key-value.ini, punctuation.separator.key-value.toml, punctuation.definition.key-value.toml, punctuation.definition.keyValuePair.toml, punctuation.separator.return-type.python, punctuation.separator.annotation.return.python, punctuation.accessor.arrow, punctuation.separator.key-value.html, storage.modifier.reference, storage.type.function.arrow, keyword.declaration.function.arrow</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
         <string>#78a9ff</string>
+      </dict>
+    </dict>
+
+    <!-- Path / Scope Resolution Delimiters (:: in Rust/C++ -> @punctuation.delimiter #3ddbd9) -->
+    <dict>
+      <key>name</key>
+      <string>Scope Resolution Delimiters</string>
+      <key>scope</key>
+      <string>keyword.operator.path.rust, keyword.operator.namespace, punctuation.separator.namespace, punctuation.accessor.double-colon, punctuation.accessor.rust, meta.path.rust punctuation.accessor.rust</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#3ddbd9</string>
       </dict>
     </dict>
 
@@ -136,7 +149,7 @@
       <key>name</key>
       <string>Word Operators</string>
       <key>scope</key>
-      <string>keyword.operator.word, keyword.operator.logical.python, keyword.operator.in, keyword.operator.new, keyword.operator.expression, keyword.operator.cast, keyword.operator.sizeof, keyword.operator.instanceof</string>
+      <string>keyword.operator.word, keyword.operator.logical.python, keyword.operator.logical.lua, keyword.operator.in, keyword.operator.new, keyword.operator.expression, keyword.operator.cast, keyword.operator.sizeof, keyword.operator.instanceof</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -149,7 +162,7 @@
       <key>name</key>
       <string>Functions</string>
       <key>scope</key>
-      <string>entity.name.function, variable.function, meta.function-call entity.name.function, meta.function-call.generic, support.function.any-method</string>
+      <string>entity.name.function, variable.function, meta.function-call entity.name.function, meta.function-call.generic, meta.function-call.method, support.function.any-method, meta.function-call.python</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -179,7 +192,7 @@
       <key>name</key>
       <string>Macros</string>
       <key>scope</key>
-      <string>entity.name.function.macro, entity.name.function.preprocessor, support.macro, keyword.control.directive, punctuation.definition.directive</string>
+      <string>entity.name.function.macro, entity.name.function.macro.rust, entity.name.function.macro.rules.rust, entity.name.constant.preprocessor, support.macro, support.macro.rust, meta.macro.rust support.function.rust, support.function.macro, entity.name.function.preprocessor, meta.annotation variable.function, meta.annotation variable.annotation.function, variable.annotation.rust, meta.attribute.rust meta.function.call.rust</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -194,7 +207,7 @@
       <key>name</key>
       <string>Decorators</string>
       <key>scope</key>
-      <string>meta.decorator, entity.name.function.decorator, punctuation.definition.decorator</string>
+      <string>meta.decorator, entity.name.function.decorator, punctuation.definition.decorator, punctuation.decorator, support.token.decorator</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -202,25 +215,36 @@
       </dict>
     </dict>
 
-    <!-- Attributes / Annotations (@attribute -> base15 #82cfff) -->
+    <!-- Attributes / Annotations (@attribute -> base15 #82cfff, #[...] punctuation -> base08 #3ddbd9) -->
     <dict>
       <key>name</key>
       <string>Attributes</string>
       <key>scope</key>
-      <string>meta.annotation, variable.annotation, punctuation.definition.annotation</string>
+      <string>meta.annotation, variable.annotation, storage.type.annotation, meta.decorator.python, entity.name.function.decorator.python, punctuation.definition.decorator.python, punctuation.definition.annotation.python, support.token.decorator.python, meta.function.decorator.identifier.python</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
         <string>#82cfff</string>
       </dict>
     </dict>
-
-    <!-- Types, Classes, Structs, Traits (@type, @type.builtin, @constructor -> base09 #78a9ff) -->
     <dict>
       <key>name</key>
-      <string>Types and Classes</string>
+      <string>Attribute Punctuation</string>
       <key>scope</key>
-      <string>entity.name.type, entity.name.class, entity.name.struct, entity.name.enum, entity.name.trait, entity.name.interface, entity.name.impl, entity.other.inherited-class, support.type, support.class, storage.type.primitive, storage.type.built-in, storage.type.java, storage.type.cs, storage.type.c</string>
+      <string>punctuation.definition.attribute, meta.annotation.rust punctuation, punctuation.definition.attribute.rust, meta.attribute.rust punctuation.brackets</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#3ddbd9</string>
+      </dict>
+    </dict>
+
+    <!-- Types, Classes, Structs, Traits (@type, @type.builtin, @constructor, @module -> base09 #78a9ff) -->
+    <dict>
+      <key>name</key>
+      <string>Types, Classes, and Modules</string>
+      <key>scope</key>
+      <string>entity.name.type, entity.name.class, entity.name.struct, entity.name.enum, entity.name.trait, entity.name.union, entity.name.interface, entity.name.impl, entity.other.inherited-class, support.type, support.type.exception, support.class, support.function.magic.python, storage.type.primitive, storage.type.built-in, storage.type.java, storage.type.cs, storage.type.c, storage.type.rust, storage.type.source.rust, entity.name.type.numeric.rust, meta.type, meta.type-alias, meta.generic.rust, meta.function.return-type.rust, meta.function-call.constructor, variable.parameter.generic, entity.name.scope-resolution, meta.import-name.python, meta.import-path.python, meta.statement.import.python meta.generic-name.python, comment.line.shebang, punctuation.definition.comment.shebang, meta.shebang</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -228,12 +252,12 @@
       </dict>
     </dict>
 
-    <!-- Namespaces & Modules (@namespace -> base07 #08bdba) -->
+    <!-- Namespaces & Modules (@lsp.type.namespace / @namespace -> base07 #08bdba) -->
     <dict>
       <key>name</key>
-      <string>Namespaces</string>
+      <string>Namespaces and Modules</string>
       <key>scope</key>
-      <string>entity.name.namespace, entity.name.module, support.other.namespace</string>
+      <string>entity.name.namespace, entity.name.module, entity.name.module.rust, support.other.namespace</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -246,7 +270,7 @@
       <key>name</key>
       <string>Strings</string>
       <key>scope</key>
-      <string>string, punctuation.definition.string</string>
+      <string>string, punctuation.definition.string, storage.type.string.python, meta.mapping.key.python string, string.quoted.backtick.go, meta.annotation.go, variable.annotation.go, punctuation.definition.annotation.begin.go, punctuation.definition.annotation.end.go</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -259,7 +283,7 @@
       <key>name</key>
       <string>String Escapes</string>
       <key>scope</key>
-      <string>constant.character.escape, constant.other.placeholder</string>
+      <string>constant.character.escape, constant.other.placeholder, string.quoted.double.rust constant.other.placeholder.rust</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -306,29 +330,29 @@
       </dict>
     </dict>
 
-    <!-- Booleans (@boolean -> base09 #78a9ff) -->
-    <dict>
-      <key>name</key>
-      <string>Booleans</string>
-      <key>scope</key>
-      <string>constant.language.boolean, constant.language.true, constant.language.false</string>
-      <key>settings</key>
-      <dict>
-        <key>foreground</key>
-        <string>#78a9ff</string>
-      </dict>
-    </dict>
-
     <!-- Builtin Constants: nil, null, None (@constant.builtin -> base07 #08bdba) -->
     <dict>
       <key>name</key>
       <string>Builtin Constants</string>
       <key>scope</key>
-      <string>constant.language</string>
+      <string>constant.language, constant.language.null, constant.language.nil, constant.language.none, constant.language.null.python, constant.language.null.go, constant.language.null.json, constant.language.null.yaml, constant.language.null.js, constant.language.null.ts, constant.language.undefined.js, constant.language.undefined.ts</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
         <string>#08bdba</string>
+      </dict>
+    </dict>
+
+    <!-- Booleans (@boolean -> base09 #78a9ff) -->
+    <dict>
+      <key>name</key>
+      <string>Booleans</string>
+      <key>scope</key>
+      <string>constant.language.boolean, constant.language.true, constant.language.false, constant.language.rust, constant.language.julia, constant.language.toml</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#78a9ff</string>
       </dict>
     </dict>
 
@@ -337,7 +361,7 @@
       <key>name</key>
       <string>Constants</string>
       <key>scope</key>
-      <string>variable.other.constant, entity.name.constant, constant.other.caps, variable.other.enummember</string>
+      <string>variable.other.constant, entity.name.constant, constant.other, constant.other.rust, constant.other.caps, constant.other.caps.rust, variable.other.enummember, meta.enum variable.other.readwrite, meta.enum.rust storage.type.source.rust, support.constant</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -360,12 +384,12 @@
       </dict>
     </dict>
 
-    <!-- Properties & Map/JSON/YAML/TOML Keys (@property -> base10 #ee5396) -->
+    <!-- Properties & Map/JSON/YAML/TOML/Nix Keys (@property -> base10 #ee5396) -->
     <dict>
       <key>name</key>
       <string>Properties and Keys</string>
       <key>scope</key>
-      <string>variable.other.property, support.type.property-name, meta.mapping.key string, entity.name.tag.yaml, keyword.other.definition.ini, support.type.property-name.toml, meta.object-literal.key</string>
+      <string>variable.other.property, variable.other.member, variable.other.member.rust, variable.object.property, meta.property.object, support.type.property-name, source.json meta.mapping.key string, source.json meta.mapping.key punctuation.definition.string, meta.structure.dictionary.json meta.structure.dictionary.key.json string, meta.structure.dictionary.json meta.structure.dictionary.key.json punctuation.definition.string, entity.name.tag.yaml, entity.name.tag.toml, entity.name.table.toml, meta.tag.table.toml, meta.tag.table.array.toml, keyword.other.definition.ini, keyword.key.toml, meta.mapping.key.toml string, support.type.property-name.toml, support.type.property-name.table, entity.name.section.toml, entity.name.section.group-title.ini, support.type.property-name.json, support.type.property-name.yaml, meta.object-literal.key</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
@@ -399,16 +423,38 @@
       </dict>
     </dict>
 
-    <!-- Markdown Headings (@markup.heading.1.markdown -> base10 #ee5396) -->
+    <!-- Markdown Headings (@markup.heading.1.markdown -> base10 #ee5396, 2 -> #ff7eb6, 3+ -> #82cfff) -->
     <dict>
       <key>name</key>
       <string>Markdown Headings</string>
       <key>scope</key>
-      <string>markup.heading, entity.name.section, punctuation.definition.heading</string>
+      <string>markup.heading, heading.1.markdown, markup.heading.1.markdown, entity.name.section, punctuation.definition.heading</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
         <string>#ee5396</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Markdown Heading 2</string>
+      <key>scope</key>
+      <string>heading.2.markdown, markup.heading.2.markdown</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#ff7eb6</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Markdown Heading 3+</string>
+      <key>scope</key>
+      <string>heading.3.markdown, heading.4.markdown, heading.5.markdown, heading.6.markdown, markup.heading.3.markdown</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#82cfff</string>
       </dict>
     </dict>
 
@@ -456,7 +502,7 @@
       <key>name</key>
       <string>Markdown Lists and Quotes</string>
       <key>scope</key>
-      <string>markup.list punctuation.definition.list_item, punctuation.definition.list_item.markdown, markup.quote</string>
+      <string>markup.list punctuation.definition.list_item, punctuation.definition.list_item.markdown, punctuation.definition.list.begin.markdown, markup.list.bullet, markup.quote</string>
       <key>settings</key>
       <dict>
         <key>foreground</key>
