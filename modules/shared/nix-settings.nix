@@ -17,7 +17,7 @@ let
     extra-substituters = caches.substituters;
     extra-trusted-public-keys = caches.trustedPublicKeys;
 
-    keep-outputs = true;
+    keep-outputs = false;
   };
 
   mkSettingsAdapter =

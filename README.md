@@ -44,6 +44,10 @@ This repo is opinionated about a few things:
   - `nix run .#home-manager -- ...`
   - `nix run .#darwin -- ...`
 
+Store GC does not retain build-only outputs (`keep-outputs = false`). Installed
+and otherwise rooted closures remain protected; later builds may need to fetch
+or rebuild their dependencies.
+
 Update uses an available `gh` login to reduce GitHub API rate limits; a failed
 token lookup still runs without injected credentials. It fetches all input
 sources, including unused ones, into the local store. Rebuild does not inject a
@@ -67,4 +71,5 @@ which does not need the flake to evaluate or an app to build. See
 - Standalone Home Manager hosts use `configurations.home."user@host"` naming.
 - The shared NVIDIA contract for standalone Home Manager lives under `configurations.home.<name>.nvidia` and expects a host-local JSON pin file.
 - Downstream `flake-file` consumers should import `inputs.dendritic-lib.flakeModules.downstream-flake-file` alongside `inputs.flake-file.flakeModules.default`.
+- The shared macOS Homebrew cask list lives in [`modules/darwin/homebrew.nix`](./modules/darwin/homebrew.nix); MacTeX and Microsoft Teams are intentionally excluded.
 - Zoom is installed through the Homebrew cask on macOS and `pkgs.zoom-us` on Linux. The macOS cask avoids the ad-hoc-signed Nix package invalidating hash-bound screen-recording permissions after upgrades. When migrating, quit Zoom before `nix run .#rebuild`, then launch `/Applications/zoom.us.app` and grant screen-recording access again; remove stale Home Manager Zoom entries from Privacy & Security if necessary.
