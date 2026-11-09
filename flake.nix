@@ -94,10 +94,6 @@
       url = "github:can1357/oh-my-pi";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    paseo = {
-      url = "github:getpaseo/paseo/v0.15.0";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     rewrite-rs-skills = {
       url = "github:rewrite-rs/skills";
       flake = false;

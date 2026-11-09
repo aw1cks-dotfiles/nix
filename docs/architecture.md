@@ -86,11 +86,12 @@ Downstream repos can keep using `aw1cks.*` as the shared upstream contract while
 
 Generic Home Manager networking belongs under `modules/home/networking/`.
 The `aw1cks.modules.home.tailscale-serve` atom exposes the
-`services.tailscale-serve.endpoints` registry without AI dependencies. Feature
-modules such as OMP collab and Paseo contribute entries; the host independently
-opts into the single networking owner.
-The registry is authoritative for the node's complete Serve configuration;
-manual Serve entries are replaced rather than merged or preserved.
+`services.tailscale-serve.endpoints` registry without AI dependencies. Hosts
+explicitly import and enable this networking owner; endpoint declarations do
+not enable it. The registry is authoritative for the node's complete Serve
+configuration; manual Serve entries are replaced rather than merged or preserved.
+The Mac keeps this owner enabled with an empty registry so the next activation
+clears retired endpoints rather than leaving persisted mappings behind.
 
 The opt-in Darwin `aw1cks.modules.darwin.tailscale-app` atom retains the
 Standalone app and applies declared client preferences at rebuild/login.
@@ -145,9 +146,9 @@ Optional shared metadata includes fields such as:
 }
 ```
 
-`tailnetHost` is machine metadata, not an AI service option. The opt-in
-`modules.ai.omp.collab` feature derives its browser and relay URLs from this
-fact; hosts without collab enabled do not need it.
+`tailnetHost` is machine metadata used by the opt-in Tailscale Serve and Darwin
+Tailscale.app modules to check node identity. Hosts not using these modules do
+not need it.
 
 Facts are for safe shared metadata only.
 
@@ -178,9 +179,8 @@ They all:
 - add shared baseline imports from `modules/constructors/_lib.nix`
 
 NixOS and darwin constructors also forward the same `hostFacts` through
-`home-manager.extraSpecialArgs` into their embedded homes. Features such as
-OMP collab therefore consume one machine fact regardless of Home Manager
-deployment mode.
+`home-manager.extraSpecialArgs` into their embedded homes. Home Manager modules
+therefore consume the same machine facts regardless of deployment mode.
 
 The shared helper file `modules/constructors/_lib.nix` is intentionally small. It centralizes repeated constructor policy such as facts lookup, role expansion, target assertions, baseline imports, and user/home resolution.
 

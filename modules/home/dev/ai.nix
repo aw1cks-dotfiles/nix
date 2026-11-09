@@ -1,8 +1,5 @@
 # AI coding tools — from nix-upstream/modules/development/ai.nix
-{ inputs, config, ... }:
-let
-  tailscaleServeModule = config.aw1cks.modules.home.tailscale-serve;
-in
+{ inputs, ... }:
 {
   aw1cks.modules.home.ai =
     {
@@ -31,12 +28,6 @@ in
       small_model = cfg.models.small;
     in
     {
-      imports = [
-        (import ./_omp-collab.nix { inherit inputs; })
-        (import ./_paseo.nix { inherit inputs; })
-        tailscaleServeModule
-      ];
-
       options.modules.ai = {
         models = lib.mkOption {
           type = lib.types.submodule {
@@ -133,64 +124,6 @@ in
                         an entry; set `disabled = true` to suppress one, including
                         built-in servers.
                       '';
-                    };
-                    collab = {
-                      enable = lib.mkEnableOption "the self-hosted OMP collab relay and browser client" // {
-                        description = ''
-                          Run loopback-only user services for native OMP session sharing.
-                          The HTTPS hostname comes from hostFacts.tailnetHost.
-                          Publication is managed by services.tailscale-serve when
-                          enabled; this service itself only opens loopback listeners.
-                        '';
-                      };
-
-                      package = lib.mkOption {
-                        type = lib.types.package;
-                        default = import ../../integrations/_omp-collab-package.nix {
-                          inherit pkgs;
-                          ompInput = inputs.oh-my-pi;
-                        };
-                        defaultText = lib.literalExpression "the collab package built from inputs.oh-my-pi";
-                        description = "Package providing loopback-only omp-collab-web and omp-collab-relay executables.";
-                      };
-
-                      webPort = lib.mkOption {
-                        type = lib.types.port;
-                        default = 7467;
-                        description = "Loopback HTTP port serving the browser client.";
-                      };
-
-                      relayPort = lib.mkOption {
-                        type = lib.types.port;
-                        default = 7466;
-                        description = "Loopback WebSocket relay port.";
-                      };
-
-                      webHttpsPort = lib.mkOption {
-                        type = lib.types.port;
-                        default = 443;
-                        description = "Browser HTTPS port published by services.tailscale-serve when enabled.";
-                      };
-
-                      relayHttpsPort = lib.mkOption {
-                        type = lib.types.port;
-                        default = 8443;
-                        description = "Relay HTTPS port published by services.tailscale-serve when enabled.";
-                      };
-
-                      autoStart = lib.mkOption {
-                        type = lib.types.enum [
-                          "off"
-                          "view"
-                          "control"
-                        ];
-                        default = "off";
-                        description = ''
-                          Default sharing policy for interactive OMP sessions. Off
-                          preserves manual /collab sharing; view or control opts
-                          into sharing every session with that guest permission.
-                        '';
-                      };
                     };
                   };
 
@@ -479,7 +412,7 @@ in
             ];
           };
           default = { };
-          description = "OMP home-manager configuration plus opt-in native collab services.";
+          description = "OMP home-manager configuration.";
         };
       };
 
@@ -494,7 +427,6 @@ in
         programs.mcp = cfg.mcp;
         programs.omp = lib.mkMerge [
           (builtins.removeAttrs cfg.omp [
-            "collab"
             "extraMcpConfig"
             "disabledMcpServers"
             "lspServers"

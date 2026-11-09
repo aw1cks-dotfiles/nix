@@ -125,10 +125,10 @@ Home Manager owns `~/.omp/agent/lsp.json` on hosts with this module enabled, so
 add servers through the module rather than editing that file.
 
 This shares binaries, not running server processes or Neovim's server settings.
-Terminal OMP needs the HM profile on PATH; managed Paseo already adds it, and
-Avante ACP inherits Neovim's wrapper environment. Other GUI launchers, services,
-and ACP clients need their own environment setup. Zed remains independently
-configured. Package provisioning is not a blanket offline guarantee.
+Terminal OMP needs the HM profile on PATH; Avante ACP inherits Neovim's wrapper
+environment. Other GUI launchers, services, and ACP clients need their own
+environment setup. Zed remains independently configured. Package provisioning
+is not a blanket offline guarantee.
 
 ## Why seven supplemental package specs remain
 
