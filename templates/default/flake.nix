@@ -51,7 +51,6 @@
         nixpkgs.follows = "nixpkgs";
         nixpkgs-unstable.follows = "nixpkgs-unstable";
         oh-my-pi.follows = "oh-my-pi";
-        paseo.follows = "paseo";
         rewrite-rs-skills.follows = "rewrite-rs-skills";
         stylix.follows = "stylix";
         trailofbits-skills.follows = "trailofbits-skills";
@@ -114,10 +113,6 @@
       url = "github:can1357/oh-my-pi";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    paseo = {
-      url = "github:getpaseo/paseo/v0.15.0";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     rewrite-rs-skills = {
       url = "github:rewrite-rs/skills/ae0fd62485d071437ae5e6c4036c986b0dd122a0";
       flake = false;
@@ -127,7 +122,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     trailofbits-skills = {
-      url = "github:trailofbits/skills/470419e16f97e112d01fc32f4898aea1755015d9";
+      url = "github:trailofbits/skills/e4dd0bb5b15535f7c5a0834187dffba6ac37e4ff";
       flake = false;
     };
     treefmt-nix = {

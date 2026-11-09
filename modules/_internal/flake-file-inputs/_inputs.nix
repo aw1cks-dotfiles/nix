@@ -99,11 +99,6 @@
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
   };
 
-  paseo = {
-    url = lib.mkDefault "github:getpaseo/paseo/v0.15.0";
-    inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
-  };
-
   apple-fonts = {
     url = lib.mkDefault "github:Lyndeno/apple-fonts.nix";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";

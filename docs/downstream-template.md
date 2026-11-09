@@ -277,9 +277,9 @@ After switching, check `bat --list-themes` for `oxocarbon-dark` and launch OMP n
 
 The reusable Home Manager export is
 `config.aw1cks.modules.home.tailscale-serve`. Its public interface is
-`services.tailscale-serve`, independent of the AI module and OMP/Paseo schemas.
-For example, a **flake-parts host composition** can expose an unrelated HTTP
-service without importing any AI configuration:
+`services.tailscale-serve`, independent of the AI module.
+For example, a **flake-parts host composition** can expose an HTTP service
+without importing any AI configuration:
 
 ```nix
 { config, ... }:
@@ -305,11 +305,14 @@ backend. Enabled entries must have distinct HTTPS ports.
 The interface intentionally does not expose public Funnel, raw TCP, or path
 routing options.
 
-The AI module imports this same networking export. Collab registers
-`omp-collab-web` and `omp-collab-relay`; Paseo registers `paseo`, using their
-existing port options only while their feature is enabled. The owner contains
-no AI service list. Registering endpoints does not enable publication:
-`services.tailscale-serve.enable` remains a separate opt-in, enabled for `mbp`.
+Import this networking export explicitly in the host's Home Manager composition;
+the AI module does not import it or register endpoints. Registering endpoints
+does not enable publication: `services.tailscale-serve.enable` remains a separate
+opt-in. On `mbp`, the host explicitly imports this owner and keeps it enabled
+with an empty endpoint registry. The next activation applies an empty Serve
+configuration to remove retired endpoints, including any persisted public
+Funnel mappings; removing service declarations alone does not clear live state.
+No live services or Serve state are changed merely by editing this repository.
 
 The existing Tailscale.app daemon is retained on macOS; Linux uses the pinned
 CLI and requires an already-running daemon plus user operator authorization.
@@ -381,11 +384,12 @@ account policy. Inspect the installed configuration with
 
 `packages.tailscale-serve-reconcile` exposes the apply helper with a settings
 JSON argument. `checks.<system>.tailscale-serve` covers private desired state,
-identity guards, idempotence, marker persistence and disable cleanup. Live Mac
-checks exercised removal of undeclared ports/paths, addition/removal of declared
-HTTPS endpoints, and HTTP/TCP/foreground-to-HTTPS transitions while retaining
-the unchanged production endpoints. Full clear-on-disable is unit-tested, not
-performed against the live production endpoints. Linux lifecycle is evaluated,
+identity guards, idempotence, marker persistence and disable cleanup. Historical
+live Mac checks exercised removal of undeclared ports/paths, addition/removal
+of declared HTTPS endpoints, and HTTP/TCP/foreground-to-HTTPS transitions while
+retaining unchanged mappings. These observations describe the generic owner,
+not the current empty registry or its pending cleanup. Full clear-on-disable
+is unit-tested, not exercised against live state. Linux lifecycle is evaluated,
 not deployed here.
 
 ### Community Approaches And Why This Adapter Remains
@@ -402,11 +406,11 @@ That issue also documents CLI-driven oneshot units as a workaround.
 [tsnsrv](https://github.com/boinkor-net/tsnsrv) provides a generic NixOS service
 registry too, but each proxy joins as its own tailnet participant with separate
 identity/state and enrollment credentials. That is useful for service-specific
-hostnames, but would change this Mac's current topology and URLs.
+hostnames, but changes the node identity and topology.
 
 Here, the generic Home Manager registry renders authoritative whole-Serve JSON
-and uses the existing Mac app's raw apply path. It keeps the current hostname
-and private HTTPS topology, but intentionally does not preserve undeclared
+and uses the existing Mac app's raw apply path. It retains the existing node
+identity for private HTTPS endpoints, but intentionally does not preserve undeclared
 Serve configuration. It is not a drop-in alias for the upstream NixOS option,
 and does not claim to configure the entire Tailscale daemon declaratively.
 
@@ -469,285 +473,8 @@ enable the native `services.tailscale` daemon alongside this module.
 Verification exercised the real app CLI preference apply, a generated login
 agent exiting successfully, and the generated disabled-state cleanup unloading
 that agent and removing its plist. A helper built for another tailnet refused
-to apply and preserved the live preferences. The production private endpoints
-and Paseo authentication were checked afterward. GUI controls, login after an
-actual logout/reboot, and selecting a live exit node were not exercised.
-
-## Self-Hosted OMP Collab Over Tailscale
-
-OMP collab is an opt-in feature of the existing AI module:
-`modules.ai.omp.collab.enable`. AI-enabled homes keep it disabled by default;
-this repo opts in only `mbp`. Enabling it installs two loopback-only user
-services: the upstream OMP WebSocket relay and its browser client, using the
-existing locked `oh-my-pi` input and offline Bun dependency cache. The packaged
-browser client removes upstream's external analytics script.
-
-Add the machine's full Tailscale HTTPS hostname, without the trailing DNS dot,
-to its existing entry in `aw1cks.hostFacts` in `hosts/facts.nix`:
-
-```nix
-tailnetHost = "mbp.example.ts.net";
-```
-
-Then opt in through the AI configuration in the **flake-parts host composition
-module**; do not repeat the hostname here:
-
-```nix
-{ ... }:
-{
-  configurations.darwin.mbp.home.modules.ai.omp.collab = {
-    enable = true;
-    # autoStart = "view"; # or "control"; default "off" requires /collab
-  };
-}
-```
-
-Replace the illustrative host key and facts hostname with your own. The
-`developer` role already imports the AI module; homes without that role must
-import `config.aw1cks.modules.home.ai` in their Home Manager composition.
-The same AI surface works with standalone Linux and embedded NixOS homes.
-Constructors forward the matching `hostFacts` into Home Manager, including
-embedded homes, and already import the required `programs.omp` schema. Raw
-Home Manager consumers must provide `extraSpecialArgs.hostFacts` and the AI
-module's other prerequisites, including
-`inputs.oh-my-pi.homeManagerModules.default` exactly once.
-
-There is no separate collab module import, `services.omp-collab` option, or
-collab hostname override: the hostname comes only from `hostFacts.tailnetHost`
-and is required only when collab is enabled. The AI module consumes service
-options rather than forwarding them to `programs.omp`.
-
-The feature supplies defaults for `collab.webUrl`, `collab.relayUrl`, and
-`collab.autoStart`; explicit OMP settings still take precedence. Sharing stays
-manual by default. `modules.ai.omp.collab.autoStart = "view"` or `"control"`
-explicitly opts into sharing every interactive session at that access level.
-
-On `mbp`, the declarative Serve owner above publishes these services after the
-switch; no separate CLI setup is needed. For a host deliberately keeping that
-owner disabled, the equivalent manual configuration is:
-
-```sh
-tailscale serve status
-tailscale serve --bg --https=443 --set-path=/ http://127.0.0.1:7467
-tailscale serve --bg --https=8443 --set-path=/ http://127.0.0.1:7466
-```
-
-The manual commands claim the root endpoint on their HTTPS port: inspect
-existing Serve configuration first. Change
-`modules.ai.omp.collab.webHttpsPort` / `relayHttpsPort` in Nix rather than editing
-managed mappings. Under the same option group, `webPort` (default `7467`) and
-`relayPort` (default `7466`) control the local listeners. All ports must be
-nonzero; the two local ports must differ, as must the two HTTPS ports.
-
-Both devices need Tailscale, HTTPS certificates enabled, and access rules
-permitting the published ports. Use **Serve, not Funnel**. Serve supplies the
-trusted HTTPS/WSS required by browser WebCrypto; plain HTTP to a tailnet IP is
-not sufficient.
-
-Start a new OMP process after switching so it reads the declared URLs, run
-`/collab`, and open its browser link or QR code in Safari on the phone. For an
-already-running process, update **Interaction → Collab** in `/settings` to the
-same URLs: `https://mbp.example.ts.net` and
-`wss://mbp.example.ts.net:8443` with the defaults above. Stop an existing room
-with `/collab stop` before starting one on the new relay. This shares the
-running session rather than importing its transcript into another agent.
-
-Full-control links grant prompting, interruption, and supported guest actions;
-treat them as credentials. `/collab view` prints a read-only link. Model/session
-administration such as `/model`, `/compact`, and `/resume` remains host-only.
-The included relay is upstream development tooling, not its private production
-Go service; keep it private. Restarting the relay disconnects current rooms,
-and manual rooms require starting `/collab` again and reopening the new link.
-Tailscale itself can still use an encrypted DERP transport if a direct peer
-connection is unavailable.
-
-On macOS, Home Manager manages launchd agents named
-`org.nix-community.home.omp-collab-web` and
-`org.nix-community.home.omp-collab-relay`; logs are
-`~/.omp-collab-web.log` and `~/.omp-collab-relay.log`. On Linux, the units are
-`omp-collab-web.service` and `omp-collab-relay.service`; inspect them with
-`systemctl --user status` and `journalctl --user -u <unit>`.
-
-With Serve management enabled, disabling collab omits its endpoints from the
-complete configuration on the next apply. Only in manual mode, remove roots you
-added (adjust customized ports) without resetting all Serve configuration:
-
-```sh
-tailscale serve --bg --https=443 --set-path=/ off
-tailscale serve --bg --https=8443 --set-path=/ off
-```
-
-The reproducible package is also available with `nix build .#omp-collab`.
-It provides `omp-collab-relay --port PORT` and `omp-collab-web --port PORT`;
-neither downloads dependencies at runtime. `nix run .#omp-collab -- --port 7466`
-runs only the relay, not the web service or Tailscale publication.
-
-## Private Paseo With The OMP Plugin
-
-The AI module also provides `modules.ai.paseo`. It is disabled by default and
-enabled only for `mbp` in this repo:
-
-```nix
-configurations.darwin.mbp.home.modules.ai.paseo.enable = true;
-```
-
-After the host switch, Home Manager starts the daemon automatically through
-launchd on macOS (`org.nix-community.home.paseo`) or a systemd user service on
-Linux (`paseo.service`). It runs as the existing user, not a separate service
-account. Logs are `~/.paseo-service.log` on macOS and the user journal on Linux.
-
-Plugin initialization can take several minutes. The HTTP status endpoint can
-respond before WebSocket connections and the provider catalog are ready;
-startup may temporarily return HTTP 503 or show the provider as Loading. Check
-the service log for the `paseo-omp` plugin-ready event and wait for **OMP Plugin**
-to become available rather than disabling authentication or changing pairing.
-
-Paseo is pinned to upstream **0.15.0**, revision
-`8938fde3c713143f12eacbdd60c11fdfc0be0fb1`, through the shared `paseo` input and
-the generated flake/lock. Its Nix recipe has a narrow runtime-closure correction
-to retain the plugin compiler worker, TypeScript and native esbuild executable.
-The package sets a 4 GiB Node heap budget during compilation so Metro's web
-bundle does not inherit the smaller RAM-derived default on hosted Darwin
-builders. This flag is not exported by the daemon/CLI wrappers or inherited by
-OMP agents. Fatal Expo bundle errors are flushed synchronously before exit so
-Nix build logs retain the underlying exception.
-The **OMP Plugin 5.2.3** npm archive and published production shrinkwrap are
-integrity-pinned and installed offline by Nix. No global npm install or runtime
-plugin dependency download is required. Update these through Nix, not Paseo's
-plugin updater. The artifacts are exposed as `packages.paseo` and
-`packages.paseo-omp-plugin`.
-
-The plugin is registered as `paseo-omp` and contributes **OMP Plugin**
-(`omp-plugin`); select that provider, not Paseo's separate bundled `omp`
-provider. `OMP_COMMAND` points to the existing `programs.omp.package` binary.
-The daemon retains the real user `HOME`, existing `~/.omp/agent` configuration
-and credentials, and Nix/user-profile tool paths. OMP provider login remains an
-ordinary user operation through OMP; credentials are not copied into a derivation.
-
-### Networking And Phone Setup
-
-Both services use `hostFacts.tailnetHost`; do not repeat the hostname in Paseo
-configuration. Default listeners and private Serve ports are:
-
-| Service | Loopback listener | Tailnet HTTPS port |
-| --- | --- | --- |
-| OMP collab browser | `127.0.0.1:7467` | `443` |
-| OMP collab relay | `127.0.0.1:7466` | `8443` |
-| Paseo daemon | `127.0.0.1:6767` | `9443` |
-
-Paseo rejects loopback binding conflicts with collab. The generic Serve registry
-rejects duplicate HTTPS ports across every enabled endpoint, including non-AI
-services. On `mbp`, that owner publishes Paseo's private endpoint. For hosts
-keeping it disabled, inspect existing mappings before the manual equivalent:
-
-```sh
-tailscale serve status
-tailscale serve --bg --https=9443 --set-path=/ http://127.0.0.1:6767
-```
-
-Change `modules.ai.paseo.httpsPort` in Nix if occupied. Never overwrite collab's
-443/8443 roots, use Funnel, or reset all Serve configuration. Tailscale HTTPS
-certificates and access rules must permit the dedicated port. The daemon
-forcibly disables Paseo's hosted relay and optional public service-proxy
-listeners, including when an older config enabled them. Relay enablement
-cannot be changed through the running daemon.
-
-On the phone, connect Tailscale and open Paseo:
-
-1. **Settings → Add host → Direct connection**.
-2. Host: the machine's full `hostFacts.tailnetHost`; for this Mac,
-   `mbp.gentoo-boa.ts.net`.
-3. Port: `9443` by default. Enable **Use SSL**.
-4. Enter the password from the private file described below.
-5. Create an agent with **OMP Plugin**.
-
-The default Mac endpoint is `https://mbp.gentoo-boa.ts.net:9443`.
-Do not enable Paseo's hosted relay or use relay-based pairing. This is a direct
-authenticated HTTPS/WebSocket connection through the tailnet's Serve proxy.
-Tailscale may still transport encrypted packets through its own DERP relay.
-
-### Passwords, Persistence And Adoption
-
-`modules.ai.paseo.stateDirectory` defaults to `~/.paseo`.
-`passwordFile` defaults to `~/.config/paseo/password` (under the configured XDG
-config directory). Both options are absolute **strings** naming writable paths
-outside `/nix/store`; never put the password value in Nix.
-
-For a fresh instance, first service startup generates a random password once
-in a user-owned `0600` regular file. Read that file locally to enter the password
-in the app; do not paste it into configuration, logs, or a URL. An existing custom
-password file must be a private user-owned regular file, not a symlink, containing
-one nonempty line. Empty, symlinked or group/world-accessible files stop startup.
-
-The exec wrapper reads this file as data, exports `PASEO_PASSWORD`, and starts
-the native supervisor. Paseo hashes the password in memory; the wrapper does not
-create or update a bcrypt hash in `config.json`. The plaintext stays outside the
-Nix store and command-line arguments, but **is present in the daemon environment
-and can be inherited by child processes**, including plugins and agents.
-This is a same-user coding-agent service, not a secret-isolated runtime.
-
-The same shell launcher is used on launchd and systemd to preserve the raw
-`passwordFile` format without sourcing shell code, a second secret file, or
-custom JavaScript helpers.
-
-If an existing Paseo config already has a password but the managed file is
-missing, startup refuses to replace it: provision `passwordFile` with the
-existing password first. Stop any already-running Paseo instance before
-adoption. The wrapper refuses an existing supervisor before modifying state,
-and the native supervisor takes its PID lock atomically; an unmanaged running
-daemon is never silently accepted as an authenticated managed instance.
-
-Existing managed installations reuse their password file unchanged. Any existing
-bcrypt hash in `config.json` is preserved, but the startup environment takes
-precedence; rotating the file does not update that older hash. Always start the
-managed service rather than bypassing its password loader.
-
-Rebuilds/restarts retain the password, sessions, `plugin-settings`, `plugin-data`,
-daemon identity and other user state. Only managed listen/hostname/relay policy
-and the pinned OMP plugin registration are merged into `config.json` with `jq`
-from Nix-generated nonsecret settings; other settings and plugins remain.
-There are no Home Manager store symlinks replacing the mutable state tree.
-
-To rotate the password, replace the private file securely and restart the
-**managed service**, then update the phone's saved password. On macOS:
-
-```sh
-launchctl kickstart -k "gui/$(id -u)/org.nix-community.home.paseo"
-```
-
-On Linux use `systemctl --user restart paseo`. Do not start a second daemon with
-Paseo Desktop or `paseo daemon start`; this feature owns the supervisor and its
-security environment.
-
-Disabling Paseo and switching removes its user service but preserves password
-and state. The next authoritative Serve apply omits its endpoint. In manual
-mode only, separately remove the root you added:
-
-```sh
-tailscale serve --bg --https=9443 --set-path=/ off
-```
-
-### Verification
-
-The generated startup shell is checked by ShellCheck when its derivation builds.
-
-The integration was exercised on aarch64 macOS with temporary user state:
-native daemon startup, unauthenticated/wrong-password rejection, authenticated
-HTTP and WebSocket access through the actual private tailnet HTTPS endpoint,
-**OMP Plugin** reporting Ready with eight models, duplicate-supervisor refusal,
-and restart preservation of the password/hash and user-state marker. The Mac
-configuration was subsequently switched and the deployed daemon/provider
-verified. No model turn or physical iPhone UI was exercised. Temporary smoke
-routes were removed after verification; normal mappings are now declaratively
-configured from Nix when the Serve layer is enabled.
-
-The shell-only startup path was exercised through the actual rendered Home
-Manager runner on aarch64 macOS with temporary state. Checks covered fresh
-password generation, missing/wrong/inherited-password rejection, successful
-authentication, duplicate-start refusal, restart preservation, rotation,
-existing-hash adoption, literal password loading, unsafe-file rejection and
-BOM/malformed configurations. No managed hash was persisted. This change was
-not switched onto the live host or validated from a downstream consumer.
+to apply and preserved the live preferences. GUI controls, login after an actual
+logout/reboot, and selecting a live exit node were not exercised.
 
 ## Zed Kubernetes And CRD Schemas
 

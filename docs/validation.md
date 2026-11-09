@@ -72,21 +72,6 @@ initial setup can work before flake evaluation succeeds. No wrapper recipes exis
 so there is no second copy of that interface to drift.
 
 
-### OMP collaboration package
-
-`checks.<system>.omp-collab` builds the same derivation as `packages.<system>.omp-collab`.
-It exercises the loopback/analytics patches, offline Bun dependency installation, relay and browser bundling, and installation of assets and license notices.
-Unlike the host-derivation evaluation, this catches build- and install-phase regressions during input-update CI on Linux and Darwin.
-
-The package preserves upstream's MIT license and the CLI's JavaScript notices, which also cover the shared `collab-web` viewer.
-It does not build the OMP CLI/native addon to obtain those notices or include the addon's separate notice catalog.
-This is a package-build check, not a live Collab session or Tailscale deployment check.
-
-```bash
-nix build .#checks.aarch64-darwin.omp-collab --no-link
-nix build .#checks.x86_64-linux.omp-collab --no-link
-```
-
 ### Neovim plugin loading
 
 `checks.<system>.neovim-plugin-loading` exercises require-triggered activation of

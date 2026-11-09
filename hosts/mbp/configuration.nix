@@ -7,9 +7,8 @@
       system.stateVersion = 6;
     };
     home = { ... }: {
+      imports = [ config.aw1cks.modules.home.tailscale-serve ];
       home.stateVersion = "25.11";
-      modules.ai.omp.collab.enable = true;
-      modules.ai.paseo.enable = true;
       services.tailscale-serve = {
         enable = true;
       };
