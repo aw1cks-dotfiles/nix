@@ -2,8 +2,19 @@
 { ... }:
 {
   aw1cks.modules.home.cli-tools =
-    { pkgs, lib, ... }:
     {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
+    {
+      # step-cli defaults to ~/.step, which is outside XDG. Point it at
+      # $XDG_CONFIG_HOME/step so its authorities, profiles, and contexts live
+      # with the rest of the user configuration. Existing state has to be moved
+      # there by hand; step does not migrate it on its own.
+      home.sessionVariables.STEPPATH = "${config.xdg.configHome}/step";
+
       home.packages =
         with pkgs;
         [

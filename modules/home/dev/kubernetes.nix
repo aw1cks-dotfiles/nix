@@ -2,7 +2,7 @@
 { lib, ... }:
 {
   aw1cks.modules.home.kubernetes =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     let
       helm-unittest = pkgs.kubernetes-helmPlugins.helm-unittest.overrideAttrs (oldAttrs: {
         postInstall = (oldAttrs.postInstall or "") + ''
@@ -19,6 +19,13 @@
       });
     in
     {
+      # kubectl invokes the external program with the two comparison
+      # directories and propagates its exit status, so any diff that understands
+      # directories works. delta is used because `programs.delta` already makes
+      # it the git pager. `--no-gitconfig` keeps delta from reading repo-local
+      # styling, and `--paging never` stops it waiting for input.
+      home.sessionVariables.KUBECTL_EXTERNAL_DIFF = "${lib.getExe pkgs.delta} --no-gitconfig --paging never";
+
       home.packages =
         with pkgs;
         [
