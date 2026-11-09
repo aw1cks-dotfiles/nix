@@ -202,20 +202,24 @@ A fork, revision, or local source can still be selected explicitly through `flak
 Such overrides are intentional departures from the library's reviewed versions, not independently approved content.
 
 In the library repo, Renovate can automerge skill updates and weekly mixed lockfile maintenance only after CI passes.
-The existing `host-check` jobs run `python3 .github/check-skill-inputs.py` immediately after checkout, before installing Nix or starting builds.
-It compares all four effective locked `narHash` values with `.github/reviewed-skill-inputs.json`, an independent record of reviewed source contents.
-A changed hash fails the job, including when the skill update arrives through mixed lockfile maintenance.
-An unrelated input update, or a revision change with identical source contents, does not require new skill approval.
-The subsequent flake check uses `--no-update-lock-file`, so Nix cannot replace the checked inputs while resolving a stale lock.
+The required `skill-input-review` status compares all four effective locked `narHash` values with the protected target branch's `flake.lock`.
+The default-branch reporter posts one diff comment with old/new hashes and revisions, a changed-file summary, bounded excerpts, and a complete exact two-tree diff artifact.
+A content change waits for an authorized human's GitHub **Approve** review on the current PR head, including when it arrives through mixed lockfile maintenance.
+An unrelated update, or a revision change with identical contents, does not require approval.
+Host builds wait before Nix installation; review events automatically rerun the read-only gate and host checks after approval.
+A new push/rebase requires fresh approval; dismissal and superseding reviews are re-evaluated.
+Bot reviews, PR-author reviews, comment text, labels, and checkboxes do not authorize changed contents.
+The flake check uses `--no-update-lock-file`, so Nix cannot replace checked inputs while resolving a stale lock.
 
-After reviewing an upstream skill diff, update that input's approved hash in `.github/reviewed-skill-inputs.json` and commit the approval alongside the lock change.
-The checker never rewrites this file, and Renovate's Nix manager does not update it.
-Do not regenerate approval hashes without reviewing the contents: passing assembly checks does not establish instruction safety.
-This GitHub CI approval gate is not inherited by importing the Nix modules; downstream pinning supplies reviewed defaults, not runtime enforcement against explicit overrides.
+The target branch and GitHub review history replace the independently maintained approval-hash ledger.
+`.github/skill-inputs.json` now inventories source identities and supplies the unchanged set of downstream skill defaults.
+Required-check setup and the automerge-safe rollout are documented in [validation.md](validation.md#required-check-rollout).
+Passing assembly checks does not establish instruction safety; review the upstream diff rather than approving blindly.
+This GitHub approval gate is not inherited by importing Nix modules; downstream pinning supplies reviewed defaults, not runtime enforcement against explicit overrides.
 `platformAutomerge: false` makes Renovate itself observe green CI before merging.
 
 This is repository CI policy, not a runtime restriction on consumer forks or local input overrides.
-Independent consumers need an equivalent CI gate or must retain manual merge review; neither this workflow nor its approved hashes are inherited through a flake input.
+Independent consumers need an equivalent CI gate or must retain manual merge review; this workflow and its GitHub approval history are not inherited through a flake input.
 OMP loading is wired by this module; loading in other harnesses and consumer-specific precedence remain the consumer's responsibility.
 
 ## AI Model Routing

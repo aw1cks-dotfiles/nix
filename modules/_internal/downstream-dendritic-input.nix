@@ -28,7 +28,7 @@ let
   # Root URLs stay floating so Renovate can continue proposing lock updates.
   lock = builtins.fromJSON (builtins.readFile ../../flake.lock);
   skillInputs = builtins.attrNames (
-    builtins.fromJSON (builtins.readFile ../../.github/reviewed-skill-inputs.json)
+    builtins.fromJSON (builtins.readFile ../../.github/skill-inputs.json)
   );
   skillDefaults = lib.genAttrs skillInputs (
     name:

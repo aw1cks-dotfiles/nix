@@ -1,0 +1,63 @@
+name: Skill input review
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+  # Review events run CI with a read-only token. Relay their lifecycle here,
+  # rather than running privileged code from the PR's merge ref.
+  workflow_run:
+    workflows: [CI]
+    types: [in_progress, completed]
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+jobs:
+  resolve:
+    if: github.event_name == 'pull_request_target' || github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.event == 'pull_request_review'
+    runs-on: ubuntu-latest
+    outputs:
+      pulls: ${{ steps.pulls.outputs.pulls }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Resolve associated pull requests
+        id: pulls
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 .github/skill_input_review.py route
+  review:
+    needs: resolve
+    if: needs.resolve.outputs.pulls != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pull: ${{ fromJSON(needs.resolve.outputs.pulls) }}
+    concurrency:
+      # Dropping a superseded report is safe only within the same PR:
+      # every surviving report recomputes that PR's live state.
+      group: skill-input-review-${{ matrix.pull }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Never check out PR code in this write-capable workflow.
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Report changes and reconcile approval
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PULL_NUMBER: ${{ matrix.pull }}
+        run: python3 .github/skill_input_review.py report --pull "$PULL_NUMBER"
+      - name: Attach complete upstream diff
+        if: always() && hashFiles('skill-input-diff.patch') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-input-diff-${{ matrix.pull }}
+          path: skill-input-diff.patch
+          retention-days: 30

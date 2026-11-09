@@ -169,7 +169,7 @@ let
             }
             ''
               export PYTHONDONTWRITEBYTECODE=1
-              pytest -p no:cacheprovider ${../.github}/test_skill_input_gate.py
+              pytest -p no:cacheprovider ${../.github}/test_skill_input_gate.py ${../.github}/test_skill_input_review.py
               touch "$out"
             '';
       }

@@ -1,0 +1,18 @@
+{
+  "intel-performance-skills": {
+    "owner": "intel",
+    "repo": "intel-performance-skills"
+  },
+  "low-level-dev-skills": {
+    "owner": "mohitmishra786",
+    "repo": "low-level-dev-skills"
+  },
+  "rewrite-rs-skills": {
+    "owner": "rewrite-rs",
+    "repo": "skills"
+  },
+  "trailofbits-skills": {
+    "owner": "trailofbits",
+    "repo": "skills"
+  }
+}
