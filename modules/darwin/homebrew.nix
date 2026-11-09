@@ -9,10 +9,8 @@
       casks = [
         "calibre"
         "crystalfetch"
-        "mactex"
         "microsoft-auto-update"
         "microsoft-remote-desktop"
-        "microsoft-teams"
         "omnissa-horizon-client"
         "openmtp"
         "openvpn-connect"
