@@ -264,11 +264,12 @@ The shared AI module installs `~/.omp/agent/themes/oxocarbon-dark.json` when OMP
 The JSON palette is adapted from [Oxocarbon.nvim](https://github.com/nyoom-engineering/oxocarbon.nvim); OMP does not change the terminal's background, so use `#161616` in the terminal for a matching canvas.
 Downstream configurations can override the dark theme through the existing per-key settings interface; the light-theme slot is unchanged.
 
-The shared CLI tools module supplies the checked-in `oxocarbon-dark.tmTheme` through `programs.bat.themes.oxocarbon-dark.src` and selects it with `programs.bat.config.theme`.
-Home Manager installs the theme and rebuilds bat's cache during activation; no manual `bat cache --build` step is needed after switching.
-The theme's source of truth is `modules/home/shells/files/bat/oxocarbon-dark.tmTheme`, not a mutable file under `~/.config/bat/themes`.
+The shared CLI tools module supplies the checked-in `oxocarbon-dark.tmTheme` through `programs.bat.themes.oxocarbon-dark.src`, registers the companion syntax overrides (`Go`, `JSON`, `Python`, `Rust`) through `programs.bat.syntaxes`, and selects the theme with `programs.bat.config.theme`.
+Home Manager installs the theme and syntax files and rebuilds bat's cache during activation; no manual `bat cache --build` step is needed after switching.
+The sources of truth live under `modules/home/shells/files/bat/`, not mutable files under `~/.config/bat`.
 
-Delta uses the same palette: `modules/home/vcs/default.nix` declares a `delta "oxocarbon"` feature with `syntax-theme = "oxocarbon-dark"` and selects it via `programs.delta.options.features`. The syntax theme ships with delta's embedded bat themes, so no extra theme file is required.
+Delta uses the same compiled `bat` theme and syntax cache: `modules/home/vcs/default.nix` declares a `delta "oxocarbon"` feature with `syntax-theme = "oxocarbon-dark"` and selects it via `programs.delta.options.features`.
+Difftastic (`difft`) only emits 16-color ANSI escapes, so `modules/home/vcs/default.nix` sets `programs.difftastic.options.background = "dark"` and `DFT_BACKGROUND = "dark"`, while WezTerm, OMP, and Neovim `:terminal` align their 16-color ANSI slots to Oxocarbon (`#ee5396` red, `#42be65` green, `#ffe97b` yellow, `#78a9ff` blue, `#be95ff` magenta, `#3ddbd9` cyan).
 
 After switching, check `bat --list-themes` for `oxocarbon-dark` and launch OMP normally to use its declared dark-theme default.
 
