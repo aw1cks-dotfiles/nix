@@ -25,11 +25,14 @@
       };
     in
     {
-      home.packages = with pkgs; [
-        gg-jj
-        onefetch
-        tig
-      ];
+      home = {
+        packages = with pkgs; [
+          gg-jj
+          onefetch
+          tig
+        ];
+        sessionVariables.DFT_BACKGROUND = "dark";
+      };
 
       programs = {
         delta = {
@@ -39,7 +42,10 @@
           options.features = "oxocarbon";
         };
 
-        difftastic.enable = true;
+        difftastic = {
+          enable = true;
+          options.background = "dark";
+        };
 
         gh = {
           enable = true;
@@ -270,17 +276,26 @@
               file-modified-label = "[*]";
               file-removed-label = "[-]";
               file-renamed-label = "[->]";
-              hunk-header-decoration-style = "\"#3e3e43\" box ul";
-              line-numbers-left-style = "\"#3e3e43\"";
-              line-numbers-right-style = "\"#3e3e43\"";
-              line-numbers-zero-style = "\"#57575f\"";
+              hunk-header-decoration-style = "#3e3e43 box ul";
+              line-numbers-left-style = "#3e3e43";
+              line-numbers-right-style = "#3e3e43";
+              line-numbers-zero-style = "#57575f";
               line-numbers-minus-style = "brightred";
               line-numbers-plus-style = "brightgreen";
-              minus-style = "syntax \"#3b121e\"";
-              minus-emph-style = "black \"#ee5396\"";
-              plus-style = "syntax \"#0f2e20\"";
-              plus-emph-style = "black \"#42be65\"";
+              minus-style = "syntax #3b121e";
+              minus-emph-style = "black #ee5396";
+              plus-style = "syntax #0f2e20";
+              plus-emph-style = "black #42be65";
               zero-style = "syntax";
+              blame-code-style = "syntax";
+              blame-palette = "#161616 #262626 #393939 #525252";
+              merge-conflict-begin-symbol = "~";
+              merge-conflict-end-symbol = "~";
+              merge-conflict-ours-diff-header-decoration-style = "#3e3e43 box";
+              merge-conflict-ours-diff-header-style = "yellow bold";
+              merge-conflict-theirs-diff-header-decoration-style = "#3e3e43 box";
+              merge-conflict-theirs-diff-header-style = "yellow bold";
+              whitespace-error-style = "black bold";
             };
           };
         };
