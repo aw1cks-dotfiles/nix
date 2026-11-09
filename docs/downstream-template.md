@@ -203,9 +203,9 @@ Such overrides are intentional departures from the library's reviewed versions, 
 
 In the library repo, Renovate can automerge skill updates and weekly mixed lockfile maintenance only after CI passes.
 The required `skill-input-review` status compares all four effective locked `narHash` values with the protected target branch's `flake.lock`.
-The default-branch reporter posts one diff comment with old/new hashes and revisions, a changed-file summary, bounded excerpts, and a complete exact two-tree diff artifact.
+For changed contents, the default-branch reporter posts one concise comment with approval guidance, upstream two-SHA diff links, and a complete exact two-tree diff artifact.
 A content change waits for an authorized human's GitHub **Approve** review on the current PR head, including when it arrives through mixed lockfile maintenance.
-An unrelated update, or a revision change with identical contents, does not require approval.
+An unrelated update, or a revision change with identical contents, requires neither approval nor a comment. Reverting content changes removes the reporter's previous review comments.
 Host builds wait before Nix installation; review events automatically rerun the read-only gate and host checks after approval.
 A new push/rebase requires fresh approval; dismissal and superseding reviews are re-evaluated.
 Bot reviews, PR-author reviews, comment text, labels, and checkboxes do not authorize changed contents.

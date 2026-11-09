@@ -258,7 +258,6 @@ def run_git(directory, environment, *arguments, stdout=None):
 
 
 def upstream_diffs(changes, sources, patch_path=PATCH_PATH):
-    summaries = []
     with open(patch_path, "ab") as artifact, tempfile.TemporaryDirectory(prefix="skill-input-review-") as temporary:
         home = Path(temporary)
         environment = git_environment(home)
@@ -284,54 +283,29 @@ def upstream_diffs(changes, sources, patch_path=PATCH_PATH):
             diff_args = ("--no-ext-diff", "--no-textconv", "--no-renames", before["rev"] + "^{tree}", after["rev"] + "^{tree}", "--")
             artifact.write(f"\n# {name}: {before['rev']} -> {after['rev']}\n".encode("ascii"))
             artifact.flush()
-            start = artifact.tell()
             run_git(directory, environment, "diff", "--binary", "--full-index", *diff_args, stdout=artifact)
-            artifact.flush()
-            size = artifact.tell() - start
-            stat = run_git(directory, environment, "diff", "--stat=100", "--stat-count=30", *diff_args).decode("utf-8", errors="replace")
-            with open(patch_path, "rb") as reader:
-                reader.seek(start)
-                excerpt = reader.read(min(size, 4000)).decode("utf-8", errors="replace")
-            summaries.append({"change": change, "stat": stat, "excerpt": excerpt, "truncated": size > 4000})
-    return summaries
 
 
 def safe_text(text):
-    # HTML pre blocks prevent Markdown injection; removing literal @ additionally
-    # prevents notifications, even if GitHub changes its handling of pre blocks.
+    # Escape markup and neutralize mentions in diagnostic output.
     return html.escape(str(text)).replace("@", "&#64;")
 
 
-def pre_block(text, limit=None):
-    escaped = safe_text(text)
-    if limit is not None and len(escaped) > limit:
-        # Truncate before escaping to avoid splitting an HTML entity.
-        text = str(text)[:limit // 6]
-        escaped = safe_text(text) + "\n[Display truncated; see full artifact.]"
-    return "<pre>" + escaped + "</pre>"
-
-
-def comment_body(pull, result, summaries, run_url):
+def comment_body(pull, result, run_url):
     if not result["changes"]:
-        state = "No guarded skill content changes; approval is not required."
-    elif result["approved"]:
-        state = "Approved by an authorized human review on this exact head."
+        return None
+    head = sha_value(pull["head"]["sha"])[:7]
+    if result["approved"]:
+        state = f"**Approved** for PR head `{head}`."
     else:
-        state = "Awaiting human approval. A maintainer with write access must use GitHub **Approve** on this exact PR head to authorize host builds."
-    parts = [MARKER, "## Skill input review", state,
-             "Current PR head: " + pre_block(pull["head"]["sha"]),
-             "This comment is informational, not approval authority. Upstream code below is untrusted.",
-             f"[Full exact two-tree diff artifact: skill-input-diff.patch]({run_url})",
-             "Source compare links are for navigation; GitHub compare views can use a merge base. The artifact compares the two pinned trees directly."]
-    for summary in summaries:
-        change = summary["change"]
+        state = f"Review the diffs, then **Approve** this PR at `{head}` (write access required)."
+    rows = ["| Skill input | Upstream diff |", "| --- | --- |"]
+    for change in result["changes"]:
         before, after = change["before"], change["after"]
-        compare = f"https://github.com/{quote(after['owner'], safe='')}/{quote(after['repo'], safe='')}/compare/{before['rev']}...{after['rev']}"
-        parts.extend(["### " + safe_text(change["name"]), f"[Source SHA compare]({compare})",
-                      pre_block(f"old rev: {before['rev']}\nnew rev: {after['rev']}\nold narHash: {before['narHash']}\nnew narHash: {after['narHash']}"),
-                      "Changed-file diffstat (up to 30 entries; full patch is in the artifact):", pre_block(summary["stat"], 4000),
-                      "<details><summary>Untrusted patch excerpt (bounded)</summary>\n\n" + pre_block(summary["excerpt"], 6000) + ("\nExcerpt truncated; see the complete artifact." if summary["truncated"] else "") + "\n</details>"])
-    body = "\n\n".join(parts)
+        compare = f"https://github.com/{quote(after['owner'], safe='')}/{quote(after['repo'], safe='')}/compare/{before['rev']}..{after['rev']}"
+        rows.append(f"| {safe_text(change['name'])} | [`{before['rev'][:7]}` → `{after['rev'][:7]}`]({compare}) |")
+    body = "\n\n".join([MARKER, "## Skill input review", state, "\n".join(rows),
+                         f"[Full patch artifact]({run_url}#artifacts) · exact pinned-tree diff."])
     if len(body) > 60000:
         raise ReviewError("Review summary exceeds the safe GitHub comment size")
     return body
@@ -343,7 +317,10 @@ def sticky_comment(api, number, body):
         user = comment.get("user") or {}
         if user.get("login") == "github-actions[bot]" and user.get("type") == "Bot" and isinstance(comment.get("body"), str) and comment["body"].startswith(MARKER):
             matches.append(comment)
-    if matches:
+    if body is None:
+        for comment in matches:
+            api.request(api.path(f"issues/comments/{number_value(comment['id'])}"), "DELETE")
+    elif matches:
         first = matches[0]
         api.request(api.path(f"issues/comments/{number_value(first['id'])}"), "PATCH", {"body": body})
         for duplicate in matches[1:]:
@@ -393,14 +370,15 @@ def report_pull(api, number, sources, run_url, patch_path):
         if sources is None:
             sources = load_sources()
         result = evaluate_pull(api, pull, sources)
-        summaries = upstream_diffs(result["changes"], sources, patch_path)
+        if result["changes"]:
+            upstream_diffs(result["changes"], sources, patch_path)
         current = api.pull(number)
         if not same_snapshot(pull, current):
             raise ReviewError("Pull request changed while generating source diffs")
         # Reviews/permissions can change during a slow source fetch. Recompute
         # from live data immediately before publishing the final status.
         result = evaluate_pull(api, current, sources)
-        body = comment_body(current, result, summaries, run_url)
+        body = comment_body(current, result, run_url)
         sticky_comment(api, number, body)
         publish_status(api, number, current, "success" if result["approved"] else "pending",
                        "Skill input contents approved." if result["approved"] else "Waiting for human approval of current skill input changes.", run_url)

@@ -123,9 +123,9 @@ nix build .#checks.aarch64-darwin.agent-omp-skills
 These checks cover assembly contracts and known example defects, not the safety or correctness of every upstream instruction.
 CI compares all guarded skill inputs' locked `narHash` values against the target branch's `flake.lock`.
 The protected target branch is the approved baseline; `.github/skill-inputs.json` inventories the guarded sources, not approved hashes.
-Unchanged contents allow ordinary maintenance to proceed without review, even if revisions change.
+Unchanged contents allow ordinary maintenance to proceed without review or a PR comment, even if revisions change. If changes are reverted, the reporter removes its previous review comments.
 Changed contents leave the required `skill-input-review` commit status pending and skip host builds before Nix installation.
-The trusted default-branch reporter maintains one PR comment with source revisions/hashes, changed-file statistics, bounded patch excerpts, and an Actions artifact containing the complete exact two-tree upstream diff.
+For changed contents, the trusted default-branch reporter maintains one concise PR comment with approval guidance, upstream two-SHA diff links, and a link to the Actions artifact containing the complete exact two-tree upstream diff.
 Review the diff, then use GitHub **Approve** on the current PR head with a human account having write, maintain, or admin access.
 Bot reviews, PR-author reviews, read-only collaborators, dismissed/superseded decisions, and approvals of an older head cannot authorize changed contents.
 A new push or rebase needs fresh approval; comment text, labels, and checkboxes are never approval authority.
@@ -134,7 +134,7 @@ Dismissal and later review decisions cause the trusted reporter to recompute app
 The reporter checks out only default-branch code, never executes upstream code, and does not pass its token to Git.
 The host flake check still uses `--no-update-lock-file`.
 
-`checks.<system>.agent-skill-input-gate` covers content identity, source validation, current-head human reviews, dismissal/precedence, paginated API results, stale-head races, reporting failures, and untrusted comment markup.
+`checks.<system>.agent-skill-input-gate` covers content identity, source validation, current-head human reviews, dismissal/precedence, paginated API results, stale-head races, reporting failures, and review-comment ownership/cleanup.
 These are repository CI checks; downstream overrides do not inherit this approval policy.
 
 #### Required-check rollout
