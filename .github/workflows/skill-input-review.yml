@@ -56,7 +56,7 @@ jobs:
         run: python3 .github/skill_input_review.py report --pull "$PULL_NUMBER"
       - name: Attach complete upstream diff
         if: always() && hashFiles('skill-input-diff.patch') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: skill-input-diff-${{ matrix.pull }}
           path: skill-input-diff.patch
