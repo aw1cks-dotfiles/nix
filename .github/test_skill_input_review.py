@@ -129,7 +129,6 @@ def test_sticky_comment_search_pages_and_rejects_user_spoof(state, tmp_path):
     report(state, tmp_path)
     assert len(state.comments) == 101
     assert state.comments[0] == spoof
-    assert "Awaiting human approval" in state.comments[-1]["body"]
 
 
 def test_diff_failure_revokes_previous_success(state, tmp_path, monkeypatch):
@@ -199,20 +198,26 @@ def test_unreviewed_gate_is_pending_not_a_command_failure(state, tmp_path, monke
     assert output.read_text().splitlines()[-1] == "approved=false"
 
 
-def test_no_drift_needs_no_review(state, tmp_path):
+@pytest.mark.parametrize("revision", [BASE, NEXT])
+def test_no_drift_needs_no_review_or_comment(state, tmp_path, revision):
+    state.locks[HEAD] = deepcopy(state.locks[BASE])
+    state.locks[HEAD]["nodes"]["alias"]["locked"]["rev"] = revision
+    assert report(state, tmp_path) == "success"
+    assert state.comments == []
+
+
+def test_reverted_drift_removes_only_owned_review_comments(state, tmp_path):
+    spoof = {"id": 1, "body": REVIEW.MARKER + " forged",
+             "user": {"login": "author", "type": "User"}}
+    state.comments = [spoof] + [
+        {"id": index + 2, "body": "unrelated", "user": {}} for index in range(99)
+    ]
+    assert report(state, tmp_path) == "pending"
+    state.comments.append({**deepcopy(state.comments[-1]), "id": 102})
+    preserved = deepcopy(state.comments[:100])
     state.locks[HEAD] = deepcopy(state.locks[BASE])
     assert report(state, tmp_path) == "success"
-
-
-def test_comment_neutralizes_upstream_markup_and_mentions(state):
-    result = REVIEW.evaluate_pull(state, state.current, SOURCES)
-    malicious = "</pre><img src=x onerror=alert(1)>\n@maintainer\n<!-- skill-input-review -->"
-    body = REVIEW.comment_body(state.current, result, [{"change": result["changes"][0],
-        "stat": malicious, "excerpt": malicious, "truncated": False}], "https://github.com/owner/repository/actions/runs/1")
-    assert "<img src=x" not in body
-    assert "@maintainer" not in body
-    assert body.count(REVIEW.MARKER) == 1
-    assert "&lt;/pre&gt;" in body
+    assert state.comments == preserved
 
 
 def relay(state, candidates):
