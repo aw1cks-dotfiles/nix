@@ -9,6 +9,7 @@
       casks = [
         "calibre"
         "crystalfetch"
+        "keepingyouawake"
         "microsoft-auto-update"
         "microsoft-remote-desktop"
         "omnissa-horizon-client"
