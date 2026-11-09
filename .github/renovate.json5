@@ -5,7 +5,7 @@
   ],
   lockFileMaintenance: {
     enabled: true,
-    // The host-check job rejects unreviewed skill contents before building.
+    // Skill content changes wait for a maintainer review before host builds.
     automerge: true,
     automergeType: 'pr',
     platformAutomerge: false,
@@ -29,7 +29,7 @@
       automergeType: 'pr',
       platformAutomerge: false,
       prBodyNotes: [
-        'Review the upstream skill diff and update .github/reviewed-skill-inputs.json only after approving the new contents.',
+        'Review the skill-input-review diff comment, then approve this PR at its current head. A new push requires fresh approval.',
       ],
     },
   ],

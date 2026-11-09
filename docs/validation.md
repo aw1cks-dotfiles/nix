@@ -121,16 +121,33 @@ nix build .#checks.aarch64-darwin.agent-omp-skills
 ```
 
 These checks cover assembly contracts and known example defects, not the safety or correctness of every upstream instruction.
-CI runs `python3 .github/check-skill-inputs.py` before installing Nix or starting any builds.
-It fails closed unless all skill inputs' locked content hashes match the independently reviewed values in `.github/reviewed-skill-inputs.json`.
-Review source changes and update the approved hash in an explicit commit; do not copy new hashes blindly.
-Unchanged skill contents allow ordinary input maintenance to proceed and automerge after green CI.
+CI compares all guarded skill inputs' locked `narHash` values against the target branch's `flake.lock`.
+The protected target branch is the approved baseline; `.github/skill-inputs.json` inventories the guarded sources, not approved hashes.
+Unchanged contents allow ordinary maintenance to proceed without review, even if revisions change.
+Changed contents leave the required `skill-input-review` commit status pending and skip host builds before Nix installation.
+The trusted default-branch reporter maintains one PR comment with source revisions/hashes, changed-file statistics, bounded patch excerpts, and an Actions artifact containing the complete exact two-tree upstream diff.
+Review the diff, then use GitHub **Approve** on the current PR head with a human account having write, maintain, or admin access.
+Bot reviews, PR-author reviews, read-only collaborators, dismissed/superseded decisions, and approvals of an older head cannot authorize changed contents.
+A new push or rebase needs fresh approval; comment text, labels, and checkboxes are never approval authority.
+Review events automatically rerun the read-only CI gate and host matrix; no manual rerun or hash-update commit is needed.
+Dismissal and later review decisions cause the trusted reporter to recompute approval.
+The reporter checks out only default-branch code, never executes upstream code, and does not pass its token to Git.
+The host flake check still uses `--no-update-lock-file`.
 
-`checks.<system>.agent-skill-input-gate` runs isolated CLI regression cases for unrelated maintenance, rejected content changes, explicit approval transitions, root/node aliases, and missing or invalid approval data.
-The policy comparison is repo-local CI; the flake check tests its behavior without enforcing this repo's approved inputs on downstream source overrides.
+`checks.<system>.agent-skill-input-gate` covers content identity, source validation, current-head human reviews, dismissal/precedence, paginated API results, stale-head races, reporting failures, and untrusted comment markup.
+These are repository CI checks; downstream overrides do not inherit this approval policy.
+
+#### Required-check rollout
+
+The `main` ruleset must require **all four** contexts: `skill-input-review`, `skill-input-gate`, `host-check (x86_64-linux)`, and `host-check (aarch64-darwin)`, with GitHub Actions as their expected source.
+The pending commit status blocks unreviewed drift; the gate job must also be required so API/evaluation failures cannot be hidden by skipped host jobs.
+GitHub treats skipped jobs as successful, so requiring host checks alone is insufficient.
+Pause Renovate automerge during initial rollout: merge these workflows, refresh an open PR to publish the new contexts, add both new requirements, then resume automerge.
+The privileged reporter activates only after its workflow and scripts reach the default branch.
+Do not mark a pending review `neutral` or `skipped`, and do not bypass these requirements for Renovate.
 
 ```bash
-python3 .github/check-skill-inputs.py
+python3 -m pytest .github/test_skill_input_gate.py .github/test_skill_input_review.py
 nix build .#checks.x86_64-linux.agent-skill-input-gate
 ```
 
