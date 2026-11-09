@@ -20,7 +20,8 @@
     "base15": "#82cfff",
     "mutedText": "#a8a8a8",
     "successBg": "#122f2f",
-    "errorBg": "#361c28"
+    "errorBg": "#361c28",
+    "yellow": "#ffe97b"
   },
   "colors": {
     "accent": "base08",
@@ -103,10 +104,10 @@
     "chrome": "base00",
     "widget": "base01",
     "ansi": [
-      "base01", "base11", "base14", "base13",
-      "base09", "base15", "base08", "base05",
-      "base03", "base11", "base14", "base13",
-      "base09", "base15", "base07", "base06"
+      "base01", "base10", "base13", "yellow",
+      "base09", "base14", "base08", "base05",
+      "base03", "base10", "base13", "yellow",
+      "base09", "base14", "base08", "base06"
     ]
   }
 }
