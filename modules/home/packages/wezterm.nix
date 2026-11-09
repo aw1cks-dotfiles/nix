@@ -78,18 +78,18 @@
                 "#ee5396"
                 "#42be65"
                 "#ffe97b"
-                "#33b1ff"
-                "#ff7eb6"
+                "#78a9ff"
+                "#be95ff"
                 "#3ddbd9"
                 "#dde1e6"
               ];
               brights = [
-                "#393939"
+                "#525252"
                 "#ee5396"
                 "#42be65"
                 "#ffe97b"
-                "#33b1ff"
-                "#ff7eb6"
+                "#78a9ff"
+                "#be95ff"
                 "#3ddbd9"
                 "#ffffff"
               ];
