@@ -90,6 +90,12 @@
       programs.bat = {
         enable = true;
         themes.oxocarbon-dark.src = ./files/bat/oxocarbon-dark.tmTheme;
+        syntaxes = {
+          Go.src = ./files/bat/syntaxes/Go.sublime-syntax;
+          JSON.src = ./files/bat/syntaxes/JSON.sublime-syntax;
+          Python.src = ./files/bat/syntaxes/Python.sublime-syntax;
+          Rust.src = ./files/bat/syntaxes/Rust.sublime-syntax;
+        };
         extraPackages = with pkgs; [
           bat-extras.core
         ];
