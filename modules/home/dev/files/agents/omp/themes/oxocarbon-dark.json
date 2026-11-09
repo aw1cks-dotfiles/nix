@@ -105,9 +105,9 @@
     "widget": "base01",
     "ansi": [
       "base01", "base10", "base13", "yellow",
-      "base09", "base14", "base08", "base05",
-      "base03", "base10", "base13", "yellow",
-      "base09", "base14", "base08", "base06"
+      "base11", "base12", "base08", "base05",
+      "base02", "base10", "base13", "yellow",
+      "base11", "base12", "base08", "base06"
     ]
   }
 }

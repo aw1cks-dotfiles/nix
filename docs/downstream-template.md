@@ -269,7 +269,7 @@ Home Manager installs the theme and syntax files and rebuilds bat's cache during
 The sources of truth live under `modules/home/shells/files/bat/`, not mutable files under `~/.config/bat`.
 
 Delta uses the same compiled `bat` theme and syntax cache: `modules/home/vcs/default.nix` declares a `delta "oxocarbon"` feature with `syntax-theme = "oxocarbon-dark"` and selects it via `programs.delta.options.features`.
-Difftastic (`difft`) only emits 16-color ANSI escapes, so `modules/home/vcs/default.nix` sets `programs.difftastic.options.background = "dark"` and `DFT_BACKGROUND = "dark"`, while WezTerm, OMP, and Neovim `:terminal` align their 16-color ANSI slots to Oxocarbon (`#ee5396` red, `#42be65` green, `#ffe97b` yellow, `#78a9ff` blue, `#be95ff` magenta, `#3ddbd9` cyan).
+Difftastic (`difft`) only emits 16-color ANSI escapes, so `modules/home/vcs/default.nix` sets `programs.difftastic.options.background = "dark"` and `DFT_BACKGROUND = "dark"`, while WezTerm, OMP, and Neovim `:terminal` align their 16-color ANSI slots to Oxocarbon (`#ee5396` red, `#42be65` green, `#ffe97b` yellow, `#33b1ff` blue, `#ff7eb6` magenta, `#3ddbd9` cyan).
 
 After switching, check `bat --list-themes` for `oxocarbon-dark` and launch OMP normally to use its declared dark-theme default.
 
