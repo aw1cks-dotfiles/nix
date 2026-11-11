@@ -99,6 +99,13 @@
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
   };
 
+  # Nix-built rustup-shaped toolchains (see modules/home/dev/rust.nix). Only
+  # `lib.mkRustBin` is used, applied to the consumer's pkgs, so its nixpkgs
+  # input exists solely to avoid fetching a second nixpkgs.
+  rust-overlay = {
+    url = lib.mkDefault "github:oxalica/rust-overlay";
+    inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
+  };
   apple-fonts = {
     url = lib.mkDefault "github:Lyndeno/apple-fonts.nix";
     inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";

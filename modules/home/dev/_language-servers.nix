@@ -1,4 +1,8 @@
-{ pkgs }:
+{
+  pkgs,
+  # Callers pass the analyzer from ./_rust-toolchains.nix.
+  rust-analyzer,
+}:
 with pkgs;
 [
   bash-language-server
@@ -18,7 +22,8 @@ with pkgs;
   nixd
   omnisharp-roslyn
   python3Packages.ruff
-  # Prefer the packaged server over rustup's proxy without changing its toolchain.
+  # One analyzer, toolchain-independent: beat rustup's per-toolchain proxy,
+  # which fails for toolchains without the rust-analyzer component.
   (lib.hiPrio rust-analyzer)
   sqls
   taplo

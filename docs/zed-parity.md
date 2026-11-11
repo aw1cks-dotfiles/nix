@@ -134,7 +134,7 @@ than replaced with Neovim-specific servers.
 | Lua | LuaLS plus StyLua (`--respect-ignores`, buffer path); LuaLS formatting disabled. |
 | Python | `ty` for type analysis, Ruff server for lint/format; formatting also runs `source.organizeImports.ruff`. |
 | Go | gopls with `gofumpt` and `staticcheck` enabled; server formatting also runs `source.organizeImports`; hard tabs. Go and golangci-lint supplied. |
-| Rust | rust-analyzer, rustc, Cargo, rustfmt, and Clippy supplied. |
+| Rust | Shared rust-analyzer from the Nix stable toolchain; rustup's proxies supply rustc, Cargo, rustfmt, and Clippy per the project's toolchain file. |
 | F# | .NET SDK and FsAutoComplete (adaptive server); language-server formatting. |
 | Markdown | Marksman, Prettier with buffer path, editor-width wrapping; markdownlint-cli2 task. |
 | TOML | Tombi LSP and formatter. |

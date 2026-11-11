@@ -4,6 +4,14 @@
     { config, pkgs, ... }:
     let
       configDir = ./files;
+      rustToolchains = import ../../dev/_rust-toolchains.nix {
+        inherit
+          config
+          inputs
+          lib
+          pkgs
+          ;
+      };
       mermaidRendererPackage =
         inputs.mermaid-rs-renderer.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
           {
@@ -196,11 +204,14 @@
           };
 
           extraPackages =
-            (import ../../dev/_language-servers.nix { inherit pkgs; })
+            (import ../../dev/_language-servers.nix {
+              inherit pkgs;
+              inherit (rustToolchains) rust-analyzer;
+            })
+            ++ rustToolchains.editorPackages
             ++ (with pkgs; [
               alejandra
               bacon
-              cargo
               csharpier
               curl
               fd
@@ -237,7 +248,6 @@
               prettier
               python3
               ripgrep
-              rustc
               shellcheck
               shfmt
               sqlite
