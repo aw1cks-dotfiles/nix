@@ -9,10 +9,21 @@
     home = { ... }: {
       imports = [ config.aw1cks.modules.home.tailscale-serve ];
       home.stateVersion = "25.11";
-      modules.tern.enable = true;
+      modules.tern = {
+        enable = true;
+        plugins = {
+          tern-projects.enable = true;
+          tern-kata.enable = true;
+          tern-kube.enable = true;
+          tern-grafana.enable = true;
+        };
+      };
       services.tern = {
         daemon.enable = true;
-        remote.enable = true;
+        remote = {
+          enable = true;
+          listenAddress = "0.0.0.0";
+        };
       };
       services.tailscale-serve = {
         enable = true;

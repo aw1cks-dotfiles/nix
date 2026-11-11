@@ -142,6 +142,15 @@ own source. Stop only the fixture's processes and remove its temporary files.
 `checks.<system>.tern.mkFixture [ ... ]` exposes the native Home Manager fixture
 for these scenarios without requiring an authenticated archive in public CI.
 
+For the bundled registry, native loading must report all four IDs ready with no
+loader problems. Check the Projects panel against the packaged indexer, the Kube
+settings status against the real `kubectl` and managed `tern` executables, and
+Grafana's unconfigured Query view without adding a backend or credentials. Verify
+Kata's CLI version and palette command without connecting to a real daemon.
+Use a fresh HOME/XDG tree and kubeconfig; turn off Projects checks in the trial's
+private update preferences and set `TERN_KATA_NO_UPDATE_CHECK=1`. Optional tools,
+live backend operations and user credentials are separate acceptance scenarios.
+
 ### Agent skills
 
 `checks.<system>.agent-skills` exercises selection layering, `mkForce`, final exclusions, unknown selectors, ID/name collisions, read-only output configuration, and whole-directory replacements.
