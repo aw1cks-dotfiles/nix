@@ -256,6 +256,19 @@ wrappers and generated selection settings only. Raw `settings.theme_dark` and
 `settings.theme_light` overrides bypass wrapper selection and its CSS layers.
 Prefer `theme.dark` / `theme.light` when composing additional CSS.
 
+The shared Tern module prepends `_tern/quiet-grip.css` to `extraCssFiles` with
+`lib.mkBefore`, so downstream consumers inherit the quieter pane grip without
+host-local wiring. It stays centered but is smaller, transparent and lifted
+into the top inset, clear of the first row at the default fonts and padding.
+Hover/focus reveal a compact outline; native resting auto-hide, menu and drag
+behaviour remain. Other grip types are untouched.
+
+Ordinary `extraCssFiles = [ ./custom.css ];` contributions append after this
+default. To opt out, use `modules.tern.theme.extraCssFiles = lib.mkForce [];`,
+or force a replacement list containing only your own files. Normal CSS
+specificity still applies. Recheck row clearance when changing font sizes or
+vertical padding.
+
 Migration: replace `theme.base` with `theme.dark`; `theme.name` is removed because
 wrapper names are internal. Home Manager removes obsolete managed theme links.
 Fonts, padding and the settings escape hatch remain unchanged.
