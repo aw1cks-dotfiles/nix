@@ -153,7 +153,7 @@ The `plugins.nix-managed` fragment supplies only this profile's gaps:
 | --- | --- |
 | `yetone/avante.nvim` | `pkgs.vimPlugins.avante-nvim` |
 | `nyoom-engineering/oxocarbon.nvim` | `pkgs.vimPlugins.oxocarbon-nvim` |
-| `sindrets/diffview.nvim` | `pkgs.vimPlugins.diffview-nvim` |
+| `dlyongemallo/diffview-plus.nvim` | Local `diffviewPackage` (`v0.39`) |
 | `stevearc/dressing.nvim` | `pkgs.vimPlugins.dressing-nvim` |
 | `HakonHarnes/img-clip.nvim` | `pkgs.vimPlugins.img-clip-nvim` |
 | `saghen/blink.cmp` | `pkgs.vimPlugins.blink-cmp` |
@@ -166,6 +166,16 @@ Dependency-only Dressing, img-clip and friendly-snippets also use `lazy = true`;
 provisioning them must not make them eager. Preserve nixpkgs' native Avante
 artifacts and Blink Rust matcher rather than replacing their packages with raw
 plugin sources or maintaining a custom native build.
+
+Diffview uses the maintained [diffview-plus fork](https://github.com/dlyongemallo/diffview-plus.nvim).
+The module pins release `v0.39` with `buildVimPlugin` because the locked nixpkgs
+does not yet provide `vimPlugins.diffview-plus-nvim`. The Lua spec explicitly sets
+`main = "diffview"`: the fork keeps that module namespace and the `Diffview*`
+commands, including the existing `diff3_mixed` merge layout. The original plugin is
+explicitly disabled because upstream discovery can still emit it from the
+pre-switch installed configuration; loading both mixes their shared Lua modules.
+The package check bootstraps the plugin before requiring its internal runtime
+modules, which depend on `DiffviewGlobal`.
 
 ## Treesitter and runtime files
 
