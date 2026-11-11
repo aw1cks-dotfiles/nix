@@ -1,0 +1,38 @@
+/* Keep the native pane handle in the top inset, above the first terminal row.
+ * Tern scales these dimensions with the UI font. At the default 18/16px fonts
+ * and 12px vertical padding the hitbox is 32 x 13.5 CSS pixels.
+ * Keep native resting auto-hide and drag/menu handlers; leave other grips alone.
+ */
+section.tn-pane > button.tn-grip {
+  top: 0;
+  left: 50%;
+  right: auto;
+  margin-left: -13px;
+  box-sizing: border-box;
+  width: 26px;
+  height: 11px;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+section.tn-pane > button.tn-grip > svg.ico {
+  width: 10px;
+  height: 8px;
+  opacity: 0.65;
+}
+
+/* Reveal a precise target during interaction without a permanently filled pill. */
+section.tn-pane > button.tn-grip:hover,
+section.tn-pane > button.tn-grip:focus {
+  border-color: currentColor;
+  opacity: 1;
+}
+
+section.tn-pane > button.tn-grip:hover > svg.ico,
+section.tn-pane > button.tn-grip:focus > svg.ico {
+  opacity: 1;
+}

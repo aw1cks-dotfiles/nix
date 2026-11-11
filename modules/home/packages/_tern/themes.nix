@@ -97,12 +97,13 @@ in
       extraCssFiles = lib.mkOption {
         type = lib.types.listOf lib.types.path;
         default = [ ];
-        description = "CSS files appended in order after the selected base and optional palette in each generated theme. Normal CSS specificity applies. Use mkBefore/mkAfter to order contributions from multiple modules.";
+        description = "CSS files appended in order after the selected base and optional palette in each generated theme. Includes the shared quiet pane grip before normal contributions. Use mkForce to replace the complete list, or mkBefore/mkAfter to order additions. Normal CSS specificity applies.";
       };
     };
   };
 
   config = lib.mkIf cfg.enable {
+    modules.tern.theme.extraCssFiles = lib.mkBefore [ ./quiet-grip.css ];
     assertions = [
       {
         assertion = lib.all (
