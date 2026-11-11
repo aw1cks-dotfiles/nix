@@ -81,10 +81,14 @@ symbol source used by lualine. The actual host's native `home.checks` separately
 validate its installed Treesitter parser/query pairs.
 See [Neovim integration decisions](./neovim.md) for scope and retained workarounds.
 
-### Tern packages
+### Tern settings
 
-Authenticated upstream archives are opt-in local build inputs, not public CI inputs.
-Package pins and platform selection are evaluated without downloading a login page.
+`checks.<system>.tern` evaluates an enabled native Home Manager fixture with an
+external executable, so CI does not require authenticated application archives.
+It rejects unsafe theme names, invalid palettes and overlong socket paths.
+Python regressions exercise writable settings ownership, preservation of
+unmanaged values, crash recovery, permissions and atomic updates. No check
+activates a real user home or runs an application session.
 
 ### Agent skills
 
