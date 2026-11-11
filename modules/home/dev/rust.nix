@@ -114,7 +114,7 @@
 
         home.activation.rustupDefaultToolchain = lib.mkIf (cfg.defaultToolchain != null) (
           lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-            if ! RUSTUP_HOME=${lib.escapeShellArg rustupHome} ${toolchains.rustup}/bin/rustup default >/dev/null 2>&1; then
+            if [ -n "''${DRY_RUN:-}" ] || ! RUSTUP_HOME=${lib.escapeShellArg rustupHome} ${toolchains.rustup}/bin/rustup default >/dev/null 2>&1; then
               RUSTUP_HOME=${lib.escapeShellArg rustupHome} run ${toolchains.rustup}/bin/rustup default ${lib.escapeShellArg cfg.defaultToolchain}
             fi
           ''
