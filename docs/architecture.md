@@ -570,8 +570,16 @@ It links Nix-built rust-overlay toolchains into rustup as custom toolchains
 collection. Activation makes `aw1cks.rust.defaultToolchain` the rustup default
 only when none is set. rustup refuses channel names (`stable`, `nightly`,
 versions) for custom toolchains, so those still download through rustup.
+The module also rejects the reserved custom-toolchain name `none`.
 Linked toolchains cannot take `rustup component add` or `target add`: declare
 extensions and targets in Nix instead.
+
+`home.sessionVariables.RUSTUP_HOME` is the shared location for managed links,
+shell sessions and default-selection activation; it defaults to
+`${config.home.homeDirectory}/.rustup`. To relocate it, set that variable in
+Home Manager to an absolute path inside the home directory, for example
+`"${config.xdg.dataHome}/rustup"`. Activation explicitly uses the configured
+location rather than an inherited shell override.
 
 On generic Linux, rustup is built without nixpkgs' toolchain-patching patch and
 without its `LD_LIBRARY_PATH` wrapper. That patch rewrites each downloaded
@@ -585,6 +593,10 @@ and editor modules. Editors get one rust-analyzer from the Nix stable toolchain
 and, with the rust module, rustup's proxies on their wrapper PATH. Every
 compiler, Cargo, Clippy and rustfmt call then follows the project's toolchain
 file, as in a shell.
+The analyzer preserves an explicit `RUST_SRC_PATH` and sources bundled with the
+selected compiler (`RUSTC`, otherwise `rustc` on PATH). When that compiler lacks
+sources, its wrapper falls back to nixpkgs' `rustPlatform.rustLibSrc`, retaining
+standard-library navigation for standalone consumers and Nix development shells.
 
 ## Shared Namespaces
 
