@@ -440,6 +440,24 @@ Upstream references: [keymaps](https://docs.stencil.so/tern/guides/commands.html
 [themes](https://docs.stencil.so/tern/guides/themes.html),
 [settings API](https://docs.stencil.so/tern/reference/api-window.html#settings-cx).
 
+## Kata
+
+`packages.<system>.kata` packages Kata 0.23.0 from its hash-pinned dedicated
+release source archive. Unlike the Git tag archive, it contains the production
+web UI and vendored Go dependencies. The package identifies itself as
+`nixpkgs`, so install-capable `kata update` commands cannot replace it. Use
+`nix build .#kata` or `nix run .#kata -- version --json`; updates belong in
+`modules/home/packages/_kata/package.nix`. Optional embeddings, remote backends
+and additional services are not enabled implicitly.
+
+The package carries `browser-auth.patch` for the pinned release: a configured
+static token disables unauthenticated loopback browser-session bootstrap.
+Loopback identifies a machine, not an OS user, so other local users must not
+obtain an owner session without the private token. The web UI stays available
+but requires explicit token login; native CLI and Tern clients are unchanged.
+The patch and focused upstream policy regression must be reviewed when updating
+Kata and can be removed only after equivalent upstream protection is verified.
+
 ## Shared Namespaces
 
 The public reusable namespace in this repo is `aw1cks.*`.
