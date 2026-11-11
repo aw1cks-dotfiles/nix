@@ -251,3 +251,10 @@ Blink's Rust matcher, and diff/Kotlin/Lua queries. Exercise ordinary startup and
 Avante/OMP separately; parser validation does not prove plugin initialization or
 ACP behavior. These are validation expectations, not a claim that all surfaces
 have passed for the current checkout.
+
+## Git mergetool
+
+`git mt` aliases `git mergetool` and launches Diffview with Git's `$MERGED`
+working-tree path. Do not use `$MERGE`: Git does not set that variable, and the
+empty filename opens the current directory, allowing Snacks Explorer to take
+focus from the merge view during startup.

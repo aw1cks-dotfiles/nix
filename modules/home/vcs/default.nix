@@ -226,7 +226,7 @@
             "merge \"mergiraf\"".driver =
               "${pkgs.mergiraf}/bin/mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L";
             merge.conflictStyle = lib.mkForce "zdiff3";
-            "mergetool \"diffview\"".cmd = ''nvim -n -c "DiffviewOpen" "$MERGE"'';
+            "mergetool \"diffview\"".cmd = ''nvim -n -c "DiffviewOpen" "$MERGED"'';
             "mergetool \"meld\"".cmd = ''meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"'';
             mergetool = {
               keepBackup = false;
