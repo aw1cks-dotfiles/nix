@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   sources = lib.mapAttrs (_: pin: pkgs.fetchFromGitHub pin) (import ./plugin-sources.nix);
   projectsBackend = pkgs.rustPlatform.buildRustPackage {
@@ -43,6 +48,23 @@ let
       mainProgram = "tern-kata";
     };
   };
+  kataService = lib.attrByPath [ "services" "kata" ] { enable = false; } config;
+  kataClient =
+    if kataService.enable then
+      let
+        environment =
+          (import ../_kata/connection.nix {
+            inherit (kataService) stateDirectory listenAddress port;
+          }).environment;
+      in
+      pkgs.writeShellScriptBin "tern-kata" ''
+        ${lib.toShellVars environment}
+        export ${lib.concatStringsSep " " (builtins.attrNames environment)}
+        export PATH=${lib.escapeShellArg (lib.makeBinPath [ kataService.package ])}''${PATH:+:}''${PATH:-}
+        exec ${lib.escapeShellArg (lib.getExe kata)} "$@"
+      ''
+    else
+      kata;
 in
 {
   modules.tern.plugins = {
@@ -52,7 +74,7 @@ in
     };
     tern-kata = {
       source = lib.mkDefault sources.tern-kata;
-      runtimePackages = [ kata ];
+      runtimePackages = [ kataClient ];
     };
     tern-kube = {
       source = lib.mkDefault sources.tern-kube;

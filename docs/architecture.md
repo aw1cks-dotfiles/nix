@@ -71,8 +71,20 @@ definitions do not match several nixpkgs server names and omit others;
 
 ## Tern
 
-`aw1cks.modules.home.tern` exposes opt-in declarative settings and a managed launcher.
-The desktop profile imports its definitions; the public `mbp` host enables it.
+`aw1cks.modules.home.tern` defines opt-in `modules.tern` settings and independently
+opt-in `services.tern.daemon` / `services.tern.remote`. The desktop profile imports
+the definitions without enabling them. The public `mbp` host enables both services.
+
+Tern 0.9.13 is packaged by this flake and selected automatically on macOS arm64,
+Linux x86-64 and Linux arm64. The unrelated nixpkgs `tern` package is not this
+terminal. After importing the authenticated archive below, a home can simply use:
+
+```nix
+{
+  modules.tern.enable = true;
+  services.tern.daemon.enable = true;
+}
+```
 
 ### Binary packages and manual import
 
@@ -273,32 +285,6 @@ Migration: replace `theme.base` with `theme.dark`; `theme.name` is removed becau
 wrapper names are internal. Home Manager removes obsolete managed theme links.
 Fonts, padding and the settings escape hatch remain unchanged.
 
-### Writable settings ownership
-
-Home Manager links the theme, not `settings.json`. Activation atomically merges
-the declared settings into that writable JSON file, preserving unrelated fields
-such as SQLite recents and custom keybindings. `modules.tern.settings` overrides
-generated defaults; its contents enter the Nix store, so do not put secrets there.
-Only declared leaves are owned. Removed declarations remove their formerly owned
-leaves/chords rather than leaving obsolete prefix bindings behind.
-
-The private `.nix-settings-state.json` records ownership and interrupted-commit
-recovery. Do not edit it. Malformed JSON and output symlinks fail without replacing
-settings. An interrupted merge with subsequent external edits fails closed:
-preserve both files and resolve the ambiguity before applying again.
-Reapplying unchanged settings does not rewrite the file.
-
-Preferences are merged after file linking and before launchd/systemd service
-startup, so newly started services cannot read the previous settings generation.
-
-Quit Tern's GUI before rebuilding to avoid racing its preference writes, then
-reopen it to load the changed preferences; the daemon need not be restarted.
-No application shutdown or reload is forced. GUI changes to managed values last
-until the next
-activation. Disabling the entire feature preserves mutable settings/state;
-disable individual generated settings and activate once first if their owned
-values should be removed. User state, keys and histories are never garbage-collected.
-
 ### Plugins
 
 `modules.tern.plugins` is a mergeable registry keyed by native manifest ID:
@@ -328,10 +314,11 @@ tools (`promtool`, `amtool`, `logcli`, `curl`) remain optional user dependencies
 After activation, open the command palette and choose Projects, Open kata,
 Tern Kube Settings/Explore, or Tern Grafana Query/Settings. Projects' upstream
 Command+Option+S binding collides with a native preset on Tern 0.9.13; use the
-palette rather than relying on that shortcut. Kata still needs its daemon/account
-configured, Kube uses your kubeconfig, and Grafana needs backend contexts in
-`~/.config/tern-grafana/config.json`. Loading a plugin does not configure these
-services or credentials. Plugin actions retain upstream permissions and mutation
+palette rather than relying on that shortcut. The separate [Kata service](#kata)
+below supplies `mbp`'s local backend; other hosts need their own local or remote
+Kata daemon. Kube uses your kubeconfig, and Grafana needs backend contexts in
+`~/.config/tern-grafana/config.json`. Loading a plugin alone does not configure
+these services or credentials. Plugin actions retain upstream permissions and mutation
 defaults; enabling Kube is not a read-only cluster policy.
 
 Update the pinned sources and dependency hashes to update managed plugins;
@@ -396,6 +383,32 @@ styles do not reach web clients; upstream manifest `styles` do. Plugin-specific
 configuration remains the plugin's responsibility; this contract does not
 invent a generic settings or secrets format.
 
+### Writable settings ownership
+
+Home Manager links the theme, not `settings.json`. Activation atomically merges
+the declared settings into that writable JSON file, preserving unrelated fields
+such as SQLite recents and custom keybindings. `modules.tern.settings` overrides
+generated defaults; its contents enter the Nix store, so do not put secrets there.
+Only declared leaves are owned. Removed declarations remove their formerly owned
+leaves/chords rather than leaving obsolete prefix bindings behind.
+
+The private `.nix-settings-state.json` records ownership and interrupted-commit
+recovery. Do not edit it. Malformed JSON and output symlinks fail without replacing
+settings. An interrupted merge with subsequent external edits fails closed:
+preserve both files and resolve the ambiguity before applying again.
+Reapplying unchanged settings does not rewrite the file.
+
+Preferences are merged after file linking and before launchd/systemd service
+startup, so newly started services cannot read the previous settings generation.
+
+Quit Tern's GUI before rebuilding to avoid racing its preference writes, then
+reopen it to load the changed preferences; the daemon need not be restarted.
+No application shutdown or reload is forced. GUI changes to managed values last
+until the next
+activation. Disabling the entire feature preserves mutable settings/state;
+disable individual generated settings and activate once first if their owned
+values should be removed. User state, keys and histories are never garbage-collected.
+
 ### User services and migration
 
 The local session daemon and remote server are different processes. Both use
@@ -440,7 +453,14 @@ Upstream references: [keymaps](https://docs.stencil.so/tern/guides/commands.html
 [themes](https://docs.stencil.so/tern/guides/themes.html),
 [settings API](https://docs.stencil.so/tern/reference/api-window.html#settings-cx).
 
+
 ## Kata
+
+`aw1cks.modules.home.kata` is independent of Tern. Import this atom at the host's
+composition root, then opt in with `services.kata.enable = true`. The public
+`mbp` host does both; importing the Tern plugin does not enable the server.
+The service does not manage the `tern-kata` worker, which remains under the
+plugin's own opt-in supervision.
 
 `packages.<system>.kata` packages Kata 0.23.0 from its hash-pinned dedicated
 release source archive. Unlike the Git tag archive, it contains the production
@@ -457,6 +477,89 @@ obtain an owner session without the private token. The web UI stays available
 but requires explicit token login; native CLI and Tern clients are unchanged.
 The patch and focused upstream policy regression must be reviewed when updating
 Kata and can be removed only after equivalent upstream protection is verified.
+
+### State, authentication and clients
+
+`services.kata` exposes `package`, `stateDirectory`, `listenAddress`, `port` and
+`autostart`. State defaults to `$XDG_STATE_HOME/kata` (`~/.local/state/kata`),
+including the SQLite `kata.db`, native mutable `config.toml`, runtime records,
+and `auth-token`. Relative paths, the Nix store and parent components are
+rejected. This is not an automatic migration from an existing `~/.kata` home.
+
+The runner creates private state (0700) and generates one random bearer token
+(0600) atomically if absent. It reuses an existing private, owned regular token
+file and refuses unsafe files without replacing them. Tokens and database data
+never enter the Nix store; disabling the service preserves both.
+Native clients authenticate using that file token. Browser login exchanges it
+for a cookie plus session/CSRF credentials; anonymous local-session bootstrap
+is disabled when the token is configured. No hosted account is required for
+ordinary local issue creation. Do not put the token in shell history or Nix
+configuration.
+
+The default listener is `127.0.0.1:7777`; `listenAddress` accepts only
+`127.0.0.1` or `::1`, and `port` must be a fixed positive TCP port. The runner
+passes the listener explicitly and disables the embedded MCP server.
+
+`_kata/connection.nix` defines one connection environment for the daemon and its
+clients: `KATA_HOME`, the explicit SQLite `KATA_DSN`/`KATA_DB`,
+`KATA_AUTH_TOKEN_FILE`, and a loopback `KATA_SERVER`. An inherited inline
+`KATA_AUTH_TOKEN` is cleared so it cannot override the selected file.
+
+The installed home-profile `kata` command binds these settings in its executable
+launcher. When the service is enabled alongside Tern, the bundled `tern-kata`
+helper does the same and includes the selected Kata package on PATH. Thus a new
+client invocation does not depend on login-shell environment inheritance or a
+previously started GUI/daemon seeing updated Home Manager session variables.
+The module also exports the connection through session variables and Tern's
+launcher/service environment for other clients. The generic `packages.kata`
+output remains an unconfigured upstream CLI.
+
+`KATA_SERVER` deliberately selects the managed endpoint instead of Kata's local
+auto-start path. Clients fail when the service is stopped rather than spawning
+an unmanaged daemon. Kata may describe this URL-selected connection as
+\"remote\" even though it is loopback. It also takes precedence over workspace
+server overrides; use an explicit named `--daemon` selection when intentionally
+targeting another backend.
+
+After activation, reopen existing Kata panes/client processes to use the new
+profile launchers; they cannot repair the environment of an already-running
+client. A routing-only client change does not require restarting the database
+daemon. Native Tern login shells can use the real user's login environment,
+so isolated smoke tests must use the generated client executables rather than
+manually supplying the connection variables and masking an inheritance bug.
+
+### Supervision and upgrades
+
+The managed daemon runs `kata daemon start --foreground`, not Kata's detached
+launcher. Its supervisor is `org.nix-community.home.kata-managed` on Darwin
+and `kata-managed.service` under Linux's user manager. It starts at login by
+default; `autostart = false` leaves it manually startable. Restart-on-failure
+and a 45-second stop allowance preserve Kata's graceful shutdown. A concurrent
+foreground daemon is rejected by Kata's ownership checks, not adopted or killed.
+Retire any manually started daemon in the selected state directory before
+enabling management.
+
+Stable profile runner paths and systemd's `X-SwitchMethod=keep-old` avoid an
+implicit database-owning process replacement on an ordinary rebuild. Package,
+state or listener changes need a deliberate service restart. Changes to launchd
+supervisor policy, or disabling the service, can still stop it. Darwin logs are
+private `daemon.log` under the state directory; Linux uses the journal.
+The browser-auth hardening also needs an explicit restart after rebuilding;
+ordinary activation intentionally leaves a running old binary in place.
+Restart discards process-local browser sessions, and new tabs require token
+login. This auth-policy patch does not change the database schema.
+
+Before upgrading or relocating an existing database: stop the service through
+its user manager, back up the entire private state directory, rebuild, then
+explicitly start it. Native startup may migrate the SQLite schema; an older
+binary may not reopen it. Do not run detached `kata daemon start` alongside the
+managed service. Disabling management does not delete or downgrade its state.
+The package follows upstream's anonymous telemetry policy; native mutable Kata
+configuration remains available for its documented preferences.
+
+Upstream references: [packaging](https://github.com/kenn-io/kata/blob/v0.23.0/docs/development/packaging.md),
+[configuration](https://github.com/kenn-io/kata/blob/v0.23.0/docs/reference/configuration.md),
+[daemon selection](https://github.com/kenn-io/kata/blob/v0.23.0/docs/reference/daemon-discovery.md).
 
 ## Shared Namespaces
 

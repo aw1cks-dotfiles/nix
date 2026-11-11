@@ -7,7 +7,10 @@
       system.stateVersion = 6;
     };
     home = { ... }: {
-      imports = [ config.aw1cks.modules.home.tailscale-serve ];
+      imports = [
+        config.aw1cks.modules.home.tailscale-serve
+        config.aw1cks.modules.home.kata
+      ];
       home.stateVersion = "25.11";
       modules.tern = {
         enable = true;
@@ -18,6 +21,7 @@
           tern-grafana.enable = true;
         };
       };
+      services.kata.enable = true;
       services.tern = {
         daemon.enable = true;
         remote = {
