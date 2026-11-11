@@ -10,6 +10,10 @@
       imports = [ config.aw1cks.modules.home.tailscale-serve ];
       home.stateVersion = "25.11";
       modules.tern.enable = true;
+      services.tern = {
+        daemon.enable = true;
+        remote.enable = true;
+      };
       services.tailscale-serve = {
         enable = true;
       };

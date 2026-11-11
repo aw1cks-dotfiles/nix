@@ -90,6 +90,11 @@ Python regressions exercise writable settings ownership, preservation of
 unmanaged values, crash recovery, permissions and atomic updates. No check
 activates a real user home or runs an application session.
 
+The fixture also evaluates both native user-service definitions and rejects a
+relay without an explicit URL. On Linux it exercises the read-only migration
+guard without a reachable user manager and requires that inspection to fail
+closed. No check starts real services.
+
 ### Agent skills
 
 `checks.<system>.agent-skills` exercises selection layering, `mkForce`, final exclusions, unknown selectors, ID/name collisions, read-only output configuration, and whole-directory replacements.
