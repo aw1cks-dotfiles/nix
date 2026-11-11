@@ -56,11 +56,16 @@ in
 {
   inherit nightly rustup stable;
 
-  # One analyzer for every project, from the Nix stable toolchain. It finds
-  # each project's sysroot (and proc-macro server) through rustup's `rustc`.
-  rust-analyzer = pkgs.runCommand "rust-analyzer-${stable.version}" { } ''
-    mkdir -p $out/bin
-    ln -s ${stable}/bin/rust-analyzer $out/bin/rust-analyzer
+  # Preserve explicit sources and the selected compiler's rust-src. Plain
+  # nixpkgs compilers omit sources, so retain nixpkgs' analyzer fallback there.
+  rust-analyzer = pkgs.writeShellScriptBin "rust-analyzer" ''
+    if [ -z "''${RUST_SRC_PATH+x}" ]; then
+      sysroot="$("''${RUSTC:-rustc}" --print sysroot 2>/dev/null)" || sysroot=
+      if [ -z "$sysroot" ] || [ ! -d "$sysroot/lib/rustlib/src/rust/library" ]; then
+        export RUST_SRC_PATH=${lib.escapeShellArg (toString pkgs.rustPlatform.rustLibSrc)}
+      fi
+    fi
+    exec ${stable}/bin/rust-analyzer "$@"
   '';
 
   # Editor wrapper PATH fallback. With the rust module, rustup's proxies keep

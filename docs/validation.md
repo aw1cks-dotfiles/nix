@@ -195,6 +195,25 @@ Keep HOME/XDG paths disposable; do not activate a fixture over the user's home
 or migrate a live database. This proves the runner and clients, not live
 launchd/systemd lifecycle behavior.
 
+### Rust toolchains
+
+`checks.<system>.rust-toolchains` runs the default-selection activation step
+against Home Manager-generated links in isolated homes. It covers a relocated
+Rustup home (including spaces), conflicting inherited `RUSTUP_HOME`, preservation
+of an existing default, dry-run behavior and evaluation-time rejection of the
+reserved `none` toolchain name.
+
+The check also starts the real shared rust-analyzer and requests definitions in
+both `std` and `core`. It covers the nixpkgs source fallback, a compiler with its
+own sources, and explicit `RUST_SRC_PATH` precedence. These checks are offline and
+do not activate a real home or build the generic-Linux rustup override.
+
+```sh
+nix build .#checks.aarch64-darwin.rust-toolchains --no-link
+nix build .#checks.x86_64-linux.rust-toolchains --no-link
+```
+
+
 ### Agent skills
 
 `checks.<system>.agent-skills` exercises selection layering, `mkForce`, final exclusions, unknown selectors, ID/name collisions, read-only output configuration, and whole-directory replacements.

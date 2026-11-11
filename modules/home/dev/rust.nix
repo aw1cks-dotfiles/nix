@@ -1,5 +1,10 @@
 # Rust tooling — from nix-upstream/modules/development/rust.nix
-{ inputs, ... }:
+{
+  config,
+  inputs,
+  lib,
+  ...
+}:
 {
   aw1cks.modules.home.rust =
     {
@@ -10,6 +15,7 @@
     }:
     let
       cfg = config.aw1cks.rust;
+      rustupHome = config.home.sessionVariables.RUSTUP_HOME;
       cargoToml = pkgs.formats.toml { };
       toolchains = import ./_rust-toolchains.nix {
         inherit
@@ -21,8 +27,7 @@
       };
       # rustup treats these names as release channels and would try to update
       # a linked toolchain that used one.
-      isChannelName =
-        name: builtins.match "(stable|beta|nightly|[0-9]+(\\.[0-9]+)*)(-.*)?" name != null;
+      isChannelName = name: builtins.match "(stable|beta|nightly|[0-9]+(\\.[0-9]+)*)(-.*)?" name != null;
     in
     {
       options.aw1cks.rust = {
@@ -41,11 +46,13 @@
           defaultText = lib.literalMD "rust-overlay's latest stable and latest complete nightly, each with clippy, rustfmt and rust-src";
           description = ''
             Nix-built toolchains linked into rustup as custom toolchains
-            (`~/.rustup/toolchains/<name>`), selectable with `cargo +<name>` or
-            `channel = "<name>"` in rust-toolchain.toml. The Home Manager
-            generation keeps them alive across garbage collection. Names must
-            not be rustup channel names; other channels and versions are still
-            installed by rustup on demand.
+            (`$RUSTUP_HOME/toolchains/<name>`), selectable with `cargo +<name>` or
+            `channel = "<name>"` in rust-toolchain.toml. Set
+            `home.sessionVariables.RUSTUP_HOME` to an absolute path inside the
+            home directory to relocate it (default: `~/.rustup`). The Home
+            Manager generation keeps toolchains alive across garbage collection.
+            Names must not be rustup channel names or the reserved name `none`;
+            other channels and versions are still installed by rustup on demand.
           '';
         };
 
@@ -62,8 +69,8 @@
       config = {
         assertions = [
           {
-            assertion = !lib.any isChannelName (lib.attrNames cfg.toolchains);
-            message = "aw1cks.rust.toolchains: names must not be rustup channel names (stable, beta, nightly, versions).";
+            assertion = lib.all (name: name != "none" && !isChannelName name) (lib.attrNames cfg.toolchains);
+            message = "aw1cks.rust.toolchains: names must not be rustup channel names (stable, beta, nightly, versions) or the reserved name 'none'.";
           }
           {
             assertion = cfg.defaultToolchain == null || cfg.toolchains ? ${cfg.defaultToolchain};
@@ -74,7 +81,10 @@
         # `programs.cargo` is not available yet on the pinned Home Manager
         # release stream used by this repo, so keep managing Cargo config
         # manually until that lands here.
-        home.sessionVariables.CARGO_HOME = "${config.xdg.dataHome}/cargo";
+        home.sessionVariables = {
+          CARGO_HOME = "${config.xdg.dataHome}/cargo";
+          RUSTUP_HOME = lib.mkDefault "${config.home.homeDirectory}/.rustup";
+        };
 
         xdg.configFile."cargo/config.toml".source = cargoToml.generate "cargo-config.toml" (
           lib.recursiveUpdate {
@@ -98,15 +108,14 @@
           } cfg.cargo.settings
         );
 
-        # rustup's default RUSTUP_HOME; this module does not relocate it.
         home.file = lib.mapAttrs' (
-          name: toolchain: lib.nameValuePair ".rustup/toolchains/${name}" { source = toolchain; }
+          name: toolchain: lib.nameValuePair "${rustupHome}/toolchains/${name}" { source = toolchain; }
         ) cfg.toolchains;
 
         home.activation.rustupDefaultToolchain = lib.mkIf (cfg.defaultToolchain != null) (
           lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-            if ! ${toolchains.rustup}/bin/rustup default >/dev/null 2>&1; then
-              run ${toolchains.rustup}/bin/rustup default ${lib.escapeShellArg cfg.defaultToolchain}
+            if ! RUSTUP_HOME=${lib.escapeShellArg rustupHome} ${toolchains.rustup}/bin/rustup default >/dev/null 2>&1; then
+              RUSTUP_HOME=${lib.escapeShellArg rustupHome} run ${toolchains.rustup}/bin/rustup default ${lib.escapeShellArg cfg.defaultToolchain}
             fi
           ''
         );
@@ -124,6 +133,15 @@
           toolchains.rustup
           sqlx-cli
         ];
+      };
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      checks.rust-toolchains = import ./_rust-toolchains-check.nix {
+        inherit inputs lib pkgs;
+        rustModule = config.aw1cks.modules.home.rust;
       };
     };
 }
