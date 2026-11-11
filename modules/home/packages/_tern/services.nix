@@ -9,6 +9,9 @@ let
   tern = config.modules.tern;
   inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
   enabled = cfg.daemon.enable || cfg.remote.enable;
+  pluginRuntimePackages = lib.concatMap (plugin: plugin.runtimePackages) (
+    builtins.attrValues (lib.filterAttrs (_: plugin: plugin.enable) tern.plugins)
+  );
   absolutePath = lib.types.strMatching "/.*";
   mutablePath =
     path:
@@ -118,10 +121,11 @@ let
             serviceEnvironment name
           )
         )}
-        # Restore supervisor tools and the managed profile CLI after overrides.
+        # Environment overrides may replace PATH. Restore declared tools and the
+        # managed profile CLI for plugins that invoke tern themselves.
         export PATH=${
           lib.escapeShellArg (
-            lib.makeBinPath [ pkgs.coreutils config.home.profileDirectory ]
+            lib.makeBinPath ([ pkgs.coreutils ] ++ pluginRuntimePackages ++ [ config.home.profileDirectory ])
           )
         }:"$PATH"
         ${lib.concatMapStringsSep "\n"

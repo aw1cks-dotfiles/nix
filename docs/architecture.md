@@ -286,6 +286,68 @@ activation. Disabling the entire feature preserves mutable settings/state;
 disable individual generated settings and activate once first if their owned
 values should be removed. User state, keys and histories are never garbage-collected.
 
+### Plugins
+
+`modules.tern.plugins` is a mergeable registry keyed by native manifest ID:
+1–32 lowercase letters, digits or hyphens, excluding reserved ID `tern`.
+Every entry has `enable` (default false), `source` (required only when enabled)
+and `runtimePackages` (default empty). No third-party plugins are fetched or
+enabled implicitly. Public and downstream modules contribute entries through
+the same contract:
+
+```nix
+# A registry module: use a pinned input or a reviewed local source directory.
+{ inputs, lib, ... }: {
+  modules.tern.plugins.company-tools.source =
+    lib.mkDefault (inputs.company-plugins + "/tern/company-tools");
+}
+```
+
+A profile may set `plugins.company-tools.enable = lib.mkDefault true` under
+`modules.tern`. A consuming host can set it to false without `mkForce`, enable
+other registry entries, or supply its own:
+
+```nix
+{ pkgs, ... }: {
+  modules.tern.plugins = {
+    company-tools.enable = false;
+    local-tools = {
+      enable = true;
+      source = ./plugins/local-tools;
+      runtimePackages = [ pkgs.git ];
+    };
+  };
+}
+```
+
+Sources enter the immutable Nix store. Build-time validation checks the upstream
+`plugin.toml` schema, matching ID, host/window entry files, stylesheet paths and
+source containment without executing plugin code. Home Manager owns individual
+`plugins/<id>.path` pointers, never the entire writable plugins directory.
+Disabling a managed entry removes its pointer, not mutable plugin data or
+manually installed plugins. Before `writeBoundary`, a read-only migration guard
+checks existing source directories, symlinked directories and `.path` aliases
+by manifest ID. A copy that would shadow an enabled managed plugin aborts
+activation with an explicit migration error, even when its filename differs.
+Move the old source and any alias pointer outside the active plugins directory
+yourself; keep plugin data intact. Nothing is deleted, adopted or executed.
+The exact managed `<id>.path` slot remains under Home Manager's normal
+ownership/collision handling so generation updates work. Unreadable candidates
+fail closed; hidden entries and obvious invalid/nonpackages are ignored.
+
+Enabled runtime packages enter the home profile and are prepended to managed
+GUI/CLI and service PATHs after configured environment overrides. Changes apply
+to newly started processes; activation does not restart sessions or reload
+plugins. Run `tern plugin reload` explicitly to update a running daemon's plugin
+set. A running GUI may retain its previous environment until reopened.
+
+Plugins are trusted code with filesystem, process and network APIs. Their host
+half runs on the daemon's machine, their window half in the local GUI; configuring
+a client does not deploy plugins to a remote server. Window-only `tern.css`
+styles do not reach web clients; upstream manifest `styles` do. Plugin-specific
+configuration remains the plugin's responsibility; this contract does not
+invent a generic settings or secrets format.
+
 ### User services and migration
 
 The local session daemon and remote server are different processes. Both use

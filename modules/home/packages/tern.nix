@@ -16,6 +16,11 @@ in
       supportedSystems = builtins.attrNames (import ../../integrations/_tern-sources.nix).artifacts;
       desktop = import ../../integrations/_tern-desktop.nix;
       json = pkgs.formats.json { };
+      pluginRuntimePackages = lib.unique (
+        lib.concatMap (plugin: plugin.runtimePackages) (
+          builtins.attrValues (lib.filterAttrs (_: plugin: plugin.enable) cfg.plugins)
+        )
+      );
       bindings = import ./_tern/keybindings.nix {
         inherit lib isDarwin;
         primary = cfg.keyboard.primaryModifier;
@@ -51,7 +56,7 @@ in
         ${lib.toShellVars environment}
         export ${lib.concatStringsSep " " (builtins.attrNames environment)}
         export PATH=${
-          lib.escapeShellArg (lib.makeBinPath [ config.home.profileDirectory ])
+          lib.escapeShellArg (lib.makeBinPath (pluginRuntimePackages ++ [ config.home.profileDirectory ]))
         }''${PATH:+:}''${PATH:-}
         exec ${lib.escapeShellArg cfg.executable} "$@"
       '';
@@ -74,6 +79,7 @@ in
       imports = [
         ./_tern/services.nix
         ./_tern/themes.nix
+        ./_tern/plugins.nix
       ];
 
       options.modules.tern = {
