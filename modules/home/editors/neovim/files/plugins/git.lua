@@ -1,6 +1,9 @@
 return {
+	-- Upstream discovery can retain the original from the pre-switch HOME.
+	{ "sindrets/diffview.nvim", enabled = false },
 	{
-		"sindrets/diffview.nvim",
+		"dlyongemallo/diffview-plus.nvim",
+		main = "diffview",
 		opts = {
 			view = {
 				merge_tool = {

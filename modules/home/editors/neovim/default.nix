@@ -4,6 +4,45 @@
     { config, pkgs, ... }:
     let
       configDir = ./files;
+      diffviewPackage = pkgs.vimUtils.buildVimPlugin {
+        pname = "diffview-plus.nvim";
+        version = "0.39";
+        src = pkgs.fetchFromGitHub {
+          owner = "dlyongemallo";
+          repo = "diffview-plus.nvim";
+          tag = "v0.39";
+          hash = "sha256-0Zu2HPU9rzsyIOVLPWB9ABmfu5UffYkJtkIQUtBLVOs=";
+        };
+        # Internal modules require the globals initialized by plugin/diffview.lua.
+        nvimRequireCheck = [ "diffview" ];
+        doInstallCheck = true;
+        installCheckPhase = ''
+          runHook preInstallCheck
+          export HOME="$TMPDIR"
+          ${pkgs.neovim-unwrapped}/bin/nvim --headless -u NONE -i NONE \
+            --cmd "set rtp^=$out" \
+            -c "runtime plugin/diffview.lua" \
+            -c "lua
+              local ok, err = pcall(function()
+                require('diffview').setup({
+                  view = { merge_tool = { layout = 'diff3_mixed' } },
+                })
+                assert(vim.fn.exists(':DiffviewOpen') == 2)
+                for _, path in ipairs(vim.fn.glob('$out/lua/**/*.lua', false, true)) do
+                  if not path:find('/tests/', 1, true) then
+                    local module = path:sub(#'$out/lua/' + 1, -5):gsub('/', '.'):gsub('%.init$', [[]])
+                    require(module)
+                  end
+                end
+              end)
+              if not ok then
+                vim.api.nvim_err_writeln(err)
+                vim.cmd('cquit')
+              end" \
+            -c "qa!"
+          runHook postInstallCheck
+        '';
+      };
       rustToolchains = import ../../dev/_rust-toolchains.nix {
         inherit
           config
@@ -123,8 +162,8 @@
                   dir = "${pkgs.vimPlugins.oxocarbon-nvim}";
                 }
                 {
-                  plugin = "sindrets/diffview.nvim";
-                  dir = "${pkgs.vimPlugins.diffview-nvim}";
+                  plugin = "dlyongemallo/diffview-plus.nvim";
+                  dir = "${diffviewPackage}";
                 }
                 {
                   plugin = "stevearc/dressing.nvim";
