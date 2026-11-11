@@ -151,6 +151,13 @@ Use a fresh HOME/XDG tree and kubeconfig; turn off Projects checks in the trial'
 private update preferences and set `TERN_KATA_NO_UPDATE_CHECK=1`. Optional tools,
 live backend operations and user credentials are separate acceptance scenarios.
 
+
+### Kata package
+
+`nix build .#kata` uses the complete pinned release source with production web
+assets and vendored Go dependencies. Its install check runs the version command
+and `_web-assets-check`; building it does not activate a user service.
+
 ### Agent skills
 
 `checks.<system>.agent-skills` exercises selection layering, `mkForce`, final exclusions, unknown selectors, ID/name collisions, read-only output configuration, and whole-directory replacements.
