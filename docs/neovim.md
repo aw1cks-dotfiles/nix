@@ -266,5 +266,20 @@ have passed for the current checkout.
 
 `git mt` aliases `git mergetool` and launches Diffview with Git's `$MERGED`
 working-tree path. Do not use `$MERGE`: Git does not set that variable, and the
-empty filename opens the current directory, allowing Snacks Explorer to take
+empty filename opens the current directory, allowing the directory explorer to take
 focus from the merge view during startup.
+
+## File explorer
+
+`programs.lazyvim.extras.editor."neo-tree".enable` explicitly selects Neo-tree,
+matching the explorer in the archived
+[`aw1cks-dotfiles/nvim` lockfile](https://github.com/aw1cks-dotfiles/nvim/blob/main/lazy-lock.json).
+Without that selection, a fresh LazyVim installation defaults to Snacks Explorer,
+which has a different layout and mappings. Keep the supported extra authoritative;
+no local imitation of Neo-tree's bindings or separate icon package is needed.
+
+`<leader>e` / `<leader>fe` toggle the project-root explorer; `<leader>E` /
+`<leader>fE` use the current directory. Inside the tree, `l` opens, `h` closes a
+node, `a` adds, `d` deletes, `r` renames, and `H` toggles hidden files. File and
+folder glyphs use the existing MiniIcons integration and require a Nerd Font in
+the terminal or GUI.
