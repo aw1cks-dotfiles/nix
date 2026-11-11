@@ -72,6 +72,7 @@ in
     in
     {
       imports = [
+        ./_tern/services.nix
         ./_tern/themes.nix
       ];
 

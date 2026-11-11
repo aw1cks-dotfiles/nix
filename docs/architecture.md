@@ -286,6 +286,50 @@ activation. Disabling the entire feature preserves mutable settings/state;
 disable individual generated settings and activate once first if their owned
 values should be removed. User state, keys and histories are never garbage-collected.
 
+### User services and migration
+
+The local session daemon and remote server are different processes. Both use
+launchd agents on Darwin and systemd user units on Linux; neither runs as root.
+Remote serving is opt-in and always uses `remote serve --user`.
+Relay use is explicitly disabled with `--relay none`, not merely omitted.
+
+Remote options include `listenAddress`, `port`, `stateDirectory`, `accessFile`,
+`authorizedKeysFile`, and `relay.{enable,url,caFile}`. Its listener defaults to
+loopback; the Mac host explicitly retains direct access on `0.0.0.0:8376`.
+No firewall or Linux lingering policy is changed. Relay-disabled does not mean
+network-disabled. Access policy, authorized keys, certificates and credentials
+remain mutable files outside the Nix store.
+
+Each service has `autostart`, `environment`, `extraArgs`, `restartPolicy`, and
+`restartDelay`. Module-owned flags cannot be replaced through `extraArgs`.
+The local daemon defaults to `always` so native idle exit does not leave it
+unavailable; choosing `on-failure` permits idle exit and requires manually
+restarting the managed service afterwards. Remote defaults to `on-failure`.
+
+Before the first switch, preserve or close active sessions, quit Tern, and
+explicitly disable/unload the old native or installer supervisor. Activation
+only inspects known old labels/units and fails before changing files if they are
+still registered; it never boots them out. On Linux it also fails if systemd
+cannot be inspected, including an unreachable user manager. Custom third-party
+supervisor names must be retired manually too.
+
+Darwin's old labels are `so.stencil.tern.daemon`, `so.stencil.tern.login` and
+`so.stencil.tern.remote`. Linux checks `tern-daemon.service` and
+`tern-remote.service`. Managed labels are
+`org.nix-community.home.tern-{daemon,remote}-managed` on Darwin and
+`tern-{daemon,remote}-managed.service` on Linux.
+
+Stable profile wrapper paths keep ordinary executable/environment/socket changes
+out of launchd plists; systemd uses `X-SwitchMethod=keep-old`. Changes take effect
+on the next start rather than terminating running panes. Changing/removing
+launchd supervisor policy, or disabling services, can still stop processes.
+Plan those changes explicitly. Darwin logs live in private `daemon.log` /
+`remote.log` files under the corresponding state directory; Linux uses the journal.
+
+Upstream references: [keymaps](https://docs.stencil.so/tern/guides/commands.html),
+[themes](https://docs.stencil.so/tern/guides/themes.html),
+[settings API](https://docs.stencil.so/tern/reference/api-window.html#settings-cx).
+
 ## Shared Namespaces
 
 The public reusable namespace in this repo is `aw1cks.*`.
