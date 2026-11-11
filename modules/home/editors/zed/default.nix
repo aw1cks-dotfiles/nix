@@ -13,6 +13,14 @@
     let
       ompCommand = "${config.programs.omp.package}/bin/omp";
       zedPackage = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.zed-editor;
+      rustToolchains = import ../../dev/_rust-toolchains.nix {
+        inherit
+          config
+          inputs
+          lib
+          pkgs
+          ;
+      };
       serverBinary = package: executable: arguments: {
         path = "${package}/bin/${executable}";
         inherit arguments;
@@ -74,39 +82,37 @@
 
         # These tools must also work from a GUI launch, independently of Neovim's PATH.
         # Keep plain Helm out of this PATH: the Kubernetes module supplies plugin-wrapped Helm.
-        extraPackages = with pkgs; [
-          alejandra
-          bash-language-server
-          cargo
-          clippy
-          dotnet-sdk
-          fsautocomplete
-          go
-          golangci-lint
-          gopls
-          hadolint
-          helm-ls
-          lua-language-server
-          markdownlint-cli2
-          marksman
-          nixd
-          prettier
-          ruff
-          rust-analyzer
-          rustc
-          rustfmt
-          shellcheck
-          shfmt
-          sqlfluff
-          statix
-          stylua
-          terraform
-          terraform-ls
-          tflint
-          tombi
-          ty
-          yaml-language-server
-        ];
+        # Rust comes through rustup's proxies so rust-toolchain.toml stays authoritative.
+        extraPackages =
+          rustToolchains.editorPackages
+          ++ (with pkgs; [
+            alejandra
+            bash-language-server
+            dotnet-sdk
+            fsautocomplete
+            go
+            golangci-lint
+            gopls
+            hadolint
+            helm-ls
+            lua-language-server
+            markdownlint-cli2
+            marksman
+            nixd
+            prettier
+            ruff
+            shellcheck
+            shfmt
+            sqlfluff
+            statix
+            stylua
+            terraform
+            terraform-ls
+            tflint
+            tombi
+            ty
+            yaml-language-server
+          ]);
 
         extensions = [
           "nix"
@@ -307,7 +313,7 @@
                   staticcheck = true;
                 };
               };
-              "rust-analyzer".binary = serverBinary pkgs.rust-analyzer "rust-analyzer" [ ];
+              "rust-analyzer".binary = serverBinary rustToolchains.rust-analyzer "rust-analyzer" [ ];
               fsautocomplete.binary = serverBinary pkgs.fsautocomplete "fsautocomplete" [
                 "--adaptive-lsp-server-enabled"
               ];

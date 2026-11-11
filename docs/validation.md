@@ -337,8 +337,8 @@ nix build --no-link .#darwinConfigurations.mbp.config.home-manager.users.alex.ho
 nix build --no-link .#darwinConfigurations.mbp.config.home-manager.users.alex.programs.neovim.finalPackage
 ```
 
-Check that `rust-analyzer` resolves to the standalone Nix package while `cargo`
-and `rustc` still resolve to rustup. Run the pinned OMP LSP tool in temporary
+Check that `rust-analyzer` resolves to the shared Nix toolchain's analyzer while
+`cargo` and `rustc` still resolve to rustup. Run the pinned OMP LSP tool in temporary
 Nix, Go, and Python projects with the generated profile on PATH; require a
 correct definition or hover response, not discovery status alone. Also exercise
 a supported project-local server launcher and missing-server discovery.

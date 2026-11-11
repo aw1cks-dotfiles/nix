@@ -1305,6 +1305,7 @@
         "noctalia": "noctalia",
         "oh-my-pi": "oh-my-pi",
         "rewrite-rs-skills": "rewrite-rs-skills",
+        "rust-overlay": "rust-overlay_2",
         "stylix": "stylix",
         "trailofbits-skills": "trailofbits-skills",
         "treefmt-nix": "treefmt-nix_6",
@@ -1324,6 +1325,26 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "51c6dc40d18552701f7c5c62e3f7a5fc899f7132",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794303164,
+        "narHash": "sha256-UZMtOt43/HRVssXPSuPv8t11Toq9+CjyWUfYQ3tqGVE=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "89750a2ef1c6a44db9f4251b16c23deffdcfddff",
         "type": "github"
       },
       "original": {

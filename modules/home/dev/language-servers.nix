@@ -6,9 +6,22 @@
 }:
 {
   aw1cks.modules.home.language-servers =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     {
-      home.packages = import ./_language-servers.nix { inherit pkgs; };
+      home.packages = import ./_language-servers.nix {
+        inherit pkgs;
+        inherit
+          (import ./_rust-toolchains.nix {
+            inherit
+              config
+              inputs
+              lib
+              pkgs
+              ;
+          })
+          rust-analyzer
+          ;
+      };
 
       # User config has higher precedence than project .clangd files: keep
       # shared diagnostics here, but leave language standards to each project.

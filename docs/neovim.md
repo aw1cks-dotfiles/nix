@@ -27,12 +27,17 @@ atom to expose servers through `home.packages`, including on editorless hosts.
 Neovim keeps its wrapper PATH so standalone and GUI-launched editors retain the
 same executables. Importing Neovim alone does not install the servers globally.
 
-Only the standalone Rust analyzer has higher package priority, to beat rustup's
-`rust-analyzer` proxy when both enter the user environment. Rustup still owns its
-compiler and Cargo proxies. Existing editor runtimes, formatters, debuggers, and
-upstream automatic extra dependencies remain unchanged; repeated references to
-the same store output are not separate installations. The server atom alone does
-not provision every project's toolchain or dependencies.
+Only the shared Rust analyzer has higher package priority, to beat rustup's
+per-toolchain `rust-analyzer` proxy when both enter the user environment. It
+comes from the Nix stable toolchain (see [Rust toolchains](./architecture.md#rust-toolchains)).
+Rustup owns the compiler and Cargo proxies, which also replace nixpkgs `cargo`
+and `rustc` in the wrapper PATH when the rust module is imported; without it the
+wrapper falls back to the Nix stable toolchain. LazyVim's automatic Rust
+dependencies still add nixpkgs `rust-analyzer` behind the shared one. Other
+editor runtimes, formatters, debuggers, and upstream automatic extra
+dependencies remain unchanged; repeated references to the same store output are
+not separate installations. The server atom alone does not provision every
+project's toolchain or dependencies.
 
 OMP uses its native definitions and supported project-local bin directories
 before PATH; missing executables are skipped rather than installed. Startup root

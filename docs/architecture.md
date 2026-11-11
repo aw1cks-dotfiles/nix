@@ -560,6 +560,31 @@ configuration remains available for its documented preferences.
 Upstream references: [packaging](https://github.com/kenn-io/kata/blob/v0.23.0/docs/development/packaging.md),
 [configuration](https://github.com/kenn-io/kata/blob/v0.23.0/docs/reference/configuration.md),
 [daemon selection](https://github.com/kenn-io/kata/blob/v0.23.0/docs/reference/daemon-discovery.md).
+## Rust toolchains
+
+`aw1cks.modules.home.rust` keeps rustup as the toolchain dispatcher, so
+`rust-toolchain.toml`, `cargo +<toolchain>` and MSRV toolchains work unchanged.
+It links Nix-built rust-overlay toolchains into rustup as custom toolchains
+(`aw1cks.rust.toolchains`, by default `nix-stable` and `nix-nightly`) through
+`home.file`. The Home Manager generation keeps them alive across garbage
+collection. Activation makes `aw1cks.rust.defaultToolchain` the rustup default
+only when none is set. rustup refuses channel names (`stable`, `nightly`,
+versions) for custom toolchains, so those still download through rustup.
+Linked toolchains cannot take `rustup component add` or `target add`: declare
+extensions and targets in Nix instead.
+
+On generic Linux, rustup is built without nixpkgs' toolchain-patching patch and
+without its `LD_LIBRARY_PATH` wrapper. That patch rewrites each downloaded
+toolchain's ELF interpreter, RUNPATH and `gcc-ld/ld.lld` to store paths that
+nothing roots, so the toolchains break after a rustup upgrade plus GC
+(NixOS/nixpkgs#473661). Upstream binaries run natively there. NixOS keeps the
+patched rustup and its fragility; prefer the linked Nix toolchains there.
+
+`modules/home/dev/_rust-toolchains.nix` is shared by the rust, language-server
+and editor modules. Editors get one rust-analyzer from the Nix stable toolchain
+and, with the rust module, rustup's proxies on their wrapper PATH. Every
+compiler, Cargo, Clippy and rustfmt call then follows the project's toolchain
+file, as in a shell.
 
 ## Shared Namespaces
 
