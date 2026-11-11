@@ -38,6 +38,9 @@ editor runtimes, formatters, debuggers, and upstream automatic extra
 dependencies remain unchanged; repeated references to the same store output are
 not separate installations. The server atom alone does not provision every
 project's toolchain or dependencies.
+The Neovim wrapper defaults `RUSTUP_HOME` to the Rust module's configured
+location, including relocated homes, while preserving an explicit launch-time
+override. GUI launches therefore do not depend on inherited shell variables.
 
 OMP uses its native definitions and supported project-local bin directories
 before PATH; missing executables are skipped rather than installed. Startup root

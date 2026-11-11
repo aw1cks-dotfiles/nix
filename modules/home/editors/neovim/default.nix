@@ -72,6 +72,11 @@
           defaultEditor = true;
           viAlias = true;
           vimAlias = true;
+          extraWrapperArgs = lib.optionals (lib.hasAttrByPath [ "aw1cks" "rust" ] config) [
+            "--set-default"
+            "RUSTUP_HOME"
+            config.home.sessionVariables.RUSTUP_HOME
+          ];
         };
 
         home.checks = lib.optionals (

@@ -560,6 +560,7 @@ configuration remains available for its documented preferences.
 Upstream references: [packaging](https://github.com/kenn-io/kata/blob/v0.23.0/docs/development/packaging.md),
 [configuration](https://github.com/kenn-io/kata/blob/v0.23.0/docs/reference/configuration.md),
 [daemon selection](https://github.com/kenn-io/kata/blob/v0.23.0/docs/reference/daemon-discovery.md).
+
 ## Rust toolchains
 
 `aw1cks.modules.home.rust` keeps rustup as the toolchain dispatcher, so

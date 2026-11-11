@@ -200,8 +200,8 @@ launchd/systemd lifecycle behavior.
 `checks.<system>.rust-toolchains` runs the default-selection activation step
 against Home Manager-generated links in isolated homes. It covers a relocated
 Rustup home (including spaces), conflicting inherited `RUSTUP_HOME`, preservation
-of an existing default, dry-run behavior and evaluation-time rejection of the
-reserved `none` toolchain name.
+of an existing default, dry-run behavior with both absent and populated Rustup
+homes, and evaluation-time rejection of the reserved `none` toolchain name.
 
 The check also starts the real shared rust-analyzer and requests definitions in
 both `std` and `core`. It covers the nixpkgs source fallback, a compiler with its

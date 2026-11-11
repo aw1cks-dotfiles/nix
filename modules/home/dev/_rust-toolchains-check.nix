@@ -43,8 +43,13 @@ let
     (
       export HOME=${lib.escapeShellArg home.config.home.homeDirectory}
       mkdir -p "$HOME"
-      cp -R --no-preserve=mode ${home.config.home-files}/. "$HOME"
       managedRustupHome=${lib.escapeShellArg home.config.home.sessionVariables.RUSTUP_HOME}
+      export DRY_RUN=1
+      run() { :; }
+      ${home.config.home.activation.rustupDefaultToolchain.data}
+      test ! -e "$managedRustupHome"
+      unset DRY_RUN
+      cp -R --no-preserve=mode ${home.config.home-files}/. "$HOME"
       export RUSTUP_HOME="$TMPDIR/inherited-rustup"
       run() { "$@"; }
 
@@ -57,6 +62,7 @@ let
       expectDefault "$managedRustupHome" nix-other
 
       rm "$managedRustupHome/settings.toml"
+      export DRY_RUN=1
       run() { :; }
       ${home.config.home.activation.rustupDefaultToolchain.data}
       if RUSTUP_HOME="$managedRustupHome" ${toolchains.rustup}/bin/rustup default; then
