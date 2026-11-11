@@ -295,6 +295,39 @@ and `runtimePackages` (default empty). No third-party plugins are fetched or
 enabled implicitly. Public and downstream modules contribute entries through
 the same contract:
 
+The bundled registry in `modules/home/packages/_tern/registry.nix` provides:
+
+| ID | Upstream | Included runtime |
+| --- | --- | --- |
+| `tern-projects` | [Projects](https://github.com/thegeneralist01/tern-projects) | Rust indexer, built by Nix rather than Cargo at first launch |
+| `tern-kata` | [Kata](https://github.com/Dangerboi/tern-kata) | Go CLI and worker |
+| `tern-kube` | [Kube](https://github.com/contrafy/tern-kube) | `kubectl` |
+| `tern-grafana` | [Grafana](https://github.com/contrafy/tern-grafana) | None required for the basic UI |
+
+All four remain opt-in in the shared module; the public `mbp` host enables them.
+Sources are pinned by commit and hash in `_tern/plugin-sources.nix`, not additional
+flake inputs. Source defaults can be replaced normally; required runtime tools
+merge with downstream `runtimePackages` contributions. To replace that tool set
+entirely, use `lib.mkForce`. Disabled entries do not build their sources or tools.
+Helm, credential-provider executables, agent harnesses and Grafana command-lens
+tools (`promtool`, `amtool`, `logcli`, `curl`) remain optional user dependencies.
+
+After activation, open the command palette and choose Projects, Open kata,
+Tern Kube Settings/Explore, or Tern Grafana Query/Settings. Projects' upstream
+Command+Option+S binding collides with a native preset on Tern 0.9.13; use the
+palette rather than relying on that shortcut. Kata still needs its daemon/account
+configured, Kube uses your kubeconfig, and Grafana needs backend contexts in
+`~/.config/tern-grafana/config.json`. Loading a plugin does not configure these
+services or credentials. Plugin actions retain upstream permissions and mutation
+defaults; enabling Kube is not a read-only cluster policy.
+
+Update the pinned sources and dependency hashes to update managed plugins;
+upstream installers cannot replace Home Manager's linked packages. Projects may
+still check for upstream releases and notify; its indexer never compiles at
+runtime in this package. Do not put credentials in the store-backed sources.
+
+Public and downstream registry modules can also contribute their own entries:
+
 ```nix
 # A registry module: use a pinned input or a reviewed local source directory.
 { inputs, lib, ... }: {
@@ -336,10 +369,12 @@ ownership/collision handling so generation updates work. Unreadable candidates
 fail closed; hidden entries and obvious invalid/nonpackages are ignored.
 
 Enabled runtime packages enter the home profile and are prepended to managed
-GUI/CLI and service PATHs after configured environment overrides. Changes apply
-to newly started processes; activation does not restart sessions or reload
-plugins. Run `tern plugin reload` explicitly to update a running daemon's plugin
-set. A running GUI may retain its previous environment until reopened.
+GUI/CLI and service PATHs after configured environment overrides. The profile's
+`bin` directory is also included so plugin subprocesses can invoke the managed
+`tern` CLI. Changes apply to newly started processes; activation does not restart
+sessions or reload plugins. Run `tern plugin reload` explicitly to update a
+running daemon's plugin set. A running GUI may retain its previous environment
+until reopened.
 
 Plugins are trusted code with filesystem, process and network APIs. Their host
 half runs on the daemon's machine, their window half in the local GUI; configuring

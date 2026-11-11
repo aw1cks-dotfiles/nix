@@ -80,6 +80,7 @@ in
         ./_tern/services.nix
         ./_tern/themes.nix
         ./_tern/plugins.nix
+        ./_tern/registry.nix
       ];
 
       options.modules.tern = {
