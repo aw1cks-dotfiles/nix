@@ -152,11 +152,48 @@ private update preferences and set `TERN_KATA_NO_UPDATE_CHECK=1`. Optional tools
 live backend operations and user credentials are separate acceptance scenarios.
 
 
-### Kata package
+### Kata local daemon
 
-`nix build .#kata` uses the complete pinned release source with production web
-assets and vendored Go dependencies. Its install check runs the version command
-and `_web-assets-check`; building it does not activate a user service.
+`checks.<system>.kata` evaluates an enabled standalone Home Manager service
+without importing Tern. It rejects non-loopback listeners, invalid fixed ports
+and unsafe state paths; disabled service evaluation does not require its package
+or state. Standard-library Python regressions cover private token creation,
+reuse without replacement, concurrent initialization and refusal of unsafe
+files. The foreign-owner test runs only with root privileges.
+
+```sh
+nix build .#checks.aarch64-darwin.kata --no-link
+nix eval .#checks.x86_64-linux.kata.drvPath --raw
+nix build .#kata --no-link
+```
+
+The real package runs the focused upstream browser-session policy regression
+before installation. Its install check runs the version command and
+`_web-assets-check`, rejecting a release containing only development UI assets.
+Neither the service check nor package build activates a user service.
+
+Native runtime acceptance uses a temporary home, state directory and free
+loopback port. Start the actual generated runner, verify authenticated health,
+create and read a disposable project/issue, require an unauthenticated mutation
+to return 401, and reject a second foreground owner without stopping the first.
+Also test the alternate browser authorization path with the correct Origin:
+`POST /api/v1/ui/session/local` must return 404 without a cookie, invalid token
+login must return 401, and valid token login must return session/CSRF credentials
+and a cookie. Require a subsequent authenticated browser mutation to succeed.
+Open the actual web UI in an isolated browser tab: it must ask for a token, then
+show the disposable project after explicit login. CLI and `tern-kata` must still
+write/read against the same hardened server. Do not probe a live user's daemon.
+After stopping the managed daemon, the configured client must fail rather than
+auto-start a replacement; after restart, the same issue and token must persist.
+Run the generated `kata` client with no caller `KATA_*` environment and require
+authenticated health and issue creation to succeed. In an isolated Tern window,
+clear inherited `KATA_HOME`, `KATA_DB`, `KATA_DSN`, `KATA_SERVER` and credential
+variables before launching the generated `tern-kata` executable. Confirm that
+the same issue renders at a supported pane width without manually injecting the
+target connection. This catches login-shell/GUI environment inheritance gaps.
+Keep HOME/XDG paths disposable; do not activate a fixture over the user's home
+or migrate a live database. This proves the runner and clients, not live
+launchd/systemd lifecycle behavior.
 
 ### Agent skills
 
