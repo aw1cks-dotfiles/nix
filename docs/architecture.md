@@ -71,7 +71,8 @@ definitions do not match several nixpkgs server names and omit others;
 
 ## Tern
 
-The flake packages the native Tern application independently of host configuration.
+`aw1cks.modules.home.tern` exposes opt-in declarative settings and a managed launcher.
+The desktop profile imports its definitions; the public `mbp` host enables it.
 
 ### Binary packages and manual import
 
@@ -103,6 +104,187 @@ missing. The reviewed pins live in
 
    The printed hash must match the platform's pin. Importing a differently
    named or different-version file does not satisfy `requireFile`.
+4. Rebuild Home Manager. Remove a previous `modules.tern.executable` override to
+   select the packaged binary. Existing constructors allow unfree packages;
+   independent Home Manager package sets must permit this unfree application.
+
+Repeat the import for each independent build machine/store. Downloading all
+three archives on a Mac does not seed a Linux machine's store. Transfer the
+archive and import there, or copy the returned source store path to a private
+builder with `nix copy`. Keep the original download: an unreferenced source may
+be garbage-collected and need importing again. Neither downloads nor user state
+are moved or deleted by the package.
+
+The macOS package preserves the signed/notarized `Tern.app` under
+`$out/Applications`, with an external CLI wrapper; it does not strip, patch or
+re-sign the application. Use the ZIP rather than a DMG so no disk-image extraction
+is needed. Verify an installed package after store registration:
+
+```sh
+package="$(nix build .#tern --no-link --print-out-paths)"
+codesign --verify --deep --strict "$package/Applications/Tern.app"
+"$package/bin/tern" --version
+```
+
+Do not execute the signed bundle inside its Nix builder: macOS can attach
+app-management metadata before output canonicalisation. Version/signature checks
+on Darwin run after registration. Linux uses `autoPatchelfHook`, declared
+graphics/windowing/WebKit/audio libraries, runtime helper wrappers and the real
+upstream icons; both Linux architectures share the same native packaging logic.
+Non-NixOS Linux still needs the existing Home Manager generic GPU setup to
+provide host-compatible drivers at `/run/opengl-driver`.
+
+Packaged Tern disables its self-updater. Update the version and all source hashes,
+import the new archives and rebuild instead; running daemons adopt the new
+executable on their next start without an automatic destructive restart.
+These authenticated unfree artifacts are not added to public CI builds or the
+public cache closure. Do not commit or redistribute archives/binaries without
+permission from the licence holder.
+
+Once verified, an old manually installed `~/.local/bin/tern` should be retired so
+it cannot shadow the package on shell PATH. Nothing removes it automatically.
+For a deliberate external install, set `modules.tern.package = null` and an
+absolute `modules.tern.executable`; that remains separate from the packaged default.
+
+
+Use `tern`, **Tern Managed.app** on Darwin, or **Tern Managed** on Linux.
+The Home Manager profile gives its managed `tern` launcher higher priority than
+the package's raw CLI; there is no separate `tern-managed` command. It sets
+`TERN_CONFIG_DIR` and `TERN_DAEMON_SOCKET`, then executes the selected backend by
+absolute path, never by looking up `tern` on PATH. This avoids recursion and keeps
+CLI/GUI clients on the same daemon, including custom paths. Do not point
+`modules.tern.executable` at the managed profile command.
+Linux's application/file/URL desktop IDs also route through this launcher.
+Launching the raw upstream application directly does not inherit custom managed
+environment settings.
+The default config directory is `~/Library/Application Support/Tern` on Darwin
+and `$XDG_CONFIG_HOME/tern` on Linux. Setting `TERN_CONFIG_DIR` also places Tern's
+application state there; it is not a read-only configuration directory.
+`modules.tern.socket` is the one socket option for launchers and services.
+Its absolute path must fit the platform's Unix-domain socket limit.
+
+### Keyboard, links and appearance
+
+Primary means Command on Darwin and Ctrl+Shift on Linux. Primary + physical
+left/right bracket splits right/down; Primary + arrows focuses a pane;
+Primary + T creates a tab; Primary + 1–8 selects a tab and Primary + 9 selects
+the last tab. Physical keys preserve these positions on non-US layouts.
+Darwin also keeps the physical Ctrl+Shift digit aliases from WezTerm.
+
+The prefix is **Shift+Space**, released before the following unmodified key:
+
+| Following key | Action |
+| --- | --- |
+| Arrow | Resize the split |
+| `[` / `]` | Previous / next pane |
+| `,` / `.` | Previous / next tab |
+| `k` / `j` | Previous / next shell prompt (`k` also preserves contextual reply-start navigation) |
+| `b` / `f` | Browser back / forward |
+| `p` / `u` | Park pane / show parked panes |
+| `s` | Session switcher |
+| `t` | New shell block |
+
+Shift+Space is reserved; it no longer inserts a space. Ordinary Space is unchanged.
+Configure `keyboard.prefix`, `keyboard.primaryModifier`, or disable the map with
+`keyboard.enable = false`. `settings.keybinds` overrides individual generated
+bindings; an empty action list unbinds a chord. Other native Tern bindings remain.
+
+New agent blocks open in a new tab, including Command+Shift+A on Darwin and
+Ctrl+Shift+A on Linux. Set `settings.agent_placement` to `split` or
+`replace_if_alone` to change that native placement policy.
+
+Darwin defaults `keyboard.optionAsAlt = "left"`: Left Option sends native Alt/Meta
+for Readline and other terminal programs; Right Option retains accents and layout
+characters. This explicitly avoids Tern's layout-dependent Auto setting.
+Linux keeps native Alt handling. Tern opens web links internally; Alt/Option with
+the link-opening click selects the default external browser. If links require
+Command-click, use Option+Command-click. File links remain in Tern.
+
+Terminal/code fonts use `aw1cks.fonts.defaults.monospace` (CaskaydiaMono first);
+UI fonts use `aw1cks.fonts.defaults.sansSerif` (SF Pro first), provisioned by the
+existing desktop font modules. Weight defaults to Medium (500). Tern uses the
+same nominal terminal size as WezTerm, capped at 32px, without an extra DPI
+conversion. UI size defaults to two pixels below the terminal size (minimum 8px):
+the shared defaults are 18px terminal / 16px UI.
+Padding is terminal-content padding in whole pixels, defaulting to 16 horizontal
+and 12 vertical, with the native 0–40px range.
+
+The terminal cursor defaults to a blinking underline. Programs may temporarily
+select another shape (for example Vim's mode cursor); a reset restores the
+underline. Built-in file editors retain their native caret shape.
+Override these through `settings.cursor`.
+
+`modules.tern.themes.<name>.source` installs an additional CSS theme without
+selecting it. Names contain only letters, digits, underscores and hyphens.
+`theme.dark` and `theme.light` independently select CSS or OMP catalog names;
+null leaves that appearance's selection unmanaged. Dark defaults to
+`oxocarbon-dark`; light is unmanaged by default. The module provisions the
+default OMP Oxocarbon JSON without requiring OMP to run.
+
+Each selected appearance gets an internal `nix-managed-dark.css` or
+`nix-managed-light.css` wrapper. Those names are reserved. Composition order is
+the selected base, the optional terminal palette, then `theme.extraCssFiles` in
+list order. Later files win subject to normal CSS specificity; nothing adds
+`!important`. Use `lib.mkBefore` / `lib.mkAfter` to order contributions from
+different modules. There is no inline CSS option.
+
+`theme.palette` follows the selected WezTerm scheme when imported, otherwise
+the shared Oxocarbon palette. It requires `background`, `foreground`,
+`cursor_bg`, eight `ansi` and eight `brights` colors; other WezTerm scheme
+fields are accepted. Set it to null to preserve the selected theme's terminal
+colors, especially when using a light theme. A non-null palette applies to both
+selected appearances. Do not compensate values for renderer color-space bugs.
+
+```nix
+{
+  modules.tern = {
+    themes.company-dark.source = ./company-dark.css;
+    themes.company-light.source = ./company-light.css;
+    theme = {
+      dark = "company-dark";
+      light = "company-light";
+      palette = null;
+      extraCssFiles = [ ./terminal-adjustments.css ];
+    };
+    settings.theme = "Light"; # Defaults to Dark; native settings remain overridable.
+  };
+}
+```
+
+Theme assets install even with `theme.enable = false`; that switch controls
+wrappers and generated selection settings only. Raw `settings.theme_dark` and
+`settings.theme_light` overrides bypass wrapper selection and its CSS layers.
+Prefer `theme.dark` / `theme.light` when composing additional CSS.
+
+Migration: replace `theme.base` with `theme.dark`; `theme.name` is removed because
+wrapper names are internal. Home Manager removes obsolete managed theme links.
+Fonts, padding and the settings escape hatch remain unchanged.
+
+### Writable settings ownership
+
+Home Manager links the theme, not `settings.json`. Activation atomically merges
+the declared settings into that writable JSON file, preserving unrelated fields
+such as SQLite recents and custom keybindings. `modules.tern.settings` overrides
+generated defaults; its contents enter the Nix store, so do not put secrets there.
+Only declared leaves are owned. Removed declarations remove their formerly owned
+leaves/chords rather than leaving obsolete prefix bindings behind.
+
+The private `.nix-settings-state.json` records ownership and interrupted-commit
+recovery. Do not edit it. Malformed JSON and output symlinks fail without replacing
+settings. An interrupted merge with subsequent external edits fails closed:
+preserve both files and resolve the ambiguity before applying again.
+Reapplying unchanged settings does not rewrite the file.
+
+Preferences are merged after file linking and before launchd/systemd service
+startup, so newly started services cannot read the previous settings generation.
+
+Quit Tern's GUI before rebuilding to avoid racing its preference writes, then
+reopen it to load the changed preferences; the daemon need not be restarted.
+No application shutdown or reload is forced. GUI changes to managed values last
+until the next
+activation. Disabling the entire feature preserves mutable settings/state;
+disable individual generated settings and activate once first if their owned
+values should be removed. User state, keys and histories are never garbage-collected.
 
 ## Shared Namespaces
 

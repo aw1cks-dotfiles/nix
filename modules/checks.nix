@@ -187,6 +187,14 @@ let
       };
     }
   ) config.systems;
+
+  terminalChecks = map (system: {
+    ${system}.tern = import ./home/packages/_tern/checks.nix {
+      inherit inputs lib;
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      ternModule = config.aw1cks.modules.home.tern;
+    };
+  }) config.systems;
 in
 {
   config.flake.checks = lib.mkMerge (
@@ -196,6 +204,7 @@ in
       homeSmokeChecks
       hostDerivationChecks
       skillsChecks
+      terminalChecks
     ]
   );
 }

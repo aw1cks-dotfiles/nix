@@ -9,6 +9,7 @@
     home = { ... }: {
       imports = [ config.aw1cks.modules.home.tailscale-serve ];
       home.stateVersion = "25.11";
+      modules.tern.enable = true;
       services.tailscale-serve = {
         enable = true;
       };

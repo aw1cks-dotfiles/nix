@@ -10,6 +10,7 @@ in
       modules.home.gui-apps
       modules.home.stylix-theme
       modules.home.wezterm
+      modules.home.tern
       modules.home.zen-browser
     ];
   };
