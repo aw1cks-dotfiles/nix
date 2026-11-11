@@ -191,6 +191,7 @@
             coding."mini-surround".enable = true;
             editor = {
               navic.enable = true;
+              "neo-tree".enable = true;
               outline.enable = true;
             };
             lang = {
