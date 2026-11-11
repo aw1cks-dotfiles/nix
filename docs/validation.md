@@ -81,19 +81,66 @@ symbol source used by lualine. The actual host's native `home.checks` separately
 validate its installed Treesitter parser/query pairs.
 See [Neovim integration decisions](./neovim.md) for scope and retained workarounds.
 
-### Tern settings
+### Tern settings and user services
 
-`checks.<system>.tern` evaluates an enabled native Home Manager fixture with an
-external executable, so CI does not require authenticated application archives.
-It rejects unsafe theme names, invalid palettes and overlong socket paths.
-Python regressions exercise writable settings ownership, preservation of
-unmanaged values, crash recovery, permissions and atomic updates. No check
-activates a real user home or runs an application session.
+`checks.<system>.tern` evaluates an enabled native Home Manager fixture through
+its final activation derivation, including theme/launcher generation and the
+platform's user-service backend. The fixture explicitly uses `package = null`
+and an external executable path, so public CI never needs authenticated archives.
+It rejects relay enablement without an explicit URL, overlong socket paths,
+unsafe theme/plugin names, reserved wrapper names and palettes without eight
+ANSI and eight bright colors. Disabled malformed plugin sources stay unevaluated
+and install no pointer.
+On Linux it also runs the read-only migration guard against an unreachable user
+manager and requires it to fail closed.
 
-The fixture also evaluates both native user-service definitions and rejects a
-relay without an explicit URL. On Linux it exercises the read-only migration
-guard without a reachable user manager and requires that inspection to fail
-closed. No check starts real services.
+The check runs standard-library Python regression tests for preserving unrelated
+settings/keybindings, managed changes/removals and type transitions, private
+permissions, unchanged-file stability, malformed input, symlinks and interrupted
+ownership commits. Plugin validator tests cover manifest schema/ID mismatches,
+upstream-compatible entries and source containment, including symlink escapes.
+Plugin migration regressions cover semantic ID collisions in directories,
+symlinks and alias pointers, unchanged source/data contents and permissions,
+normal managed-pointer updates and fail-closed inspection errors. Exercise the
+generated pre-write guard in a disposable config directory: a legacy copy must
+abort before links change, then pass after an explicit move outside the plugin
+root without deleting plugin data.
+No check activates a real user's home or executes plugin code.
+
+```bash
+nix build .#checks.aarch64-darwin.tern --no-link
+nix eval .#checks.x86_64-linux.tern.drvPath --raw
+```
+The real `packages.<system>.tern` is intentionally not a flake-check build:
+import its pinned private archive before running `nix build .#tern` on each target
+platform. Linux packaging performs a native version install-check after ELF
+fixup and generates the real icons in a temporary home. On Darwin, verify the
+unchanged bundle and its signature after registration, then run the CLI version
+and an isolated GUI/daemon smoke scenario. Executing the signed app in its builder
+can trigger macOS app-management metadata and prevent output canonicalisation.
+
+
+These checks do not prove native keyboard-layout/Option-side dispatch, Linux
+systemd runtime behaviour, or desktop rendering. Those require an installed Tern
+and isolated runtime scenarios. Headless Tern does not load user themes; verify
+custom theme selection in a real window against a separate daemon/socket/home,
+not by substituting a built-in theme and calling it a custom-theme test.
+
+For appearance/plugin changes, build an isolated Home Manager fixture with an
+external executable, temporary home/config/socket, a custom CSS base and two
+ordered `extraCssFiles`. Use `palette = null` to prove the base foreground remains
+intact while the last file wins for the overridden terminal background. Open a
+real window, inspect its active dark/light wrapper selections and capture both
+the screenshot and computed layout colors. Do not activate the fixture over the
+user's home.
+
+Exercise a plugin with both host and window entries and a tool supplied only by
+`runtimePackages`, with an explicit restricted environment PATH. Require both
+halves to record the tool's successful result in writable plugin data. Verify
+that a consuming module can disable a profile-enabled registry entry and add its
+own source. Stop only the fixture's processes and remove its temporary files.
+`checks.<system>.tern.mkFixture [ ... ]` exposes the native Home Manager fixture
+for these scenarios without requiring an authenticated archive in public CI.
 
 ### Agent skills
 
