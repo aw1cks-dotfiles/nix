@@ -81,6 +81,11 @@ symbol source used by lualine. The actual host's native `home.checks` separately
 validate its installed Treesitter parser/query pairs.
 See [Neovim integration decisions](./neovim.md) for scope and retained workarounds.
 
+### Tern packages
+
+Authenticated upstream archives are opt-in local build inputs, not public CI inputs.
+Package pins and platform selection are evaluated without downloading a login page.
+
 ### Agent skills
 
 `checks.<system>.agent-skills` exercises selection layering, `mkForce`, final exclusions, unknown selectors, ID/name collisions, read-only output configuration, and whole-directory replacements.

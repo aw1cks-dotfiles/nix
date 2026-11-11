@@ -69,6 +69,41 @@ definitions do not match several nixpkgs server names and omit others;
 `aw1cks.modules.home.ai` owns that file. See
 [shared language-server packages](./neovim.md#shared-language-server-packages).
 
+## Tern
+
+The flake packages the native Tern application independently of host configuration.
+
+### Binary packages and manual import
+
+The closed-beta build service requires an interactive login. Nix never stores
+download credentials or tries to fetch a login page: `requireFile` pins the
+archive's exact filename and flat SHA-256, and tells you how to supply it when
+missing. The reviewed pins live in
+[`modules/integrations/_tern-sources.nix`](../modules/integrations/_tern-sources.nix).
+
+| Nix system | Required upstream archive |
+| --- | --- |
+| `aarch64-darwin` | `Tern-0.9.13-macos-arm64.zip` |
+| `x86_64-linux` | `Tern-0.9.13-linux-x86_64.tar.gz` |
+| `aarch64-linux` | `Tern-0.9.13-linux-arm64.tar.gz` |
+
+1. Sign in at <https://build.stencil.so/tern> and download the pinned version for
+   the build host. Use the full macOS application ZIP, or the Linux **glibc**
+   tarball, not the musl build.
+2. Keep the exact filename above (remove any browser-added duplicate suffix).
+3. On the machine that will build it, import the archive. For example on amd64:
+
+   ```sh
+   archive="$HOME/Downloads/Tern-0.9.13-linux-x86_64.tar.gz"
+   nix hash file --type sha256 --sri "$archive"
+   nix-store --add-fixed sha256 "$archive"
+   nix build .#tern
+   nix run .#tern -- --version
+   ```
+
+   The printed hash must match the platform's pin. Importing a differently
+   named or different-version file does not satisfy `requireFile`.
+
 ## Shared Namespaces
 
 The public reusable namespace in this repo is `aw1cks.*`.
