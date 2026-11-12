@@ -1,17 +1,17 @@
 {
-  version = "0.9.13";
+  version = "0.9.18";
   artifacts = {
     aarch64-darwin = {
-      name = "Tern-0.9.13-macos-arm64.zip";
-      hash = "sha256-V/OwAriT9oExF7kyzuhrHWpPpCdr0FYy5VGWhA4AhZs=";
+      name = "Tern-0.9.18-macos-arm64.zip";
+      hash = "sha256-foCznus+TCvChPP/w/xi04g9I4xUEH8QTWkvAVMzwp4=";
     };
     x86_64-linux = {
-      name = "Tern-0.9.13-linux-x86_64.tar.gz";
-      hash = "sha256-5Ux6glv3vzk2lTfeds3E80ab3g7OLEvGXMkuNgzsjSU=";
+      name = "Tern-0.9.18-linux-x86_64.tar.gz";
+      hash = "sha256-In2LyiXCv8Yc/dSP+XANy9qoaA+d1d9aZ3mGGOYnANs=";
     };
     aarch64-linux = {
-      name = "Tern-0.9.13-linux-arm64.tar.gz";
-      hash = "sha256-ZRwFYoFpFNH1DndBMyJdlrz8FAont5xxZbtoOSKjzNc=";
+      name = "Tern-0.9.18-linux-arm64.tar.gz";
+      hash = "sha256-+i0xhB++LPMg3is9n0OPVzFwL0yqhgC9DlF0MoTBvTI=";
     };
   };
 }
