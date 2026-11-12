@@ -145,6 +145,32 @@ No chart constraints were removed. No full rebuild, interactive Zed smoke, remot
 chart-dependency fetching, or cluster operation was performed; the chart/profile
 fixtures were removed.
 
+### Ansible editor and project environments
+
+The native fallback toolchain passed playbook syntax checking, offline linting,
+and a localhost-only run (three successful tasks, zero changes). A nonexistent
+module failed syntax checking and produced an `ansible-lint` editor diagnostic.
+A fresh-HOME Neovim smoke completed builtin modules and arguments, Jinja
+variables, module hover/source navigation, and `verbosity` in the actual Blink
+menu. Conventional playbook/role paths activated Ansible; unrelated YAML and CI
+files retained ordinary `yamlls`.
+
+The final project-aware runtime was checked across separate roots in one Neovim
+process. Global fallback completed builtin arguments. A trusted `.envrc` exposed
+a collection from a nonstandard project-only path; its arguments, hover,
+definition, and `threshold` Blink completion worked. The same module remained
+unresolved in the global workspace. Trusted `.nvim.lua` activated that project's
+`site.yml` without reclassifying another root's `site.yml`. A blocked `.envrc`
+prevented server startup, did not execute its contents, and was not silently
+bypassed with global tools.
+
+These were disposable runtime/CLI smoke checks, not additional permanent suites.
+No profile switch, execution-environment container, remote-host run, Galaxy
+installation, or real private downstream validation was performed. The generated
+profile reused the installed Avante configuration to avoid the unrelated OMP
+package build failure. All smoke projects and isolated trust databases were
+removed.
+
 ### Tern settings and user services
 
 `checks.<system>.tern` evaluates an enabled native Home Manager fixture through

@@ -284,6 +284,49 @@ node, `a` adds, `d` deletes, `r` renames, and `H` toggles hidden files. File and
 folder glyphs use the existing MiniIcons integration and require a Nerd Font in
 the terminal or GUI.
 
+## Ansible and project-local configuration
+
+The supported Ansible extra supplies `nvim-ansible` filetype detection and
+`ansiblels`. Nix installs Ansible Core, `ansible-lint`, and the language server as
+Home Manager PATH fallbacks, not fixed per-workspace executable paths. The native
+server uses offline linting, disables automatic lint fixes, and does not enable
+execution-environment containers or paid completion services.
+
+For a root with an ancestor `.envrc`, the server starts through
+`direnv exec <root> ansible-language-server --stdio`. This loads project tool and
+collection paths after Neovim's wrapper. Each tool retains its own interpreter;
+the server does not emulate a virtualenv using a hardcoded Python path.
+Without `.envrc`, it uses the ordinary PATH fallbacks. A blocked or broken
+environment is not silently replaced with global tools; review it and run
+`direnv allow .` before starting the client. Restart the client after environment
+changes. This does not install Galaxy requirements or manage containers.
+
+Keep tool versions in a project devShell and `.envrc` (`use flake`), inventory and
+search paths in `ansible.cfg`, collection/role pins in `requirements.yml`, and lint
+policy in `.ansible-lint`. Include the full toolchain in the devShell when pinning
+project versions. Resolve project requirements explicitly; opening a buffer must
+not install them.
+
+`exrc` enables Neovim's native trusted `.nvim.lua` mechanism. Review a local file
+and use `:trust` before allowing it to execute. Scope overrides to that repo;
+do not classify every YAML file or mutate LSP defaults for unrelated workspaces.
+For example, a project's `.nvim.lua` can activate an unconventional playbook name:
+
+```lua
+local root = vim.fs.dirname(debug.getinfo(1, "S").source:sub(2))
+vim.filetype.add({
+  filename = {
+    [root .. "/site.yml"] = "yaml.ansible",
+  },
+})
+```
+
+The supplied detector recognizes conventional playbook and role paths but is
+still filename/path based. `site.yml` is ordinary YAML without an explicit
+association; CI and unrelated YAML keep their ordinary schema support.
+Jinja expressions in playbooks support variables; standalone `.j2` templates and
+Jinja blocks are not covered by this baseline.
+
 ## YAML and Kubernetes schemas
 
 Neovim and Zed import the shared `aw1cks.modules.home.yaml-schemas` module from
