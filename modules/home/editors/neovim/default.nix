@@ -118,6 +118,13 @@ in
       ];
 
       config = {
+        # PATH fallbacks for project tooling, not forced ahead of direnv's tools.
+        home.packages = with pkgs; [
+          ansible
+          ansible-lint
+          ansible-language-server
+        ];
+
         programs.neovim = {
           defaultEditor = true;
           viAlias = true;
@@ -218,6 +225,28 @@ in
             };
           };
 
+          plugins.ansible-tools = inputs.lazyvim-nix.lib.lazyConfig {
+            plugin = "neovim/nvim-lspconfig";
+            opts = {
+              ansible_direnv = "${config.programs.direnv.package}/bin/direnv";
+              servers.ansiblels.settings.ansible = {
+                ansible.path = "ansible";
+                # Use each tool's own interpreter; this is not a Python venv.
+                python.interpreterPath = "";
+                executionEnvironment.enabled = false;
+                validation = {
+                  enabled = true;
+                  lint = {
+                    enabled = true;
+                    path = "ansible-lint";
+                    arguments = "--offline";
+                    autoFixOnSave = false;
+                  };
+                };
+              };
+            };
+          };
+
           extras = {
             coding."mini-surround".enable = true;
             editor = {
@@ -226,6 +255,10 @@ in
               outline.enable = true;
             };
             lang = {
+              ansible = {
+                enable = true;
+                installDependencies = false;
+              };
               docker = {
                 enable = true;
                 installDependencies = true;

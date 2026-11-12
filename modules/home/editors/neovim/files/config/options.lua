@@ -1,6 +1,7 @@
 vim.opt.guicursor = "a:ver25-blinkon1,i-v:hor20"
 vim.opt.clipboard = ""
 vim.opt.fixeol = false
+vim.o.exrc = true
 
 vim.g.autoformat = false
 vim.g.loaded_node_provider = 0
