@@ -1,4 +1,12 @@
-{ inputs, lib, ... }:
+{
+  config,
+  inputs,
+  lib,
+  ...
+}:
+let
+  yamlSchemasModule = config.aw1cks.modules.home.yaml-schemas;
+in
 {
   aw1cks.modules.home.neovim =
     { config, pkgs, ... }:
@@ -104,7 +112,10 @@
           '';
     in
     {
-      imports = [ inputs.lazyvim-nix.homeManagerModules.default ];
+      imports = [
+        inputs.lazyvim-nix.homeManagerModules.default
+        yamlSchemasModule
+      ];
 
       config = {
         programs.neovim = {
@@ -186,6 +197,26 @@
                 }
               ]
           );
+
+          plugins.yaml-schemas = inputs.lazyvim-nix.lib.lazyConfig {
+            plugin = "neovim/nvim-lspconfig";
+            opts = {
+              yaml_schema_fallback = "file://${config.aw1cks.yaml.kubernetes.schemaPackage}/detected.json";
+              servers.yamlls.settings.yaml = {
+                schemas = config.aw1cks.yaml.schemaAssociations;
+                schemaStore = {
+                  enable = false;
+                  url = "";
+                };
+                kubernetesCRDStore.enable = false;
+              };
+              servers.helm_ls.settings."helm-ls".yamlls = import ../_helm-yamlls.nix {
+                inherit pkgs;
+                inherit (config.aw1cks.yaml) schemaAssociations;
+                inherit (config.aw1cks.yaml.kubernetes) schemaPackage;
+              };
+            };
+          };
 
           extras = {
             coding."mini-surround".enable = true;

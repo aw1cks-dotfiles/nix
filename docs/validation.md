@@ -81,6 +81,70 @@ symbol source used by lualine. The actual host's native `home.checks` separately
 validate its installed Treesitter parser/query pairs.
 See [Neovim integration decisions](./neovim.md) for scope and retained workarounds.
 
+### Shared YAML schema acceptance
+
+The shared contract is `aw1cks.yaml`, exported by
+`aw1cks.modules.home.yaml-schemas` and imported by both editors. Sources live in
+`modules/home/editors/yaml-schemas.nix` and `modules/home/editors/_yaml-schemas/`.
+For this integration, evaluate both rendered editor settings and an additive
+downstream Home Manager composition: preserve existing declarations while adding
+`kubernetes.extraCRDs`, `kubernetes.manifestGlobs`, and `extraSchemas`. Exercise
+served-only CRD versions, release-specific GVK overrides, duplicate-extra
+rejection, and intentional `lib.mkForce` replacement of manifest globs.
+
+Runtime acceptance should use the real YAML language server with known multi-doc
+resources and List items, checking diagnostics and resource-specific completions.
+Unknown GVKs, including unknown List items, must not select an unrelated schema:
+they intentionally lack resource-specific editor validation. Run strict
+kubeconform separately and require missing-schema failures for unknown GVKs,
+without remote fallback or `-ignore-missing-schemas`. Neither path may read
+kubeconfig, access a cluster, or guess remote CRD URLs.
+
+Keep SchemaStore coverage for GitLab CI, GitHub Actions, and Compose; check custom
+schema associations and explicit modeline precedence independently of Kubernetes.
+Pinned local/store schemas can be exercised offline, but SchemaStore and explicit
+remote schema URLs may fetch at runtime. Local file schemas need self-contained
+references or a derivation containing sibling references. Never put secrets in
+schema/CRD fixtures: these sources enter the world-readable store.
+
+The shared package build passed 19 offline regression tests. A fresh-HOME Neovim
+runtime, using the real YAML language server, exercised multi-document diagnostics
+and completions, unknown-GVK isolation, two additive downstream CRDs, custom-schema
+precedence, GitLab/GitHub Actions/Compose/Ansible coverage, and Helm-values
+separation with no kubeconfig. Two downstream-style modules appended declarations
+to the public host configuration; rendered Zed settings used the same associations.
+An additional real Blink-menu smoke opened an unscoped Role YAML file outside a
+Git repo: typing `a` under `rules` offered `apiGroups` first from the LSP source.
+The server also completed `nonResourceURLs`, `resourceNames`, `resources`, and
+`verbs`. The fallback retained GitLab/Actions/Compose/Ansible schemas and explicit
+custom-schema precedence without combining catalog and Kubernetes schemas.
+The smoke reused the installed, unchanged Avante configuration to avoid the
+unrelated OMP package build failure. No system switch, interactive Zed check, or
+real private downstream consumer validation was performed.
+
+### Helm editor smoke
+
+A disposable standalone chart, with no kubeconfig, exercised Neovim's real
+`helm_ls` and its embedded YAML server. Opening values first selected
+`yaml.helm-values` with only `helm_ls`; templates and helpers selected `helm`;
+Chart/JSON-schema files and an unrelated YAML neighbor retained their own servers.
+Template `.Values` fields completed in the actual Blink menu; hover showed main
+and overlay values, definitions reached both values files, and includes reached
+the helper. Core Deployment and pinned PrometheusRule schema fields completed.
+The evaluated current/legacy Zed embedded-server settings matched Neovim's.
+
+`helm lint --strict` passed. Rendering with the production overlay and validating
+against only the local kubeconform schemas reported two valid resources, no
+errors or skips. An overlay violating the sidecar schema minimum was rejected
+by Helm CLI.
+
+Nested values-file completion did **not** pass: Helm LS 0.5.4 logged a Boolean
+`additionalProperties` decode error for the valid sidecar schema. This is an
+upstream values-schema generation limitation, not a successful smoke result.
+No chart constraints were removed. No full rebuild, interactive Zed smoke, remote
+chart-dependency fetching, or cluster operation was performed; the chart/profile
+fixtures were removed.
+
 ### Tern settings and user services
 
 `checks.<system>.tern` evaluates an enabled native Home Manager fixture through

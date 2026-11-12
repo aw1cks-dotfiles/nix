@@ -42,10 +42,10 @@
       helmSettings = {
         # Keep Helm execution explicit; the tasks below lint/render on demand.
         helmLint.enabled = false;
-        yamlls = {
-          enabled = true;
-          path = "${pkgs.yaml-language-server}/bin/yaml-language-server";
-          config = yamlSettings;
+        yamlls = import ../_helm-yamlls.nix {
+          inherit pkgs;
+          inherit (config.aw1cks.yaml) schemaAssociations;
+          inherit (config.aw1cks.yaml.kubernetes) schemaPackage;
         };
       };
       savedTask = label: text: {

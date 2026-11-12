@@ -9,6 +9,7 @@ from pathlib import Path
 
 import yaml
 from jsonschema import Draft7Validator
+from referencing import Registry, Resource
 
 source = os.environ.get("SCHEMA_BUILDER", str(Path(__file__).with_name("build.py")))
 spec = importlib.util.spec_from_file_location("schema_builder", source)
@@ -94,6 +95,16 @@ class SchemaTests(unittest.TestCase):
         self.bundle = json.loads((output / "bundle.json").read_text())
         return Draft7Validator(self.bundle)
 
+    def detection_validator(self):
+        self.compile()
+        schema = json.loads((self.root / "output/detected.json").read_text())
+        schema["$id"] = "https://schemas.example.test/kubernetes/detected.json"
+        registry = Registry().with_resource(
+            "https://schemas.example.test/kubernetes/bundle.json",
+            Resource.from_contents(self.bundle),
+        )
+        return Draft7Validator(schema, registry=registry)
+
     def widget(self, spec=None):
         return {
             "apiVersion": "platform.example.test/v1",
@@ -113,7 +124,7 @@ class SchemaTests(unittest.TestCase):
                 {"apiVersion": "v1", "kind": "ConfigMap", "data": {"key": "value"}}
             )
         )
-        self.assertFalse(
+        self.assertTrue(
             validator.is_valid({"apiVersion": "unknown.example/v1", "kind": "Widget"})
         )
         path = self.root / "output/kubeconform/platform.example.test/widget_v1.json"
@@ -126,6 +137,117 @@ class SchemaTests(unittest.TestCase):
         self.assertTrue(
             json.loads(core.read_text())["$ref"].startswith("../../bundle.json#")
         )
+
+    def test_detection_validates_known_gvks_without_a_filename_association(self):
+        self.add(self.crd())
+        validator = self.detection_validator()
+        self.assertTrue(validator.is_valid(self.widget()))
+        self.assertFalse(validator.is_valid(self.widget({"replicas": "wrong"})))
+        self.assertFalse(
+            validator.is_valid(
+                {"apiVersion": "v1", "kind": "ConfigMap", "data": {"key": 42}}
+            )
+        )
+
+    def test_detection_leaves_unrelated_partial_and_unknown_documents_alone(self):
+        self.add(self.crd())
+        validator = self.detection_validator()
+        for document in [
+            None,
+            "plain YAML",
+            [{"hosts": "all", "tasks": []}],
+            {"stages": ["test"], "check": {"script": "echo hello"}},
+            {"jobs": {"nested": self.widget({"replicas": "not a root resource"})}},
+            {"kind": "Widget"},
+            {"apiVersion": "platform.example.test/v1"},
+            {"apiVersion": "unknown.example/v1", "kind": "Widget", "spec": {}},
+            {"apiVersion": "v1", "kind": "Config", "clusters": []},
+        ]:
+            with self.subTest(document=document):
+                self.assertTrue(validator.is_valid(document))
+
+    def test_unknown_gvks_do_not_inherit_known_resource_constraints(self):
+        self.add(self.crd())
+        validator = self.compile()
+        for api_version, kind in [
+            ("unknown.example/v1", "Widget"),
+            ("platform.example.test/v2", "Widget"),
+            ("platform.example.test/v1", "Unknown"),
+            ("v1", "Unknown"),
+        ]:
+            with self.subTest(apiVersion=api_version, kind=kind):
+                self.assertTrue(
+                    validator.is_valid({"apiVersion": api_version, "kind": kind})
+                )
+                self.assertTrue(
+                    validator.is_valid(
+                        {
+                            "apiVersion": api_version,
+                            "kind": kind,
+                            "spec": {"replicas": "not an integer", "typo": True},
+                            "data": {"key": 42},
+                            "unrelated": True,
+                        }
+                    )
+                )
+
+    def test_known_gvks_reject_resource_specific_invalid_fields(self):
+        self.add(self.crd())
+        validator = self.compile()
+        for resource, path, keyword in [
+            (self.widget({"replicas": "wrong"}), ["spec", "replicas"], "type"),
+            (
+                self.widget({"replicas": 1, "typo": True}),
+                ["spec"],
+                "additionalProperties",
+            ),
+            (
+                {"apiVersion": "v1", "kind": "ConfigMap", "data": {"key": 42}},
+                ["data", "key"],
+                "type",
+            ),
+        ]:
+            with self.subTest(resource=resource):
+                errors = list(validator.iter_errors(resource))
+                self.assertEqual(len(errors), 1)
+                self.assertEqual(list(errors[0].path), path)
+                self.assertEqual(errors[0].validator, keyword)
+
+    def test_partial_discriminators_only_report_root_requirements(self):
+        self.add(self.crd())
+        validator = self.compile()
+        for discriminators in [
+            {},
+            {"apiVersion": "v1"},
+            {"apiVersion": "platform.example.test/v1"},
+            {"kind": "Widget"},
+            {"kind": "List"},
+        ]:
+            with self.subTest(discriminators=discriminators):
+                resource = {
+                    **discriminators,
+                    "spec": {"replicas": "wrong", "typo": True},
+                    "data": {"key": 42},
+                }
+                errors = list(validator.iter_errors(resource))
+                self.assertEqual(len(errors), 2 - len(discriminators))
+                for error in errors:
+                    self.assertEqual(error.validator, "required")
+                    self.assertEqual(list(error.path), [])
+                    self.assertEqual(list(error.schema_path), ["required"])
+
+    def test_root_requires_an_object_and_string_discriminators(self):
+        validator = self.compile()
+        for resource in [None, [], "ConfigMap"]:
+            with self.subTest(resource=resource):
+                self.assertFalse(validator.is_valid(resource))
+        for api_version, kind in [(1, "ConfigMap"), ("v1", None)]:
+            with self.subTest(apiVersion=api_version, kind=kind):
+                errors = list(
+                    validator.iter_errors({"apiVersion": api_version, "kind": kind})
+                )
+                self.assertEqual(len(errors), 1)
+                self.assertEqual(errors[0].validator, "type")
 
     def test_served_versions_and_multi_document_lists(self):
         crd = self.crd()
@@ -268,8 +390,17 @@ class SchemaTests(unittest.TestCase):
         }
         self.assertTrue(validator.is_valid(resource))
         resource["items"].append(
-            {"apiVersion": "unknown.example/v1", "kind": "Unknown"}
+            {
+                "apiVersion": "unknown.example/v1",
+                "kind": "Unknown",
+                "spec": {"replicas": "unvalidated"},
+            }
         )
+        self.assertTrue(validator.is_valid(resource))
+        resource["items"][0]["spec"]["replicas"] = "wrong"
+        self.assertFalse(validator.is_valid(resource))
+        resource["items"][0]["spec"]["replicas"] = 2
+        resource["items"][-1].pop("kind")
         self.assertFalse(validator.is_valid(resource))
 
     def test_case_folded_filenames_fail_instead_of_overwriting(self):
