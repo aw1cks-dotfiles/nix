@@ -96,7 +96,7 @@ for examples and reference/security boundaries.
 opt-in `services.tern.daemon` / `services.tern.remote`. The desktop profile imports
 the definitions without enabling them. The public `mbp` host enables both services.
 
-Tern 0.9.13 is packaged by this flake and selected automatically on macOS arm64,
+Tern 0.9.18 is packaged by this flake and selected automatically on macOS arm64,
 Linux x86-64 and Linux arm64. The unrelated nixpkgs `tern` package is not this
 terminal. After importing the authenticated archive below, a home can simply use:
 
@@ -117,9 +117,9 @@ missing. The reviewed pins live in
 
 | Nix system | Required upstream archive |
 | --- | --- |
-| `aarch64-darwin` | `Tern-0.9.13-macos-arm64.zip` |
-| `x86_64-linux` | `Tern-0.9.13-linux-x86_64.tar.gz` |
-| `aarch64-linux` | `Tern-0.9.13-linux-arm64.tar.gz` |
+| `aarch64-darwin` | `Tern-0.9.18-macos-arm64.zip` |
+| `x86_64-linux` | `Tern-0.9.18-linux-x86_64.tar.gz` |
+| `aarch64-linux` | `Tern-0.9.18-linux-arm64.tar.gz` |
 
 1. Sign in at <https://build.stencil.so/tern> and download the pinned version for
    the build host. Use the full macOS application ZIP, or the Linux **glibc**
@@ -128,7 +128,7 @@ missing. The reviewed pins live in
 3. On the machine that will build it, import the archive. For example on amd64:
 
    ```sh
-   archive="$HOME/Downloads/Tern-0.9.13-linux-x86_64.tar.gz"
+   archive="$HOME/Downloads/Tern-0.9.18-linux-x86_64.tar.gz"
    nix hash file --type sha256 --sri "$archive"
    nix-store --add-fixed sha256 "$archive"
    nix build .#tern
