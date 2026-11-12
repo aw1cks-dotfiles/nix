@@ -69,6 +69,27 @@ definitions do not match several nixpkgs server names and omit others;
 `aw1cks.modules.home.ai` owns that file. See
 [shared language-server packages](./neovim.md#shared-language-server-packages).
 
+### Shared YAML schemas
+
+`modules/home/editors/yaml-schemas.nix` exports
+`aw1cks.modules.home.yaml-schemas`; both Neovim and Zed import it. Builder sources
+and pins live under `modules/home/editors/_yaml-schemas/`, not the Zed subtree.
+The Home Manager contract is `aw1cks.yaml`: additive `kubernetes.extraCRDs`,
+`kubernetes.manifestGlobs`, and `extraSchemas`, with read-only
+`kubernetes.schemaPackage`, `kubernetes.kubernetesVersion`, and
+`schemaAssociations` outputs. Ordinary list definitions append; `lib.mkForce`
+can intentionally replace manifest globs. Generic `xdg.dataFile` links under
+`yaml-schemas` retain local schema dependencies for both editors.
+
+SchemaStore keeps broad YAML coverage; the pinned Kubernetes bundle applies only
+to selected manifest globs. Exact GVK dispatch leaves unknown resources
+unvalidated in the editor; strict kubeconform instead reports missing schemas,
+without remote fallback. There is no kubeconfig/cluster discovery. Local schemas
+and CRDs enter the world-readable store; remote schema URIs can fetch at runtime.
+Downstream release-specific CRDs override matching bundled GVKs, not unrelated
+schemas. See [downstream schema composition](./downstream-template.md#shared-yaml-kubernetes-and-crd-schemas)
+for examples and reference/security boundaries.
+
 ## Tern
 
 `aw1cks.modules.home.tern` defines opt-in `modules.tern` settings and independently

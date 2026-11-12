@@ -258,7 +258,18 @@ def build(manifest, output):
             set(schema.get("required", [])) | {"apiVersion", "kind"}
         )
         definitions[name] = schema
-        branches.append({"$ref": ref})
+        branches.append(
+            {
+                "if": {
+                    "required": ["apiVersion", "kind"],
+                    "properties": {
+                        "apiVersion": {"enum": [api_version]},
+                        "kind": {"enum": [kind]},
+                    },
+                },
+                "then": {"$ref": ref},
+            }
+        )
 
         directory = output / "kubeconform" / directory_name
         directory.mkdir(parents=True, exist_ok=True)
@@ -268,10 +279,35 @@ def build(manifest, output):
         )
         inventory.append({"apiVersion": api_version, "kind": kind, "source": origin})
 
-    bundle = {"$schema": DRAFT, "definitions": definitions, "oneOf": branches}
+    bundle = {
+        "$schema": DRAFT,
+        "type": "object",
+        "required": ["apiVersion", "kind"],
+        "properties": {
+            "apiVersion": {"type": "string"},
+            "kind": {"type": "string"},
+        },
+        "definitions": definitions,
+        "allOf": branches,
+    }
     Draft7Validator.check_schema(bundle)
     (output / "bundle.json").write_text(
         json.dumps(bundle, separators=(",", ":")) + "\n"
+    )
+    # An association fallback must leave unrelated YAML (including arrays) alone.
+    # Gate one reference to the complete bundle. A separate external reference
+    # per GVK makes YAML LS repeatedly expand the same large definition graph.
+    detected = {
+        "$schema": DRAFT,
+        "if": {
+            "type": "object",
+            "anyOf": [branch["if"] for branch in branches],
+        },
+        "then": {"$ref": "bundle.json"},
+    }
+    Draft7Validator.check_schema(detected)
+    (output / "detected.json").write_text(
+        json.dumps(detected, separators=(",", ":")) + "\n"
     )
     (output / "inventory.json").write_text(
         json.dumps(

@@ -476,12 +476,14 @@ that agent and removing its plist. A helper built for another tailnet refused
 to apply and preserved the live preferences. GUI controls, login after an actual
 logout/reboot, and selecting a live exit node were not exercised.
 
-## Zed Kubernetes And CRD Schemas
+## Shared YAML, Kubernetes And CRD Schemas
 
-`inputs.dendritic-lib.flakeModules.default` provides `config.aw1cks.modules.home.zed`
-in the flake-module configuration. Downstream Home Manager compositions inherit
-its tooling/options only if they import that feature directly or through a profile;
-adding the input alone does not enable Zed. There is no `flake.modules` output.
+`inputs.dendritic-lib.flakeModules.default` provides
+`config.aw1cks.modules.home.yaml-schemas` in the flake-module configuration.
+Both `config.aw1cks.modules.home.neovim` and `config.aw1cks.modules.home.zed`
+import this shared Home Manager module; import either editor directly or through
+a profile, or import the schema module for another consumer. Adding the input
+alone enables neither editor. There is no `flake.modules` output.
 
 Public CRD schemas come from the shared **`crds-catalog` non-flake input**. The
 `downstream-flake-file` contract declares it and automatically generates
@@ -512,30 +514,77 @@ With the feature imported, add a downstream **Home Manager module**, not flake s
 ```nix
 { ... }:
 {
-  aw1cks.zed.kubernetes = {
-    extraCRDs = [ ./crds/platform.yaml ];
-    manifestGlobs = [ "**/platform/resources/**/*.yaml" ];
+  aw1cks.yaml = {
+    kubernetes = {
+      extraCRDs = [ ./crds/platform.yaml ];
+      manifestGlobs = [ "**/platform/resources/**/*.yaml" ];
+    };
+    extraSchemas = [
+      {
+        schema = ./schemas/team.schema.json;
+        fileMatch = [ "**/team/*.yaml" ];
+      }
+    ];
   };
 }
 ```
 
-The paths are illustrative downstream locations, not files supplied here; the CRD
-path is relative to this Home Manager module. `extraCRDs` accepts raw
-`apiextensions.k8s.io/v1` CRD YAML/JSON, multi-document files, and `List` wrappers;
-only served versions are compiled. Both lists merge additively with shared config.
-Use `lib.mkForce` (adding `lib` to the module arguments) to replace `manifestGlobs`
-intentionally. No raw Zed schema settings replacement is needed.
+The paths are illustrative downstream locations, relative to this Home Manager
+module. `extraCRDs` accepts raw `apiextensions.k8s.io/v1` CRD YAML/JSON,
+multi-document files, and `List` wrappers; only served versions are compiled.
+All three lists merge additively with shared and other downstream declarations;
+do not copy or replace existing entries just to add one. The four shared manifest
+globs cover `**/k8s/manifests/**/*.yaml` / `*.yml` and
+`**/kubernetes/manifests/**/*.yaml` / `*.yml`, not CI or Helm values.
+Use `lib.mkForce` (adding `lib` to the module arguments) to replace
+`aw1cks.yaml.kubernetes.manifestGlobs` intentionally. No raw editor settings
+replacement is needed.
 
-Downstream CRDs for installed operator releases override matching public
+For sibling schema references, package the complete tree in a pinned derivation
+and append a store file string instead of copying only the entrypoint:
+
+```nix
+{ pkgs, ... }:
+{
+  aw1cks.yaml.extraSchemas = [
+    {
+      schema = "${pkgs.team-schemas}/schemas/team.schema.json";
+      fileMatch = [ "**/team-json/*.yaml" ];
+    }
+    {
+      schema = "https://schemas.example.org/pinned-release/service.schema.json";
+      fileMatch = [ "**/service/*.yaml" ];
+    }
+  ];
+}
+```
+
+`pkgs.team-schemas` is an illustrative downstream package. Prefer pinned,
+self-contained local/store schemas: URI strings may fetch at editor runtime and
+are not pinned by this option. A local file enters the Nix store on its own;
+references must be self-contained or their sibling files supplied in a derivation
+tree as above. Custom schema settings override SchemaStore associations; explicit
+YAML schema modelines remain highest priority. Avoid overlapping custom-schema
+globs unless intersecting constraints are intentional. SchemaStore remains enabled
+for broad YAML coverage, including GitLab CI, GitHub Actions, and Compose.
+
+Downstream CRDs for installed operator releases override matching bundled
 group/version/kind schemas; duplicate GVKs among extras fail. The read-only
-`aw1cks.zed.kubernetes.schemaPackage` exposes `bundle.json`, `inventory.json`, and
-`kubeconform/` for YAML LS, Helm, and kubeconform, with no unknown-GVK remote fallback.
+`aw1cks.yaml.kubernetes.schemaPackage` exposes `bundle.json`, the Neovim
+`detected.json` fallback, `inventory.json`, and `kubeconform/`;
+`aw1cks.yaml.kubernetes.kubernetesVersion` exposes the pinned
+version for tasks. `aw1cks.yaml.schemaAssociations` is the read-only resolved
+URI-to-glob mapping used by both editors. The old Zed-specific options are removed;
+migrate declarations to `aw1cks.yaml` rather than retaining aliases.
 
-Definitions must use self-contained references; nonlocal references are rejected.
-Private CRDs enter the world-readable Nix store and potentially binary caches:
-include **definitions only**, never instances or credentials. See
-[Zed schema policy and validation limits](./zed-parity.md#yaml-kubernetes-and-helm-schemas)
-for pinned coverage, strictness, network caveats, and checks not performed.
+CRD references must be self-contained fragments; nonlocal references are rejected.
+Local schema files and CRDs enter the **world-readable Nix store** and potentially
+binary caches: include **definitions only**, never secrets, instances, or
+credentials. Unknown GVKs deliberately have no resource-specific editor validation;
+strict kubeconform reports missing schemas with no remote fallback. Neither
+consumer reads kubeconfig or discovers a cluster. See
+[schema policy and validation limits](./zed-parity.md#yaml-kubernetes-and-helm-schemas).
+Real private downstream consumer validation is not yet claimed.
 
 ## Identity Use In The Template
 

@@ -194,21 +194,26 @@ plugin-wrapped `helm` in the terminal (diff, secrets, unittest).
 
 ## YAML, Kubernetes, and Helm schemas
 
-YAML validation, hover, completion, and formatting are enabled, with `!reference`
-sequence and `!unsafe` scalar tags. Generic YAML still uses SchemaStore
-(`schemaStore.enable = true`) and may download unrelated schemas; this is not a
-fully offline setup. `kubernetesCRDStore.enable = false` disables CRD autodiscovery
-because public schema URLs can disclose private API groups/kinds.
+Both editors import `aw1cks.modules.home.yaml-schemas`, defined in
+`modules/home/editors/yaml-schemas.nix`; shared builder sources and pins live under
+`modules/home/editors/_yaml-schemas/`. YAML validation, hover, completion, and
+formatting remain enabled, with `!reference` sequence and `!unsafe` scalar tags.
+SchemaStore stays enabled for broad YAML coverage, including GitLab CI, GitHub
+Actions, and Compose, and may download schemas at runtime. The pinned Kubernetes
+bundle is opt-in by manifest glob, not a replacement schema for all YAML.
+`kubernetesCRDStore.enable = false` disables CRD autodiscovery because public schema
+URLs can disclose private API groups/kinds. No kubeconfig or cluster is consulted,
+and no remote CRD URL is guessed.
 
-`modules/home/editors/zed/kubernetes.nix` builds one local schema bundle for YAML
-LS, Helm's embedded YAML server, and kubeconform. It replaces the YAML server's
-`kubernetes` alias and kubeconform's remote defaults with pinned **Kubernetes
-1.36.0** definitions plus **114 public CRD GVK schemas**: **426 GVKs total**, including
+The shared module builds one local Kubernetes bundle for both editors, Helm's
+embedded YAML server, and kubeconform. It replaces the YAML server's `kubernetes`
+alias and kubeconform's remote defaults with pinned **Kubernetes 1.36.0**
+definitions plus **114 public CRD GVK schemas**: **426 GVKs total**, including
 312 Kubernetes built-in/List GVKs before downstream additions. Datree's
 CRDs-catalog is the shared **`crds-catalog` non-flake input**, pinned by revision and
-NAR hash in `flake.lock`. `schemas/pins.json` holds the curated GVK/path selection
-and the separately commit/SHA256-pinned Kubernetes definitions. Validation uses
-the local output rather than constructing public URLs from resource kinds.
+NAR hash in `flake.lock`. Shared `_yaml-schemas/pins.json` holds the curated GVK/path
+selection and separately commit/SHA256-pinned Kubernetes definitions. Validation
+uses local output rather than constructing public URLs from resource kinds.
 
 Update only the catalog with `nix flake update crds-catalog`, then rebuild the
 schema package and validate representative manifests. The input fetches the whole
@@ -218,7 +223,7 @@ bundle; new catalog entries are not automatically enabled, and missing selected
 paths fail the build. `inventory.json` records the resolved input revision (or
 NAR hash/store path for a local input) and catalog-relative source paths.
 Downstream flakes can override this input through the shared flake-file contract;
-see the [downstream example](./downstream-template.md#zed-kubernetes-and-crd-schemas).
+see the [downstream example](./downstream-template.md#shared-yaml-kubernetes-and-crd-schemas).
 
 The catalog covers Prometheus Operator, Strimzi, CloudNativePG (CNPG), External
 Secrets Operator (ESO) and generators, cert-manager/ACME, Gateway API, Envoy Gateway,
@@ -226,44 +231,65 @@ ExternalDNS, and Argo CD's `Application`, `ApplicationSet`, and `AppProject`—*
 Argo**. These are not exact installed operator releases; downstream CRD definitions
 can override matching public group/version/kind (GVK) schemas.
 
-The read-only Home Manager option `aw1cks.zed.kubernetes.schemaPackage` exposes
-`bundle.json`, `inventory.json` (GVKs and provenance), and the `kubeconform/` tree.
-The `schemaURI` settings key is a `file://` Nix store path to `bundle.json`, with
-string context stripped because Nix attribute names cannot carry it.
-`xdg.configFile."zed/kubernetes-schemas".source` retains the package dependency in
-the Home Manager closure and exposes the same output under Zed's config directory.
+The read-only Home Manager option `aw1cks.yaml.kubernetes.schemaPackage` exposes
+`bundle.json`, `inventory.json` (GVKs and provenance), and the `kubeconform/` tree;
+`aw1cks.yaml.kubernetes.kubernetesVersion` exposes the pinned version for tasks.
+`aw1cks.yaml.schemaAssociations` is the read-only resolved URI-to-glob mapping
+consumed by both editors. Schema URIs use `file://` Nix store paths with attribute
+name context stripped; generic `xdg.dataFile` links under `yaml-schemas` retain
+the bundle and local schema dependencies in the Home Manager closure, replacing
+the former Zed-only config link.
 
-`aw1cks.zed.kubernetes.manifestGlobs` associates the bundle with manifest-only YAML.
+`aw1cks.yaml.kubernetes.manifestGlobs` associates the bundle with manifest-only YAML.
 Its regular default configuration list contains `**/k8s/manifests/**/*.yaml` /
 `*.yml` and `**/kubernetes/manifests/**/*.yaml` / `*.yml`, not all YAML, CI, or values.
 Downstream list assignments append; `lib.mkForce` can deliberately replace the
-list. No raw Zed settings replacement is needed; see the
-[downstream Home Manager example](./downstream-template.md#zed-kubernetes-and-crd-schemas).
+list. No raw editor settings replacement is needed; see the
+[downstream Home Manager example](./downstream-template.md#shared-yaml-kubernetes-and-crd-schemas).
+
+Each YAML document dispatches on its exact `apiVersion` and `kind`, including known
+List items. Unknown GVKs intentionally receive no resource-specific editor
+validation rather than an unrelated closest-match schema. Required identity fields
+are still checked, but this does not establish complete Kubernetes/CRD coverage.
+
+`aw1cks.yaml.extraSchemas` adds `{ schema = ./team.schema.json;
+fileMatch = [ "**/team/*.yaml" ]; }` associations without replacing existing
+declarations. `schema` also accepts URI strings and store package file strings.
+Settings override SchemaStore associations; explicit YAML schema modelines retain
+highest priority. Avoid overlapping custom-schema globs unless intentional
+intersection is desired. Prefer pinned, self-contained local/store schemas;
+remote URI strings can fetch at runtime. Local files enter the Nix store alone,
+so sibling references require a complete schema tree supplied by a derivation.
 
 Helm file associations remain limited to `**/charts/*/templates/**/*.{yaml,yml,tpl}`
 and `**/charts/*/values*.{yaml,yml}` (separate globs in Nix). Adapt language file
-associations in project `.zed/settings.json` for other chart layouts. Helm's YAML
-server associates the same local bundle with `templates/**`; automatic Helm lint
-is disabled. Both extension settings shapes are supplied: Helm 0.0.6 uses
-`lsp.helm_ls.settings."helm-ls"`, while 0.0.8 uses `lsp.helm.settings`.
+associations in project `.zed/settings.json` for other chart layouts. The shared
+`modules/home/editors/_helm-yamlls.nix` settings associate the local bundle with
+`templates/**`, retain custom schemas/SchemaStore, and disable CRD discovery.
+Automatic Helm lint remains disabled in Zed. Both extension settings shapes are
+supplied: Helm 0.0.6 uses `lsp.helm_ls.settings."helm-ls"`, while 0.0.8 uses
+`lsp.helm.settings`. See the [Helm smoke record](./validation.md#helm-editor-smoke),
+including the upstream Boolean-schema limitation on values-file completion.
 
-`aw1cks.zed.kubernetes.extraCRDs` is an additive list of local paths to raw
+`aw1cks.yaml.kubernetes.extraCRDs` is an additive list of local paths to raw
 `apiextensions.k8s.io/v1` CRD YAML/JSON definitions, including multi-document files
 and `List` wrappers. Only served versions are compiled. Extras override built-in
 schemas by matching GVK; duplicate GVKs among extras fail the build rather than
 silently choosing one. References must be self-contained fragment references;
 nonlocal references, including remote URLs, are rejected.
 
-Private definitions enter the **world-readable Nix store** and potentially binary
-caches. Supply definitions only, never resource instances or credentials. Strict
-unknown-field checks catch typos while honoring `x-kubernetes-preserve-unknown-fields`.
+Local schema files and private CRD definitions enter the **world-readable Nix
+store** and potentially binary caches. Supply definitions only, never secrets,
+resource instances, or credentials. Strict unknown-field checks catch typos while
+honoring `x-kubernetes-preserve-unknown-fields`.
 The builder narrowly converts supported inline RE2 case folding; unsupported
 forms fail rather than silently dropping constraints. Structural schema checks
 do not validate CEL, admission, defaulting, or conversion behavior.
 
 The kubeconform task uses `-kubernetes-version 1.36.0`, `-strict`, and only the local
 `kubeconform/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json` schema tree.
-Unknown GVKs have **no remote fallback**; missing-schema failures stay visible,
+Unknown GVKs have **no remote fallback**; unlike the editor's intentionally
+unvalidated unknown resources, strict kubeconform reports missing-schema failures,
 without `-ignore-missing-schemas`. Neither editor nor task detects the cluster
 version. Helm rendering and remote-base fetching retain the network caveats above.
 
@@ -294,6 +320,13 @@ schema replacement, `extraCRDs` precedence, and revision-less input provenance.
 Nix formatting, Ruff, and focused editor diagnostics passed. The migration's broad
 `nix flake check --offline --no-build` attempt timed out after 120 seconds while
 checking `nixosConfigurations.desktop`; it is not counted as a pass.
+
+The earlier results above describe the Zed/catalog integrations. For the shared
+cutover, the package's 19 offline regression tests passed, rendered Zed schema
+settings were evaluated, and a fresh-HOME Neovim/YAML-LS smoke exercised the common
+bundle and additive downstream-style configuration. See
+[shared YAML acceptance](./validation.md#shared-yaml-schema-acceptance) for the
+exercised cases and limits. Real private downstream validation is not yet claimed.
 
 These checks are not a system switch, real-project restore/build, private
 consumer validation, or interactive Zed test. Tombi 0.10.4 formatting worked in

@@ -283,3 +283,68 @@ no local imitation of Neo-tree's bindings or separate icon package is needed.
 node, `a` adds, `d` deletes, `r` renames, and `H` toggles hidden files. File and
 folder glyphs use the existing MiniIcons integration and require a Nerd Font in
 the terminal or GUI.
+
+## YAML and Kubernetes schemas
+
+Neovim and Zed import the shared `aw1cks.modules.home.yaml-schemas` module from
+`modules/home/editors/yaml-schemas.nix`. SchemaStore retains broad YAML coverage,
+including GitLab CI, GitHub Actions, and Compose. The strict Kubernetes bundle is
+associated with configured manifest globs. Neovim additionally uses `detected.json`
+as a fallback for other YAML filenames: resource-specific fields become available
+once a document has a recognized `apiVersion` and `kind`, even outside a Git repo.
+Unrelated, partial, and unknown documents receive no Kubernetes constraints.
+`aw1cks.yaml.kubernetes.extraCRDs` and `manifestGlobs`, plus
+`aw1cks.yaml.extraSchemas`, accept additive downstream declarations. See the
+[Home Manager examples](./downstream-template.md#shared-yaml-kubernetes-and-crd-schemas)
+and [schema policy](./zed-parity.md#yaml-kubernetes-and-helm-schemas).
+
+Neovim supplies the packaged SchemaStore.nvim catalog through YAML LS's
+`json/schemaAssociations` notification, below explicit schema settings in
+precedence. Its built-in remote catalog fetch stays disabled to avoid duplication.
+The detection fallback excludes SchemaStore filename patterns, so it does not
+combine Kubernetes constraints with catalog schemas. Zed retains its native
+SchemaStore integration and path-scoped Kubernetes associations. In both editors,
+explicit custom schemas override catalog associations and the Neovim fallback.
+
+The bundle dispatches each YAML document by exact `apiVersion` and `kind`, including
+known List items. Unknown GVKs deliberately receive no resource-specific editor
+validation rather than an unrelated closest-match schema. This is incomplete
+coverage, not proof of validity: strict kubeconform validation separately reports
+a missing schema, with no remote fallback.
+
+This supersedes the Kubernetes investigation, not the rationale for removing
+`k8s-whisper`: it selected incorrect schemas and produced kubeconfig prompts.
+Do not reinstate it. The shared integration does not inspect kubeconfig, contact
+a cluster, or guess remote CRD URLs. SchemaStore and explicit remote schema URLs
+can still fetch at runtime. Real private downstream validation is not yet claimed.
+
+## Helm
+
+The supported Helm extra detects charts by `Chart.yaml`, including standalone
+charts outside a `charts/` directory. Templates and `_helpers.tpl` use `helm`;
+`values.yaml` and `values-*.yaml` use `yaml.helm-values`. Only `helm_ls` owns the
+values buffers: attaching ordinary `yamlls` as well contributes unrelated
+Kubernetes completion items. `Chart.yaml`, the JSON schema, and unrelated YAML
+retain their ordinary language servers.
+
+`modules/home/editors/_helm-yamlls.nix` supplies the embedded YAML-server settings
+for both Neovim and Zed: an absolute executable, the pinned Kubernetes/CRD bundle
+for templates, explicit custom schemas, SchemaStore, and disabled CRD discovery.
+This replaces Helm LS's default remote `kubernetes` alias. Neovim retains Helm
+LS's default lint diagnostics; Zed keeps its existing explicit lint/render tasks.
+
+**Known upstream limitation:** Helm LS 0.5.4 fails to generate values schemas
+when a valid `values.schema.json` contains Boolean schema fields such as
+`"additionalProperties": false` (`cannot unmarshal bool ... jsonschema.Schema`).
+Nested values-file completion is therefore not a verified working feature for
+those charts. Do not remove or weaken schema constraints to hide this error.
+Helm CLI schema validation still works, as do template `.Values` completion,
+hover and navigation. The sidecar parse error is upstream of this editor policy.
+
+## Deferred investigations
+
+- **AI editor integration:** investigate useful OMP-based editor workflows
+  separately. There is no longer a Copilot subscription, the previous Avante
+  setup did not work well for this user, and OpenCode has been replaced by OMP.
+  Do not restore Copilot or assume that the existing Avante configuration proves
+  a working editor workflow.
