@@ -89,13 +89,55 @@
             id = 0;
             isDefault = true;
             path = "default";
+            settings = {
+              "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+            }
+            // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+              # macOS content processes cannot follow the CSS symlink into the
+              # store without an allowance. Grant access to this file, not /nix/store.
+              "security.sandbox.content.mac.testing_read_path1" =
+                toString config.programs.zen-browser.profiles.default.userContent;
+            };
+            # losuler's Modern Hacker News, with automatic light/dark selection.
+            userContent =
+              let
+                revision = "7c148ff8e481d91c52503dc7088140bbd1917d98";
+              in
+              pkgs.runCommand "modern-hacker-news-user-content.css"
+                {
+                  light = pkgs.fetchurl {
+                    name = "modern-hacker-news-light-1.1.0.user.css";
+                    url = "https://raw.githubusercontent.com/losuler/hacker-news-userstyle/${revision}/modern-hacker-news-light.user.css";
+                    hash = "sha256-pTwS/LNX2xtgn/LR0VlD5ieBSmCC2TRtcEp8PmBYHdI=";
+                  };
+                  dark = pkgs.fetchurl {
+                    name = "modern-hacker-news-dark-1.1.0.user.css";
+                    url = "https://raw.githubusercontent.com/losuler/hacker-news-userstyle/${revision}/modern-hacker-news-dark.user.css";
+                    hash = "sha256-WQ3ghIQlu62fTW52NO35Sz3F5MvO1+IciD5Wn0AZesk=";
+                  };
+                  nativeBuildInputs = [ (pkgs.python3.withPackages (ps: [ ps.tinycss2 ])) ];
+                }
+                ''
+                  python ${./_zen-browser/user-content.py} "$light" "$dark" "$out"
+                  cat >> "$out" <<'CSS'
+
+                  @-moz-document domain("news.ycombinator.com") {
+                    table, .comment-tree .comment { font-size: 16px !important; }
+                  }
+                  CSS
+                '';
           };
           policies =
             let
               mkExtensionSettings = builtins.mapAttrs (
-                _: pluginId: {
+                extensionId: pluginId:
+                {
                   install_url = "https://addons.mozilla.org/firefox/downloads/latest/${pluginId}/latest.xpi";
                   installation_mode = "force_installed";
+                }
+                // lib.optionalAttrs (extensionId == "addon@darkreader.org") {
+                  # The site already has a native light/dark user style.
+                  runtime_blocked_hosts = [ "*://news.ycombinator.com" ];
                 }
               );
               defaultPolicies = {
