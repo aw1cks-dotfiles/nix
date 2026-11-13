@@ -72,6 +72,16 @@ initial setup can work before flake evaluation succeeds. No wrapper recipes exis
 so there is no second copy of that interface to drift.
 
 
+### Zen site styles
+
+Exercise the generated Zen `user.js` and `chrome/userContent.css` as symlinks
+to their store files in an isolated profile, not as copies. Copying the CSS
+conceals macOS content-sandbox read failures. Keep the normal sandbox level
+and verify both light/dark rendering, HN-only style scope, and Dark Reader
+exclusion on HN while it remains active on unrelated sites. On Darwin, verify
+that the sandbox read allowance names only the rendered CSS file, not the
+whole store. This runtime smoke does not activate or inspect a live user's tabs.
+
 ### Neovim plugin loading
 
 `checks.<system>.neovim-plugin-loading` exercises require-triggered activation of

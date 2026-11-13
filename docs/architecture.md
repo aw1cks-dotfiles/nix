@@ -90,6 +90,38 @@ Downstream release-specific CRDs override matching bundled GVKs, not unrelated
 schemas. See [downstream schema composition](./downstream-template.md#shared-yaml-kubernetes-and-crd-schemas)
 for examples and reference/security boundaries.
 
+## Zen Browser site styles
+
+`aw1cks.modules.home.zen-browser` installs losuler's
+[Modern Hacker News Userstyle](https://github.com/losuler/hacker-news-userstyle)
+in the managed `default` profile's `chrome/userContent.css`. The upstream
+1.1.0 light and dark styles are pinned by revision and separate SHA-256 hashes
+in `modules/home/packages/zen-browser.nix`; updates require changing the pins.
+The styles target `https://news.ycombinator.com`; `prefers-color-scheme`
+automatically selects the light/dark appearance. Story titles retain the
+upstream 18px size; the local override raises table text and comments to 16px.
+Other sites and Zen's UI are unchanged.
+
+The module enables `toolkit.legacyUserProfileCustomizations.stylesheets`.
+At build time, `_zen-browser/user-content.py` combines the two styles under
+light/dark media queries and marks declarations important: normal user-origin
+rules otherwise lose to website styles. The upstream document scopes remain
+intact. Stylus is not required for this theme; existing extensions remain installed.
+
+On macOS, the content sandbox cannot follow Home Manager's CSS symlink into
+the Nix store by default. The profile's
+`security.sandbox.content.mac.testing_read_path1` grants access to the exact
+rendered CSS store path. The sandbox stays enabled at its normal level; there
+is no directory-wide `/nix/store` allowance or mutable stylesheet copy.
+The allowance follows the configured stylesheet derivation when it changes.
+
+Dark Reader's extension policy blocks it only on Hacker News, avoiding
+double-theming while retaining it elsewhere. This uses Firefox 153+'s
+`runtime_blocked_hosts` policy. Rebuild through `nix run .#rebuild`, then fully
+restart Zen to load the profile CSS and policy changes. Existing unmanaged
+`userContent.css` files may need backing up before Home Manager can install
+its link; activation does not overwrite them automatically.
+
 ## Tern
 
 `aw1cks.modules.home.tern` defines opt-in `modules.tern` settings and independently
