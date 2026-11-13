@@ -38,6 +38,14 @@
       ]
       ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && isStandaloneHome) [ appleEmoji ];
 
+      # Lucidglyph's conf.d files set hinting and antialiasing through
+      # fontconfig, but two of its tweaks are affixed at the FreeType and Qt
+      # level and can only arrive through the environment. The NixOS desktop
+      # module applies the same option through `environment.variables`; a
+      # standalone Home Manager session needs it in the session variables so
+      # every launched client inherits them.
+      home.sessionVariables = config.aw1cks.fonts.lucidglyph.environment;
+
       # GTK can override fontconfig AA/hinting through desktop interface settings,
       # so pin these to the Lucidglyph-friendly values as well.
       dconf.settings."org/gnome/desktop/interface" = {
