@@ -1,0 +1,24 @@
+--- a/Sources/ColimaBarApp.swift
++++ b/Sources/ColimaBarApp.swift
+@@ -332,8 +332,8 @@
+         let nameField = NSTextField(string: "")
+         nameField.placeholderString = "name"
+         let cpuField = NSTextField(string: "2")
+-        let memField = NSTextField(string: "4")
+-        let diskField = NSTextField(string: "60")
++        let memField = NSTextField(string: "2")
++        let diskField = NSTextField(string: "40")
+ 
+         let grid = NSGridView(views: [
+             [NSTextField(labelWithString: "Name:"), nameField],
+@@ -355,8 +355,8 @@
+         colimaManager.create(
+             name: name,
+             cpus: Int(cpuField.stringValue) ?? 2,
+-            memoryGiB: Int(memField.stringValue) ?? 4,
+-            diskGiB: Int(diskField.stringValue) ?? 60
++            memoryGiB: Int(memField.stringValue) ?? 2,
++            diskGiB: Int(diskField.stringValue) ?? 40
+         )
+     }
+ 

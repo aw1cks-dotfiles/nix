@@ -14,14 +14,19 @@
         config.aw1cks.modules.home.tailscale-serve
         config.aw1cks.modules.home.kata
         config.aw1cks.modules.home.colima
+        config.aw1cks.modules.home.colimabar
       ];
       home.stateVersion = "25.11";
       modules.colima = {
         enable = true;
         mounts = [
-          { location = "~/Documents/git"; writable = true; }
+          {
+            location = "~/Documents/git";
+            writable = true;
+          }
         ];
       };
+      modules.colimabar.enable = true;
       modules.tern = {
         enable = true;
         plugins = {
