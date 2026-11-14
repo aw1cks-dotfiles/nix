@@ -1,0 +1,52 @@
+--- a/Sources/ColimaManager.swift
++++ b/Sources/ColimaManager.swift
+@@ -65,19 +65,7 @@
+     }
+ 
+     private static func findColimaPath() -> String {
+-        let possiblePaths = [
+-            "/opt/homebrew/bin/colima",
+-            "/usr/local/bin/colima",
+-            "/usr/bin/colima"
+-        ]
+-
+-        for path in possiblePaths {
+-            if FileManager.default.fileExists(atPath: path) {
+-                return path
+-            }
+-        }
+-
+-        return "colima"
++        return "@colima@"
+     }
+ 
+     /// Auto-refresh interval in seconds, persisted across launches.
+@@ -134,7 +122,7 @@
+         let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+         if trimmed.isEmpty || trimmed.lowercased().contains("no such file")
+             || trimmed.lowercased().contains("not found") {
+-            return "Colima not found. Install with: brew install colima"
++            return "Colima not found. Rebuild the Nix-managed ColimaBar package."
+         }
+         return trimmed
+     }
+@@ -285,7 +273,7 @@
+                 process.standardError = pipe
+ 
+                 var environment = ProcessInfo.processInfo.environment
+-                environment["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
++                environment["PATH"] = "@runtimePath@"
+                 process.environment = environment
+ 
+                 do {
+--- a/Sources/ColimaBarApp.swift
++++ b/Sources/ColimaBarApp.swift
+@@ -289,7 +289,7 @@
+     /// PATH. The profile is single-quoted; the whole command is escaped for the
+     /// AppleScript string literal.
+     private func openShell(profile: String) {
+-        let command = "\(colimaManager.executablePath) ssh -p '\(profile)'"
++        let command = "env PATH='@runtimePath@' \(colimaManager.executablePath) ssh -p '\(profile)'"
+         let escaped = command
+             .replacingOccurrences(of: "\\", with: "\\\\")
+             .replacingOccurrences(of: "\"", with: "\\\"")
