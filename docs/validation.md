@@ -72,6 +72,92 @@ initial setup can work before flake evaluation succeeds. No wrapper recipes exis
 so there is no second copy of that interface to drift.
 
 
+### macOS Linux guests
+
+Stage new Nix/patch sources before evaluation. Build before switching:
+
+```sh
+nix build .#colimabar --no-link
+nix build .#darwinConfigurations.mbp.system --no-link
+nix run .#rebuild -- . -H mbp
+nix flake check
+```
+
+The ColimaBar package check compiles the actual patched `ColimaManager` and
+calls its subprocess runner with a finite 1 MiB stdout producer plus stderr,
+requiring complete capture and exit status 23. The final bundle is ad-hoc
+signed after fixups; verify its signature again after store registration.
+This does not replace GUI acceptance.
+
+Runtime acceptance uses disposable workloads, never existing profiles/volumes:
+
+- Force non-substituted builds for both advertised Linux architectures. Observe
+  automatic boot, 120-second connection-idle shutdown and wake. Separately prove
+  writable-disk reset on launchd service restart, not ordinary guest wake.
+  Inspect empty builder scheduler features, disabled nested virtualization and
+  absence of a container daemon. Rosetta must already be installed on macOS.
+- Rebuild with a stopped verification profile and again with it running:
+  activation must own neither transition. Launch ColimaBar from Finder/Spotlight
+  without a terminal/Homebrew PATH; opening it must not start a guest.
+- Create a fresh tray profile with unchanged defaults. Inspect 2 CPUs, 2 GiB RAM,
+  40 GiB data disk, VZ/host architecture, VirtioFS, enabled Rosetta, Docker,
+  disabled Kubernetes and only the host's project allowlist. Existing profiles
+  are not template migrations.
+- Run arm64 and amd64 containers, verify the guest's enabled Rosetta binfmt
+  registration, serve a real Compose project on localhost, prove writable
+  allowed-project and inaccessible outside-allowlist fixtures, then Buildx
+  build/load/run each architecture separately.
+- Exercise tray Start/Stop/Restart and Open Shell, including Terminal Automation
+  permission and a successful SSH shell. Prove Docker context/config writes and
+  preservation of unrelated contexts/credentials without printing their values.
+  A named-volume marker must survive manual stop/start. Leave Colima running
+  beyond the builder timeout, then stop it manually.
+- Inspect absence of Colima launchd/autostart jobs and disabled login registration.
+  Record logout/reboot separately; neither evaluation nor rebuild proves it.
+
+Implementation verification on the M2 Pro: the final host derivation and
+rendered client template/plugin targets evaluated; client-file and native
+ColimaBar package builds passed, including complete subprocess output/status
+capture and post-registration signature verification. Home Manager's Colima
+service and Docker CLI module evaluated disabled, with no Colima launch agent.
+LaunchServices launched the built app without starting a profile, but the
+full-screen desktop screenshot did not expose its tray menu; no tray interaction
+or Finder/Spotlight installation-path proof is claimed.
+Home Manager's Spotlight-compatible `copyApps` evaluated enabled at
+`~/Applications/Home Manager Apps`; the app selected by the host is the same
+store output whose native build and signature were checked. The login-item
+inspection found no Colima registration; launchd showed only the explicitly
+opened ColimaBar application, not a Colima autostart job.
+
+Real CLI runtime checks passed in a new profile created with explicit matching
+flags, not through the unactivated template or GUI dialog: arm64/amd64 containers,
+enabled guest Rosetta binfmt registration, writable project bind mount and a
+rejected outside-home fixture, a real Compose localhost HTTP service, and separate
+Buildx build/load/run for both architectures. A named-volume marker survived
+manual stop/start; Colima remained running for 125 seconds afterward and was
+stopped manually. Docker configuration/credential values remained intact; unrelated
+context metadata hashes matched across final stop/context restoration. The original
+Docker context was restored, task-created workloads removed, and profile
+`omp-verification-1794636865` retained stopped (2 CPUs, 2 GiB RAM, 40 GiB data disk)
+for remaining interactive checks. Temporary scripts and credential snapshots were
+removed. These checks do not prove rebuild lifecycle preservation.
+
+The custom Darwin system build could not realize an uncached `aarch64-linux`
+guest derivation without an existing Linux builder. Temporary cached-default
+bootstrap and supported host activation require sudo authentication, unavailable
+to this session. No host switch, builder smoke builds, idle/wake/disk-reset proof,
+rebuild lifecycle-preservation proof, GUI New Instance/actions/Open Shell, or
+logout/reboot test was performed. Accessibility access was disabled.
+
+No real downstream consumer checkout was found in the inspected local checkout
+roots, so no downstream evaluation with a temporary `dendritic-lib` override was
+performed. Public-host evaluation is not downstream-consumer proof.
+
+Final `nix flake check` passed all 15 native `aarch64-darwin` checks after
+correcting formatting in the three reported implementation files. The command
+omitted incompatible `aarch64-linux` and `x86_64-linux` check systems; it is not
+a Linux-system build or activation result.
+
 ### Zen site styles
 
 Exercise the generated Zen `user.js` and `chrome/userContent.css` as symlinks

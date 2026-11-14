@@ -90,6 +90,60 @@ Downstream release-specific CRDs override matching bundled GVKs, not unrelated
 schemas. See [downstream schema composition](./downstream-template.md#shared-yaml-kubernetes-and-crd-schemas)
 for examples and reference/security boundaries.
 
+## macOS Linux guests
+
+`mbp` explicitly imports two independent, opt-in guest integrations; Darwin
+desktop profiles do not enroll other hosts.
+
+- `aw1cks.modules.darwin.linux-builder` uses
+  `pkgs.unstable.darwin.linux-builder-vz`: 2 CPUs/jobs, 2 GiB RAM, a 20 GiB
+  sparse writable disk, and a 120-second connection-idle shutdown timeout.
+  It advertises `aarch64-linux` and Rosetta-backed `x86_64-linux`, with an
+  explicitly empty `supportedFeatures` list: no `kvm`, `benchmark`, or
+  `big-parallel`. The upstream minimal guest keeps an isolated Nix store,
+  localhost SSH endpoint and low-space GC; it has no container daemon.
+  `ephemeral` resets the writable disk when launchd starts the service,
+  **not** after each idle shutdown/wake cycle.
+- `aw1cks.modules.home.colima`, enabled by `modules.colima.enable`, installs
+  Colima, Docker CLI, Compose and Buildx without a VM service. Its
+  `~/.colima/_templates/default.yaml` selects VZ, host architecture,
+  VirtioFS, Rosetta, Docker and disabled Kubernetes, initially 2 CPUs,
+  2 GiB RAM and a 40 GiB sparse data disk. `modules.colima.mounts` is an
+  explicit project allowlist; `mbp` shares only `~/Documents/git` writable.
+  Colima's internal mounts remain separate. An empty allowlist renders
+  `mounts: null`, because upstream interprets `[]` as writable whole-home sharing.
+- `packages.<darwin-system>.colimabar` builds upstream v0.4 at a fixed
+  revision/hash for the native architecture and ad-hoc signs the app bundle.
+  `aw1cks.modules.home.colimabar` / `modules.colimabar.enable` installs it
+  through Home Manager's Applications path. Focused adjacent patches replace
+  Homebrew executable discovery/PATH (including Open Shell), drain combined
+  subprocess output before waiting for exit to prevent full-pipe deadlock, and
+  align New Instance's displayed defaults and numeric fallbacks to 2/2/40.
+  Explicit user resource overrides remain supported.
+
+Install Rosetta and accept its license explicitly before using either guest;
+activation never installs it. The M2 Pro does not support accelerated nested
+KVM/NixOS VM tests; Linux builds and derivation checks remain supported.
+Customized builder images may need the cached default builder as a temporary
+bootstrap. Replace it fully afterward; never run two builders on the same port.
+
+Colima retains its supported upstream image. Lifecycle is exclusively explicit
+`colima start/stop/restart` or tray actions. Rebuilding and opening the app do
+not own guest lifecycle. Launch at Login is off by default and optional app
+login launch is separate from guest startup; there is no activation-time launch.
+Template changes affect new profiles only; Colima owns existing mutable
+`colima.yaml`, VM disks and named volumes. No `COLIMA_HOME` or `DOCKER_CONFIG`
+override separates terminal and GUI configuration.
+
+Docker owns mutable `~/.docker/config.json`, contexts and credentials. Only
+`~/.docker/cli-plugins/docker-compose` and `docker-buildx` are managed symlinks;
+neither Home Manager's Colima service nor its Docker CLI module is enabled.
+Explicit Colima actions may select their Docker context without replacing other
+contexts or credentials. Reverting the configuration does not delete persistent
+Colima workloads. Keep a known-working Darwin generation for recovery; no custom
+pruning, snapshots, socket proxy or shared host/guest Nix store is introduced.
+See [validation](./validation.md#macos-linux-guests) for runtime acceptance limits.
+
 ## Zen Browser site styles
 
 `aw1cks.modules.home.zen-browser` installs losuler's
