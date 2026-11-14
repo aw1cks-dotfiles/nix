@@ -2,7 +2,10 @@
 {
   configurations.darwin.mbp = {
     module = {
-      imports = [ config.aw1cks.modules.darwin.tailscale-app ];
+      imports = [
+        config.aw1cks.modules.darwin.tailscale-app
+        config.aw1cks.modules.darwin.linux-builder
+      ];
       services.tailscale-app.enable = true;
       system.stateVersion = 6;
     };
