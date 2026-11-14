@@ -83,6 +83,60 @@ nix run .#rebuild -- . -H mbp
 nix flake check
 ```
 
+#### First builder activation without another Linux machine
+
+The custom guest cannot build itself before a Linux builder exists. Bootstrap
+with the pinned stock VZ guest, whose Linux closure is available from the binary
+cache. Do not retry the custom guest with `--always-allow-substitutes`: that flag
+cannot supply an uncached customized image.
+
+From this checkout, create a temporary composition that clears only guest
+customizations. This leaves the committed configuration unchanged and retains
+the empty advertised feature list and both supported architectures:
+
+```sh
+bootstrap="$(mktemp -d)"
+cat > "$bootstrap/flake.nix" <<EOF
+{
+  inputs.base.url = "path:$PWD";
+  outputs = { base, ... }: {
+    darwinConfigurations.mbp = base.darwinConfigurations.mbp.extendModules {
+      modules = [ ({ lib, ... }: {
+        nix.linux-builder.config = lib.mkForce { };
+      }) ];
+    };
+  };
+}
+EOF
+nix build "path:$bootstrap#darwinConfigurations.mbp.system" --no-link
+```
+
+After that build succeeds, activate the stock generation and then rebuild the
+normal checkout using its newly running local builder:
+
+```sh
+nix run .#rebuild -- "$bootstrap" -H mbp &&
+nix run .#rebuild -- . -H mbp
+```
+
+Both switches require sudo. The first generation uses the stock guest's
+1 CPU, 3 GiB RAM and 600-second idle timeout; nested virtualization remains
+disabled. The second builds and installs the intended 2-CPU/2-GiB/120-second
+guest, replacing the same launchd service rather than running a second builder.
+Remove the temporary flake directory only after successful cutover. Do not leave
+a permanent bootstrap output or resource override in the reusable module.
+
+The pinned stock package was realized on this Mac with `--builders ''` and
+`--max-jobs 0`; no external Linux builder was used. Evaluation confirmed the
+temporary composition selects exactly that stock package. This cache/bootstrap
+proof is separate from sudo activation and the builder's runtime acceptance.
+The full transient `mbp` Darwin system also built successfully with
+`--builders ''`, producing a complete bootstrap generation without an external
+Linux builder. No bootstrap activation or subsequent custom-guest switch has
+been performed by the assistant.
+
+#### Package and runtime acceptance
+
 The ColimaBar package check compiles the actual patched `ColimaManager` and
 calls its subprocess runner with a finite 1 MiB stdout producer plus stderr,
 requiring complete capture and exit status 23. The final bundle is ad-hoc

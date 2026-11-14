@@ -125,7 +125,9 @@ Install Rosetta and accept its license explicitly before using either guest;
 activation never installs it. The M2 Pro does not support accelerated nested
 KVM/NixOS VM tests; Linux builds and derivation checks remain supported.
 Customized builder images may need the cached default builder as a temporary
-bootstrap. Replace it fully afterward; never run two builders on the same port.
+bootstrap; no separate Linux machine is required. Use the
+[temporary bootstrap composition](./validation.md#first-builder-activation-without-another-linux-machine),
+then replace it fully; never run two builders on the same port.
 
 Colima retains its supported upstream image. Lifecycle is exclusively explicit
 `colima start/stop/restart` or tray actions. Rebuilding and opening the app do
