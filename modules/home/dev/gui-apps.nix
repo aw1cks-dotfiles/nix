@@ -15,9 +15,6 @@
           wireshark
         ]
         ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [ zeal ]
-        ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-          utm
-          podman-desktop
-        ];
+        ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ utm ];
     };
 }

@@ -136,6 +136,8 @@ login launch is separate from guest startup; there is no activation-time launch.
 Template changes affect new profiles only; Colima owns existing mutable
 `colima.yaml`, VM disks and named volumes. No `COLIMA_HOME` or `DOCKER_CONFIG`
 override separates terminal and GUI configuration.
+The Darwin developer GUI bundle no longer installs Podman Desktop. Removing
+that application does not delete existing Podman machines or workload data.
 
 Docker owns mutable `~/.docker/config.json`, contexts and credentials. Only
 `~/.docker/cli-plugins/docker-compose` and `docker-buildx` are managed symlinks;
