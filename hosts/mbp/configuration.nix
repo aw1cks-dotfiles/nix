@@ -13,8 +13,15 @@
       imports = [
         config.aw1cks.modules.home.tailscale-serve
         config.aw1cks.modules.home.kata
+        config.aw1cks.modules.home.colima
       ];
       home.stateVersion = "25.11";
+      modules.colima = {
+        enable = true;
+        mounts = [
+          { location = "~/Documents/git"; writable = true; }
+        ];
+      };
       modules.tern = {
         enable = true;
         plugins = {
