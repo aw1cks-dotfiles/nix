@@ -436,12 +436,23 @@ consumers must install the Standalone app themselves. The machine facts must
 provide matching `hostName` and `tailnetHost`; the node name is not repeated in
 the host composition. Only `mbp` enables this preference module here.
 
+Enabling the module also puts a `tailscale` executable on the system PATH.
+This Nix-managed wrapper invokes
+`/Applications/Tailscale.app/Contents/MacOS/Tailscale`, forces CLI mode with
+`TAILSCALE_BE_CLI=1`, and forwards arguments and the app's exit status. It does
+not install another Tailscale distribution or require the app's optional
+`/usr/local/bin/tailscale` integration. If the app executable is missing, it
+reports the expected location and exits with status 127. The path is the
+standard installation location, not an upstream guarantee against relocation
+or future packaging changes. See the upstream
+[CLI integration documentation](https://tailscale.com/docs/reference/tailscale-cli).
+
 `services.tailscale-app` declares `acceptDNS` and `acceptRoutes` (both default
 true), `shieldsUp` (false), `autoUpdate` (false), `checkForUpdates` (true) and
 `startOnLogin` (true). nix-darwin writes the documented Standalone app defaults
 for login startup and Sparkle updates in the primary user's preferences. A
 user-scoped `tailscale-app-preferences` command applies the hostname, DNS,
-routes, shields and update flags through the app's bundled `tailscale set`.
+routes, shields and update flags through the same wrapper's `tailscale set`.
 It refuses to modify an active profile outside the fact-derived tailnet.
 
 The command runs after a rebuild and through the
