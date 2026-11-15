@@ -13,6 +13,17 @@ let
   tailnetHost = lib.toLower (hostFacts.tailnetHost or "");
   tailnetDomain = lib.concatStringsSep "." (lib.tail (lib.splitString "." tailnetHost));
   cli = "/Applications/Tailscale.app/Contents/MacOS/Tailscale";
+  tailscale = pkgs.writeShellApplication {
+    name = "tailscale";
+    text = ''
+      if [[ ! -x ${lib.escapeShellArg cli} ]]; then
+        echo ${lib.escapeShellArg "Tailscale CLI not found at ${cli}. Install the Standalone Tailscale.app before running tailscale."} >&2
+        exit 127
+      fi
+      export TAILSCALE_BE_CLI=1
+      exec ${lib.escapeShellArg cli} "$@"
+    '';
+  };
   arguments = [
     "--hostname=${hostname}"
     "--accept-dns=${lib.boolToString cfg.acceptDNS}"
@@ -31,7 +42,7 @@ let
       # Login agents can start before the app's network extension is ready.
       ready=false
       for ((attempt = 0; attempt < 30; attempt++)); do
-        if status=$(${lib.escapeShellArg cli} status --json) &&
+        if status=$(${lib.getExe tailscale} status --json) &&
           jq -e '.BackendState == "Running"' >/dev/null <<< "$status"; then
           ready=true
           break
@@ -47,7 +58,7 @@ let
         echo ${lib.escapeShellArg "Refusing to change Tailscale preferences outside the declared tailnet ${tailnetDomain}. Switch profiles and rerun tailscale-app-preferences."} >&2
         exit 1
       fi
-      ${lib.escapeShellArg cli} set ${lib.escapeShellArgs arguments}
+      ${lib.getExe tailscale} set ${lib.escapeShellArgs arguments}
       echo "Applied declared Tailscale.app preferences; exit-node selection and authentication are unchanged."
     '';
   };
@@ -115,7 +126,10 @@ in
         }
       ];
 
-      environment.systemPackages = [ apply ];
+      environment.systemPackages = [
+        tailscale
+        apply
+      ];
       system.defaults.CustomUserPreferences = lib.optionalAttrs cfg.enable {
         ${lib.escapeShellArg "${home}/Library/Preferences/io.tailscale.ipn.macsys.plist"} = {
           TailscaleStartOnLogin = cfg.startOnLogin;
