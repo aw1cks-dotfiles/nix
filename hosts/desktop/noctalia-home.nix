@@ -6,6 +6,26 @@
   ...
 }:
 let
+  quickshell =
+    inputs.noctalia.inputs.noctalia-qs.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
+      (old: {
+        # Backport upstream's Qt 6.12 metatype fix until noctalia-qs includes it.
+        # This fork predates the const accessors expected by the upstream patch.
+        prePatch = (old.prePatch or "") + ''
+          substituteInPlace src/x11/i3/ipc/monitor.hpp \
+            --replace-fail 'bindableActiveWorkspace() {' 'bindableActiveWorkspace() const {'
+          substituteInPlace src/x11/i3/ipc/workspace.hpp \
+            --replace-fail 'bindableMonitor() {' 'bindableMonitor() const {'
+        '';
+        patches = (old.patches or [ ]) ++ [
+          (pkgs.fetchpatch {
+            url = "https://github.com/quickshell-mirror/quickshell/commit/5d5d49873fe8cf1f99ddfd5006ceb2057c5c9b13.patch";
+            excludes = [ "changelog/next.md" ];
+            hash = "sha256-BYf3DPMpzBldl6Pt4Hj8YZb6DqIqUnArLu26wESJgug=";
+          })
+        ];
+      });
+
   mumblePttHelper = pkgs.writeShellScriptBin "mumble-ptt-helper" ''
     set -euo pipefail
     exec ${pkgs.python3}/bin/python3 "${./mumble-ptt-helper.py}"
@@ -456,6 +476,9 @@ in
 
   programs.noctalia-shell = {
     enable = true;
+    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+      inherit quickshell;
+    };
     # systemd.enable = true;
     plugins = {
       sources = [
