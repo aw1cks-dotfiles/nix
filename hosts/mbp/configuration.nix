@@ -7,6 +7,13 @@
         config.aw1cks.modules.darwin.linux-builder
       ];
       services.tailscale-app.enable = true;
+      nix.linux-builder.config = { lib, ... }: {
+        # Merge with upstream's forced list without replacing the daemon key.
+        services.openssh.authorizedKeysFiles = lib.mkForce [
+          "/etc/ssh/authorized_keys.d/%u"
+        ];
+        users.users.builder.openssh.authorizedKeys.keys = config.aw1cks.identity.selected.authorizedKeys;
+      };
       system.stateVersion = 6;
     };
     home = { ... }: {

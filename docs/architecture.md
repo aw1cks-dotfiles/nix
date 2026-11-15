@@ -132,6 +132,21 @@ bootstrap; no separate Linux machine is required. Use the
 [temporary bootstrap composition](./validation.md#first-builder-activation-without-another-linux-machine),
 then replace it fully; never run two builders on the same port.
 
+`mbp` explicitly grants the selected identity's `authorizedKeys` access to the
+guest's `builder` account. This includes every key in that identity, not just the
+Mac's key; other hosts do not inherit this grant. The guest accepts these
+declarative keys alongside Nix's runtime daemon key. The daemon private key
+remains root-only, and the host SSH listener remains bound to localhost.
+For an interactive shell after activation, use your matching personal key:
+
+```sh
+ssh -F /etc/ssh/ssh_config -i ~/.ssh/id_ed25519 linux-builder
+```
+
+Using the system SSH configuration avoids user hostname canonicalization rules.
+This is trusted access inside the builder VM; ephemeral guest changes are not a
+substitute for declarative configuration.
+
 Colima retains its supported upstream image. Lifecycle is exclusively explicit
 `colima start/stop/restart` or tray actions. Rebuilding and opening the app do
 not own guest lifecycle. Launch at Login is off by default and optional app
