@@ -102,6 +102,9 @@ desktop profiles do not enroll other hosts.
   explicitly empty `supportedFeatures` list: no `kvm`, `benchmark`, or
   `big-parallel`. The upstream minimal guest keeps an isolated Nix store,
   localhost SSH endpoint and low-space GC; it has no container daemon.
+  It waits for an IPv4 DHCP lease before accepting build connections; an
+  early IPv6 address alone does not provide working outbound connectivity
+  and would otherwise let cache requests race IPv4 readiness.
   `ephemeral` resets the writable disk when launchd starts the service,
   **not** after each idle shutdown/wake cycle.
 - `aw1cks.modules.home.colima`, enabled by `modules.colima.enable`, installs

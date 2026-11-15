@@ -18,6 +18,8 @@
 
         config = {
           nix.settings.max-jobs = 2;
+          # IPv6 can arrive before the IPv4 lease needed for outbound NAT.
+          networking.dhcpcd.wait = "ipv4";
           virtualisation = {
             cores = 2;
             darwin-builder = {
