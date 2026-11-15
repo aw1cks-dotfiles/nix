@@ -40,6 +40,27 @@ That confirms constructor assembly, resolved host identity/user wiring, and sele
 Rendering and validation happen at build time, not through `builtins.readFile` during evaluation, so the desktop system derivation remains evaluable on Darwin without a Linux builder.
 This check does not build the desktop system closure.
 
+#### Desktop Noctalia / QuickShell
+
+The desktop's legacy-v4 Noctalia package uses a host-local backport of
+[upstream's Qt 6.12 metatype fix](https://github.com/quickshell-mirror/quickshell/commit/5d5d49873fe8cf1f99ddfd5006ceb2057c5c9b13).
+It replaces opaque QObject pointer declarations with complete moc types and
+out-of-line bindable accessors. Two i3 accessors in the older Noctalia fork need
+their upstream const qualifiers before applying the patch. Remove the backport
+when the pinned `noctalia-qs` contains this fix.
+
+On `desktop`, build the actual configured shell before a full switch:
+
+```sh
+nix build .#nixosConfigurations.desktop.config.home-manager.users.alex.programs.noctalia-shell.package --no-link -L
+nix run .#rebuild -- . --no-nom -L
+```
+
+The package build compiles the affected PipeWire, Hyprland and i3 metatypes;
+evaluation alone cannot catch this failure. `--no-nom` bypasses the build monitor
+if excessive font warnings leave it unresponsive.
+
+
 ### nix-darwin
 
 For each entry in `flake.darwinConfigurations`, the check evaluates key resolved values and writes them into a tiny text derivation.
