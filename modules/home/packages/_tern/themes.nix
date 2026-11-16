@@ -6,6 +6,12 @@
 }:
 let
   cfg = config.modules.tern;
+  ompEnabled = lib.attrByPath [ "modules" "ai" "omp" "enable" ] false config;
+  ompAgentDirectory =
+    if lib.attrByPath [ "modules" "ai" "omp" "storage" ] "legacy" config == "xdg" then
+      "${config.xdg.configHome}/omp/agent"
+    else
+      "${config.home.homeDirectory}/.omp/agent";
   nameType = lib.types.strMatching "[A-Za-z0-9_-]+";
   managedNames = [
     "nix-managed-dark"
@@ -119,6 +125,9 @@ in
     modules.tern.settings = lib.mkIf cfg.theme.enable (
       {
         theme = lib.mkDefault "Dark";
+        # Tern resolves CSS imports through its own OMP catalog, not the OMP
+        # package wrapper's environment.
+        omp_dir = lib.mkIf ompEnabled (lib.mkDefault ompAgentDirectory);
       }
       // lib.mapAttrs' (
         appearance: _: lib.nameValuePair "theme_${appearance}" (lib.mkDefault "nix-managed-${appearance}")
@@ -139,10 +148,12 @@ in
           }
         ) selected
       ))
-      {
+      # The AI module owns this theme at the active OMP config root when enabled.
+      # A second legacy declaration would recreate ~/.omp after XDG relocation.
+      (lib.mkIf (!ompEnabled) {
         ".omp/agent/themes/oxocarbon-dark.json".source =
           lib.mkDefault ../../dev/files/agents/omp/themes/oxocarbon-dark.json;
-      }
+      })
     ];
   };
 }

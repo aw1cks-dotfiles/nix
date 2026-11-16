@@ -26,6 +26,26 @@
       premium_model = cfg.models.premium;
       standard_model = cfg.models.standard;
       small_model = cfg.models.small;
+      configRelative =
+        if cfg.omp.storage == "xdg" then
+          lib.removePrefix "${config.home.homeDirectory}/" "${config.xdg.configHome}/omp"
+        else
+          ".omp";
+      rawPackage =
+        if cfg.omp.storage == "xdg" then
+          cfg.omp.package.overrideAttrs (old: {
+            patches = (old.patches or [ ]) ++ [ ./_omp-project-config.patch ];
+          })
+        else
+          cfg.omp.package;
+      managedPackage = import ./_omp-launcher.nix {
+        inherit lib pkgs;
+        package = rawPackage;
+        settings = config.programs.omp.settings;
+        storage = cfg.omp.storage;
+        xdg = config.xdg;
+        inherit configRelative;
+      };
     in
     {
       options.modules.ai = {
@@ -104,6 +124,19 @@
                   freeformType = lib.types.attrsOf lib.types.anything;
                   options = {
 
+                    storage = lib.mkOption {
+                      type = lib.types.enum [
+                        "legacy"
+                        "xdg"
+                      ];
+                      default = "legacy";
+                      description = ''
+                        Preserve legacy storage, or use XDG config/data/state/cache.
+                        Move existing config and data offline before opting in; see
+                        docs/omp.md. Worktrees stay in ~/.omp/wt.
+                      '';
+                    };
+
                     extraMcpConfig = lib.mkOption {
                       type = lib.types.nullOr lib.types.path;
                       default = null;
@@ -139,9 +172,8 @@
                     # this whole block, so private overlays can override the
                     # model routing without restating shared UI preferences.
                     settings = {
-                      # State markers: without these every switch re-runs
-                      # onboarding and re-prompts for dev consent.
-                      setupVersion = lib.mkDefault 2;
+                      # Overlay markers prevent onboarding on every launch.
+                      setupVersion = lib.mkDefault 3;
                       dev.autoqaConsent = lib.mkDefault "granted";
 
                       theme.dark = lib.mkDefault "oxocarbon-dark";
@@ -369,7 +401,7 @@
                         }
                       ];
 
-                      modelRoles = lib.mkDefault {
+                      modelRoles = lib.mapAttrs (_: model: lib.mkDefault model) {
                         default = premium_model;
                         smol = small_model;
                         slow = frontier_model;
@@ -384,7 +416,8 @@
 
                       # Per-subkey defaults so a downstream `task.isolation.*`
                       # choice merges instead of replacing this block.
-                      task.isolation.mode = lib.mkDefault "auto";
+                      task.isolation.enabled = lib.mkDefault true;
+                      isolation.backend = lib.mkDefault "auto";
                       task.maxRecursionDepth = lib.mkDefault 1;
                       task.prewalk = lib.mkDefault false;
                       task.softRequestBudget = lib.mkDefault 50;
@@ -417,11 +450,24 @@
       };
 
       config = {
+        assertions = [
+          {
+            assertion =
+              cfg.omp.storage != "xdg"
+              || (
+                lib.hasPrefix "${config.home.homeDirectory}/" config.xdg.configHome
+                && !(lib.elem ".." (lib.splitString "/" configRelative))
+                && !(lib.hasPrefix ".omp/" configRelative)
+                && configRelative != ".omp"
+              );
+            message = "OMP XDG configHome must be strictly inside home and outside ~/.omp.";
+          }
+        ];
         modules.ai.skills.select = skills.defaultSelect;
         modules.ai.skillsSource = skills.build cfg.skills;
 
-        home.packages = with pkgs.llm-agents; [
-          claude-code
+        home.packages = [
+          pkgs.llm-agents.claude-code
         ];
 
         programs.mcp = cfg.mcp;
@@ -430,17 +476,30 @@
             "extraMcpConfig"
             "disabledMcpServers"
             "lspServers"
+            "storage"
+            "package"
           ])
           (lib.mkIf config.programs.omp.enable {
+            package = managedPackage;
             # OMP scans these alongside native user/project skills. Do not own
             # ~/.omp/agent/skills: it also contains users' locally authored skills.
             settings.skills.customDirectories = lib.mkAfter [ (toString cfg.skillsSource) ];
           })
         ];
+        # Suppress upstream's config copy: OMP owns the writable main config,
+        # and the managed package supplies declarations through an overlay.
+        home.activation.ompConfig =
+          lib.mkIf (config.programs.omp.enable && config.programs.omp.settings != null)
+            {
+              before = [ ];
+              after = [ "writeBoundary" ];
+              data = lib.mkForce "";
+            };
         home.file = lib.mkIf cfg.omp.enable (
           {
-            ".omp/agent/themes/oxocarbon-dark.json".source = ./files/agents/omp/themes/oxocarbon-dark.json;
-            ".omp/agent/lsp.json".source =
+            "${configRelative}/agent/themes/oxocarbon-dark.json".source =
+              ./files/agents/omp/themes/oxocarbon-dark.json;
+            "${configRelative}/agent/lsp.json".source =
               let
                 # OMP merges each server as `{ ...builtin, ...override }`: keys are
                 # shallow-merged and arrays replaced wholesale. Mirror that here so
@@ -456,7 +515,7 @@
                 cfg.omp.extraMcpConfig != null || (config.programs.mcp.enable && config.programs.mcp.servers != { })
               )
               {
-                ".omp/agent/mcp.json".source =
+                "${configRelative}/agent/mcp.json".source =
                   let
                     hmServersJson = pkgs.writeText "hm-mcp-servers.json" (
                       builtins.toJSON (if config.programs.mcp.enable then config.programs.mcp.servers else { })

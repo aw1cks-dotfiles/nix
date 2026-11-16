@@ -127,7 +127,7 @@ the old entrypoint is not a stable capability check.
 
 The shared Home Manager AI module exposes a read-only `modules.ai.skillsSource`: a flat directory of complete, selected skill directories for compatible agent harnesses.
 When `programs.omp.enable` is true, the module appends this output to `programs.omp.settings.skills.customDirectories`.
-OMP discovers these skills alongside native user/project skills; the module does not own or replace `~/.omp/agent/skills`.
+OMP discovers these skills alongside native user/project skills; the module does not own or replace the active config root's `agent/skills`.
 Caller-provided custom directories remain in the list. An explicit `lib.mkForce` on `customDirectories` overrides the normal composition.
 Other harnesses can consume the same `skillsSource` output independently.
 
@@ -222,6 +222,27 @@ This is repository CI policy, not a runtime restriction on consumer forks or loc
 Independent consumers need an equivalent CI gate or must retain manual merge review; this workflow and its GitHub approval history are not inherited through a flake input.
 OMP loading is wired by this module; loading in other harnesses and consumer-specific precedence remain the consumer's responsibility.
 
+OMP declarations remain under `modules.ai.omp.settings` (or additive
+`programs.omp.settings`), but are loaded through an immutable overlay rather than
+copied over the writable main config on every activation. Consumers must launch
+`config.programs.omp.package`, not the upstream input package, to inherit that
+overlay. Caller overlays remain later in `PI_CONFIG_FILES`, and child launches do
+not append duplicate managed overlays. Global UI/CLI edits remain writable but
+do not override managed values; removing a declaration exposes any global value
+still present, or the upstream default. Activation does not prune old settings;
+review or reset the former generated main config once as documented below.
+
+Storage remains environment-compatible by default. Opt in per host with
+`modules.ai.omp.storage = "xdg"` after the offline manual move documented in
+[OMP settings and storage](./omp.md). XDG mode uses
+`${config.xdg.configHome}/omp/agent` for config and separate data/state/cache
+roots, creating category directories on launch. The config home must be strictly
+inside the user home. A narrow project-registry patch preserves project `.omp`
+discovery; custom upstream packages must support it. The launcher refuses a
+remaining legacy agent directory, but does not certify migration completeness.
+Backups, quiescence, and completing the move are operator responsibilities.
+There are no migration apps or marker requirements, and no compatibility symlink.
+
 ## AI Model Routing
 
 The shared Home Manager AI module exposes model tiers under `modules.ai.models` so downstream hosts can replace models without copying the OMP agent map:
@@ -260,7 +281,7 @@ Set `modules.ai.omp.settings.bash.allowCompoundCommands = false` to opt out.
 
 ### Oxocarbon themes
 
-The shared AI module installs `~/.omp/agent/themes/oxocarbon-dark.json` when OMP is enabled and defaults `modules.ai.omp.settings.theme.dark` to `oxocarbon-dark`.
+The shared AI module installs `agent/themes/oxocarbon-dark.json` beneath the active OMP config root and defaults `modules.ai.omp.settings.theme.dark` to `oxocarbon-dark`.
 The JSON palette is adapted from [Oxocarbon.nvim](https://github.com/nyoom-engineering/oxocarbon.nvim); OMP does not change the terminal's background, so use `#161616` in the terminal for a matching canvas.
 Downstream configurations can override the dark theme through the existing per-key settings interface; the light-theme slot is unchanged.
 

@@ -1,0 +1,14 @@
+--- a/packages/coding-agent/src/discovery/helpers.ts
++++ b/packages/coding-agent/src/discovery/helpers.ts
+@@ -1115,1 +1115,1 @@
+-	const configDirName = getConfigDirName();
++	const configDirName = CONFIG_DIR_NAME;
+@@ -1137,1 +1137,1 @@
+-	return gitAnchor ? path.join(gitAnchor, getConfigDirName(), "plugins", "installed_plugins.json") : null;
++	return gitAnchor ? path.join(gitAnchor, CONFIG_DIR_NAME, "plugins", "installed_plugins.json") : null;
+@@ -1159,1 +1159,1 @@
+-		(await isForeignUserConfigRoot(cwd, getConfigDirName()))
++		(await isForeignUserConfigRoot(cwd, CONFIG_DIR_NAME))
+@@ -1162,1 +1162,1 @@
+-	return path.join(cwd, getConfigDirName(), "plugins", "installed_plugins.json");
++	return path.join(cwd, CONFIG_DIR_NAME, "plugins", "installed_plugins.json");
