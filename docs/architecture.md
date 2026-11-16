@@ -64,10 +64,21 @@ Home Manager's user environment; `aw1cks.profiles.home.developer` includes it.
 Neovim reuses the same package list in its private wrapper PATH without requiring
 the developer profile. Server configuration and discovery remain client-owned.
 
-OMP additionally needs a generated `~/.omp/agent/lsp.json`, because its built-in
-definitions do not match several nixpkgs server names and omit others;
-`aw1cks.modules.home.ai` owns that file. See
-[shared language-server packages](./neovim.md#shared-language-server-packages).
+OMP additionally needs generated `agent/lsp.json` beneath its active config root,
+because built-in definitions do not match several nixpkgs server names and omit
+others. The AI module owns that file: XDG mode uses `~/.config/omp`, legacy mode
+uses `~/.omp`. See [shared language-server packages](./neovim.md#shared-language-server-packages).
+
+The shared AI module loads composed OMP settings through an immutable
+`PI_CONFIG_FILES` overlay and keeps the main config writable. Its package is the
+single launch contract for shell, Tern, and editor consumers. Storage defaults to
+the existing environment; opting into `modules.ai.omp.storage = "xdg"` requires
+an offline manual move of existing config and storage. Activation leaves the
+writable main config untouched; old generated settings need a one-time manual
+review. The launcher creates XDG category directories and refuses a remaining
+legacy agent directory, without migration markers or transaction machinery.
+A narrow upstream patch preserves project-plugin `.omp` discovery.
+See [OMP settings and storage](./omp.md) for commands and backup/recovery limits.
 
 ### Shared YAML schemas
 
@@ -304,6 +315,25 @@ application state there; it is not a read-only configuration directory.
 `modules.tern.socket` is the one socket option for launchers and services.
 Its absolute path must fit the platform's Unix-domain socket limit.
 
+### Settings ownership
+
+Tern's `settings.json` remains writable. Activation reconciles declared leaves
+and records their ownership in `.nix-settings-state.json`; it preserves
+runtime-owned siblings such as `sqlite.recent`. Removing a formerly declared
+leaf removes it from the file rather than retaining an obsolete override.
+
+The mbp host declares its audited appearance, cursor and agent preferences in
+`hosts/mbp/configuration.nix`, including `expand_thoughts = true` and
+`surface_fold = false`. These are host preferences, not new downstream defaults.
+
+Do not treat a Nix-store symlink as enforcement: a native-window test of Tern
+0.9.18 showed that saving a preference atomically replaces that symlink with a
+writable regular file. The store target is untouched, but ownership of the
+live pathname is lost. Full-file replacement at activation is possible, but
+would reset runtime state embedded in the same JSON. Keep explicit preference
+ownership unless that reset is intentional; no such lifecycle change is enabled.
+
+
 ### Keyboard, links and appearance
 
 Primary means Command on Darwin and Ctrl+Shift on Linux. Primary + physical
@@ -359,8 +389,11 @@ Override these through `settings.cursor`.
 selecting it. Names contain only letters, digits, underscores and hyphens.
 `theme.dark` and `theme.light` independently select CSS or OMP catalog names;
 null leaves that appearance's selection unmanaged. Dark defaults to
-`oxocarbon-dark`; light is unmanaged by default. The module provisions the
-default OMP Oxocarbon JSON without requiring OMP to run.
+`oxocarbon-dark`; light is unmanaged by default. With the AI module enabled,
+Tern's `omp_dir` defaults to its active OMP agent directory (XDG or legacy), so
+CSS imports resolve the same theme catalog without depending on a child OMP
+launcher's environment. The AI module owns the Oxocarbon JSON there; without
+it, Tern provisions the legacy catalog entry itself. No OMP process is required.
 
 Each selected appearance gets an internal `nix-managed-dark.css` or
 `nix-managed-light.css` wrapper. Those names are reserved. Composition order is

@@ -74,6 +74,35 @@ The check builds one synthetic Home Manager activation package per distinct syst
 That exercises the Home Manager activation pipeline without building a real host's full closure.
 The separate `host-derivations` check evaluates every native real activation package, but does not build it.
 
+### OMP settings and storage
+
+```sh
+nix build .#checks.aarch64-darwin.agent-omp-skills \
+  .#checks.aarch64-darwin.agent-omp-lsp
+```
+
+The skills check exercises the actual managed OMP package: immutable declarations,
+byte-preserved global config across activation, writable CLI edits, removal of a
+managed key, and native/caller/Nix-selected skill discovery. Its XDG case refuses
+a remaining legacy agent directory before exercising the relocated configuration.
+The LSP check probes relocated MCP/LSP discovery and project `.omp` plugin paths.
+Both checks isolate user storage and inherited overlays in temporary homes.
+
+Migration is an offline operator procedure, not a maintained app or check suite.
+See [OMP settings and storage](./omp.md) for the manual commands. Verify those
+commands in a disposable home when changing the layout; cover SQLite sidecars,
+hidden config/identity, worktree retention, conflicts, and backup recovery.
+Per-host rollout must additionally prove credential availability, resuming
+existing sessions and blobs, session transitions after a settings edit, and
+Tern/editor launches. A successful restart alone does not cover failed saves.
+Shared-contract changes require private downstream validation before rollout.
+
+On 2026-11-16, both focused Darwin checks passed. A disposable-home smoke ran the
+documented commands and verified category routing, SQLite contents and sidecars,
+permissions, symlinks/hidden files, worktree retention, config-only moves,
+destination conflicts, settings reset, and backup recovery. No live data was
+moved, no host was switched, and no private downstream validation was performed.
+
 ### Operational command and template contracts
 
 The canonical operational entry points are `nix run .#rebuild`,
@@ -634,8 +663,8 @@ available; Darwin execution does not prove Linux runtime behavior.
 
 ### Generated OMP LSP configuration
 
-`checks.<system>.agent-omp-lsp` checks the generated `~/.omp/agent/lsp.json`
-merge contract: shared defaults, per-key overrides, whole-array replacement, and
+`checks.<system>.agent-omp-lsp` checks generated `agent/lsp.json` under the active
+config root, including the XDG variant, and its
 new entries. It also runs the pinned OMP config loader against the generated
 default and disabled configurations in temporary homes. With real binaries and
 matching project markers, Rust (built-in) and TOML (added) must be eligible by
