@@ -54,19 +54,19 @@
             options = {
               frontier = mkModelTierOption {
                 description = "Frontier model used for the most demanding planning and review tasks.";
-                model = "openai-codex/gpt-6-astra:xhigh";
+                model = "openai-codex/gpt-6.2-astra:max";
               };
               premium = mkModelTierOption {
                 description = "Premium model used for primary interactive work.";
-                model = "openai-codex/gpt-6.1-sol:high";
+                model = "openai-codex/gpt-6.2-sol:xhigh";
               };
               standard = mkModelTierOption {
                 description = "Standard model used for general delegated work.";
-                model = "openai-codex/gpt-6.1-sol:medium";
+                model = "openai-codex/gpt-6.2-sol:medium";
               };
               small = mkModelTierOption {
                 description = "Small model used for exploration and lightweight background work.";
-                model = "openai-codex/gpt-6-luna:low";
+                model = "openai-codex/gpt-6-luna:medium";
               };
             };
           };
