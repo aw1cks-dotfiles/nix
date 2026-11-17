@@ -16,7 +16,7 @@
       };
       system.stateVersion = 6;
     };
-    home = { ... }: {
+    home = {
       imports = [
         config.aw1cks.modules.home.tailscale-serve
         config.aw1cks.modules.home.kata
@@ -24,6 +24,7 @@
         config.aw1cks.modules.home.colimabar
       ];
       home.stateVersion = "25.11";
+      modules.mpv.upscaling.enable = true;
       modules.ai.omp = {
         storage = "xdg";
         settings = {

@@ -963,6 +963,56 @@ The shared Home Manager `multimedia-apps` module disables mpv's horizontal
 swipe/wheel seeking on macOS through `programs.mpv.bindings`. Vertical volume
 scrolling and keyboard controls remain enabled; Linux bindings are unchanged.
 
+### Opt-in mpv upscaling
+
+The `multimedia-apps` module (included by the `multimedia` role) already
+imports the mpv upscaling module. To make the profiles available, set:
+
+```nix
+configurations.darwin.mbp.home.modules.mpv.upscaling.enable = true;
+configurations.nixos.desktop.home.modules.mpv.upscaling.enable = true;
+```
+
+This adds both shader families by default. Set `artcnn.enable` or
+`anime4k.enable` to `false` under `modules.mpv.upscaling` to omit one.
+The profiles use `gpu-next` and default to Vulkan/`macvk` on Darwin.
+On other platforms, `gpuApi` and `gpuContext` are unset; setting either
+to `null` on Darwin also leaves that mpv setting unchanged. Individual
+profile settings remain overridable through `programs.mpv.profiles`.
+
+For a Home Manager configuration without `multimedia-apps`, import
+`config.aw1cks.modules.home.mpv-upscaling` directly and enable mpv separately.
+
+ArtCNN C4F32 is pinned by commit and hash, and Anime4K comes from `pkgs.anime4k`.
+
+| Profile | Pipeline |
+| --- | --- |
+| `anime` | ArtCNN C4F32: runs when both output dimensions exceed 1.3 times the source dimensions |
+| `anime4k` | Upstream Mode A (Fast): M restoration/upscale, S final upscale |
+| `anime4k-l` | Intermediate Mode A: L restoration/upscale, M final upscale |
+| `anime4k-hq` | Upstream Mode A (HQ): VL restoration/upscale, M final upscale |
+| `anime4k-aa-hq` | Upstream Mode A+A (HQ): VL restoration/upscale, then M restoration and final upscale |
+
+After rebuilding, select one profile:
+
+```sh
+mpv --profile=anime4k "/path/to/episode.mkv"
+```
+
+In Syncplay, enable **Show more settings** and set **Player Arguments** to
+`--profile=<name>` using a profile from the table, then save and restart the
+session. Select only one upscaler profile. None is applied to default playback.
+
+A+A HQ is intended only for enlargement of at least 2x; it can oversharpen or
+introduce ringing, banding, and aliasing. Larger models cost more GPU time and
+are not guaranteed to look better on every source. With mpv statistics open
+(`Shift+I`, then `2`), look for `Anime4K` restoration and upscale passes with
+the selected model sizes.
+
+Earlier synthetic 720p-to-1440p playback on `mbp` exercised the ArtCNN shader
+and the expected Anime4K render passes. The L, HQ, and A+A HQ runs recorded
+dropped frames; this verifies shader execution, not sustained playback performance.
+
 ## Validation
 
 Validation is intentionally narrower than a full switch or deployment.
