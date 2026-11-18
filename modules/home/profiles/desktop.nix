@@ -8,6 +8,7 @@ in
     imports = [
       modules.home.fonts-theme
       modules.home.gui-apps
+      modules.home.learnharness
       modules.home.stylix-theme
       modules.home.wezterm
       modules.home.tern

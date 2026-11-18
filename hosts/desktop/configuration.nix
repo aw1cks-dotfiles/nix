@@ -123,6 +123,7 @@ in
       imports = [ sharedHomeModule ];
       home.stateVersion = "25.05";
       modules.mpv.upscaling.enable = true;
+      modules.learnharness.enable = true;
     };
   };
 

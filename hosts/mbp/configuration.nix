@@ -71,6 +71,7 @@
         ];
       };
       modules.colimabar.enable = true;
+      modules.learnharness.enable = true;
       modules.tern = {
         enable = true;
         settings = {
