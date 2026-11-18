@@ -87,7 +87,7 @@
           lazyjournal
           terraform
           terraform-docs
-          vault
+          vault-bin
         ]
         # Linux-only tools are omitted on nix-darwin hosts.
         ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
