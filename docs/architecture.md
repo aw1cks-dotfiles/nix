@@ -209,6 +209,26 @@ restart Zen to load the profile CSS and policy changes. Existing unmanaged
 `userContent.css` files may need backing up before Home Manager can install
 its link; activation does not overwrite them automatically.
 
+## LearnHarness
+
+`packages.<system>.learnharness` repackages the pinned upstream DMG on
+`aarch64-darwin` and AppImage on `x86_64-linux`. The macOS bundle keeps its
+upstream signature. The Linux package uses the Nixpkgs AppImage wrapper and
+keeps upstream's desktop-launch flags, including `--no-sandbox`.
+The Home Manager desktop profile imports `aw1cks.modules.home.learnharness`
+without enabling it. `mbp` and the NixOS `desktop` set `modules.learnharness.enable = true`.
+
+Home Manager only installs the app. LearnHarness still owns its profile at
+`~/Library/Application Support/LearnHarness` on macOS, or
+`${XDG_CONFIG_HOME:-$HOME/.config}/LearnHarness` on Linux, including lessons,
+settings, and credentials. No data migration is needed. On macOS, quit the
+manual copy before opening the Home Manager copy. Once you confirm the lesson
+history is present, you can remove just the old `/Applications/LearnHarness.app`.
+For the Nix-managed copy, turn off **Settings → General → Automatic updates**
+and update the version and both hashes in
+[`learnharness/_sources.nix`](../modules/home/packages/learnharness/_sources.nix)
+instead.
+
 ## Tern
 
 `aw1cks.modules.home.tern` defines opt-in `modules.tern` settings and independently
