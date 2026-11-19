@@ -223,10 +223,10 @@ Independent consumers need an equivalent CI gate or must retain manual merge rev
 OMP loading is wired by this module; loading in other harnesses and consumer-specific precedence remain the consumer's responsibility.
 
 OMP uses the nixpkgs revision from its upstream lockfile, independent of the
-consumer's `nixpkgs-unstable`. When updating an existing downstream, run
-`nix run .#update -- dendritic-lib oh-my-pi`, then `nix flake lock` to record
-the regenerated input graph. Remove any local
-`oh-my-pi.inputs.nixpkgs.follows` override before regenerating.
+consumer's `nixpkgs-unstable`. Remove any local
+`oh-my-pi.inputs.nixpkgs.follows` override, run `nix run .#update -- dendritic-lib`
+to regenerate the flake, then run `nix flake update oh-my-pi` so Nix takes OMP's
+own lockfile with the follow removed.
 
 OMP declarations remain under `modules.ai.omp.settings` (or additive
 `programs.omp.settings`), but are loaded through an immutable overlay rather than
