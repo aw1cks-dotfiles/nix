@@ -61,7 +61,7 @@
   };
 
   nixpkgs-unstable = {
-    url = lib.mkDefault "github:NixOS/nixpkgs/nixpkgs-unstable";
+    url = lib.mkDefault "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   stylix = {
