@@ -306,6 +306,11 @@ upstream icons; both Linux architectures share the same native packaging logic.
 Non-NixOS Linux still needs the existing Home Manager generic GPU setup to
 provide host-compatible drivers at `/run/opengl-driver`.
 
+Enabling `modules.tern` also installs the `xterm-kitty` entry under `~/.terminfo`,
+where system curses applications can find it on macOS and on Linux, including
+non-NixOS hosts. It compiles just the terminfo entry from Kitty's source; it
+does not install Kitty or set `TERMINFO` globally.
+
 Packaged Tern disables its self-updater. Update the version and all source hashes,
 import the new archives and rebuild instead; running daemons adopt the new
 executable on their next start without an automatic destructive restart.

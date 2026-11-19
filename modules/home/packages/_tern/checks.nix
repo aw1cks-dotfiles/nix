@@ -30,6 +30,8 @@ let
       ++ extraModules;
     };
   fixture = mkFixture fixtureModules;
+  terminfoBucket = if pkgs.stdenv.hostPlatform.isDarwin then "78" else "x";
+  terminfo = fixture.config.home.file.".terminfo/${terminfoBucket}/xterm-kitty";
   # Force native HM option/unit/file generation without building a host closure
   # or requiring a proprietary upstream Tern download in CI.
   evaluated = builtins.unsafeDiscardStringContext fixture.activationPackage.drvPath;
@@ -103,11 +105,18 @@ assert
   !(builtins.hasAttr "${lib.removePrefix "${fixture.config.home.homeDirectory}/" fixture.config.modules.tern.configDirectory}/plugins/disabled-malformed.path" disabledPluginFixture.config.home.file);
 pkgs.runCommand "tern-settings-checks"
   {
-    nativeBuildInputs = [ pkgs.python3 ];
+    nativeBuildInputs = [
+      pkgs.ncurses
+      pkgs.python3
+    ];
     passthru = { inherit fixture mkFixture; };
     evaluatedHome = evaluated;
   }
   ''
+    install -Dm644 ${terminfo.source} "$TMPDIR/home/${terminfo.target}"
+    colors=$(env -u TERMINFO -u TERMINFO_DIRS HOME="$TMPDIR/home" TERM=xterm-kitty tput colors)
+    test "$colors" = 256
+
     export PYTHONDONTWRITEBYTECODE=1
     python3 -m unittest discover -s ${./.} -p 'test_*.py' -v
     ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
