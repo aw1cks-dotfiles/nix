@@ -8,7 +8,7 @@ let
   sources = lib.mapAttrs (_: pin: pkgs.fetchFromGitHub pin) (import ./plugin-sources.nix);
   projectsBackend = pkgs.rustPlatform.buildRustPackage {
     pname = "tern-projects";
-    version = "0.2.12";
+    version = "0.2.16";
     src = sources.tern-projects;
     cargoRoot = "indexer";
     buildAndTestSubdir = "indexer";
@@ -21,7 +21,7 @@ let
       mainProgram = "tern-projects";
     };
   };
-  projects = pkgs.runCommand "tern-projects-plugin-0.2.12" { } ''
+  projects = pkgs.runCommand "tern-projects-plugin-${projectsBackend.version}" { } ''
     mkdir -p "$out"
     cp -R ${sources.tern-projects}/. "$out/"
     chmod -R u+w "$out"
@@ -30,15 +30,15 @@ let
   '';
   kata = (pkgs.buildGoModule.override { go = pkgs.go_1_27; }) {
     pname = "tern-kata";
-    version = "0.11.0";
+    version = "0.15.0";
     src = sources.tern-kata;
-    vendorHash = "sha256-3g30MsV6/FXRvHWHj6XbcH8mYTLmcQb7K7hkiuwdQlo=";
+    vendorHash = "sha256-ECb+Uqv6ACRBXmVlxzsduk4fBvCx/Wb41vGgVyEP++0=";
     subPackages = [ "cmd/tern-kata" ];
     env.CGO_ENABLED = 0;
     ldflags = [
       "-s"
       "-w"
-      "-X main.version=v0.11.0"
+      "-X main.version=v0.15.0"
     ];
     doCheck = false;
     meta = {

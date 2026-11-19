@@ -2,20 +2,20 @@
   tern-projects = {
     owner = "thegeneralist01";
     repo = "tern-projects";
-    rev = "0fbdc42e65781f5ec540d475d45ff660a698cf4b";
-    hash = "sha256-3GJH/f8UGG4ptKBwath/dPXLKnqcF7ssOwHgmSyx/m8=";
+    rev = "323252b83c7814dbfb81fbf25faae4f49eef07a1";
+    hash = "sha256-ndxKiXvc0VfiTmGeVYdyLeM3SEpL1HY1pNhhy1XZJzQ=";
   };
   tern-kata = {
     owner = "Dangerboi";
     repo = "tern-kata";
-    rev = "f8af21ab5d62a1e7a52590bf9922324f130dacaa";
-    hash = "sha256-akDXNcA+FCbMstY/duHTa25rS75XDShMJ1wIxp41mN4=";
+    rev = "3aad79634547d4d6bd46e84366ed7c9d9840dc3a";
+    hash = "sha256-9XIvATKbNhJyWtBR/XZ9dUT116heD3sKUKy+7t2IAj4=";
   };
   tern-kube = {
     owner = "contrafy";
     repo = "tern-kube";
-    rev = "9c27c7cb04c5020655e1e363b8d2f77248d4b833";
-    hash = "sha256-+9wOZTeMTLeBYEDZk4DeDaKnN/I+6fh6oqtyFK7FpLs=";
+    rev = "74d9c25da66d44c7d2102e2d2e383bdc330116de";
+    hash = "sha256-NZn0AZVtCafFG/AM2sfVWzfqe4L+mAWxmn2O0TXs50M=";
   };
   tern-grafana = {
     owner = "contrafy";
