@@ -33,7 +33,7 @@
 
       import-tree.url = "github:denful/import-tree";
 
-      nixpkgs.url = "github:NixOS/nixpkgs/release-26.05";
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     };
   };
 }

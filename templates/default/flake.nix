@@ -52,6 +52,7 @@
         nixpkgs-unstable.follows = "nixpkgs-unstable";
         oh-my-pi.follows = "oh-my-pi";
         rewrite-rs-skills.follows = "rewrite-rs-skills";
+        rust-overlay.follows = "rust-overlay";
         stylix.follows = "stylix";
         trailofbits-skills.follows = "trailofbits-skills";
         treefmt-nix.follows = "treefmt-nix";
@@ -107,8 +108,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-26.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     oh-my-pi = {
       url = "github:can1357/oh-my-pi";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -116,6 +117,10 @@
     rewrite-rs-skills = {
       url = "github:rewrite-rs/skills/ae0fd62485d071437ae5e6c4036c986b0dd122a0";
       flake = false;
+    };
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
