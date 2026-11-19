@@ -90,10 +90,7 @@
       url = "github:noctalia-dev/noctalia/legacy-v4";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    oh-my-pi = {
-      url = "github:can1357/oh-my-pi";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    oh-my-pi.url = "github:can1357/oh-my-pi";
     rewrite-rs-skills = {
       url = "github:rewrite-rs/skills";
       flake = false;

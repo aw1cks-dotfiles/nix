@@ -92,11 +92,10 @@
     flake = false;
   };
 
-  # Consumed directly for its home-manager module (`programs.omp`) and package;
-  # upstream's package uses the Rust toolchain pinned by OMP itself.
+  # Consume OMP's package and Home Manager module without overriding its
+  # nixpkgs pin, so it builds against upstream's tested dependency set.
   oh-my-pi = {
     url = lib.mkDefault "github:can1357/oh-my-pi";
-    inputs.nixpkgs.follows = lib.mkDefault "nixpkgs-unstable";
   };
 
   # Nix-built rustup-shaped toolchains (see modules/home/dev/rust.nix). Only
