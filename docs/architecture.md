@@ -235,7 +235,7 @@ instead.
 opt-in `services.tern.daemon` / `services.tern.remote`. The desktop profile imports
 the definitions without enabling them. The public `mbp` host enables both services.
 
-Tern 0.9.18 is packaged by this flake and selected automatically on macOS arm64,
+Tern 0.9.28 is packaged by this flake and selected automatically on macOS arm64,
 Linux x86-64 and Linux arm64. The unrelated nixpkgs `tern` package is not this
 terminal. After importing the authenticated archive below, a home can simply use:
 
@@ -256,18 +256,18 @@ missing. The reviewed pins live in
 
 | Nix system | Required upstream archive |
 | --- | --- |
-| `aarch64-darwin` | `Tern-0.9.18-macos-arm64.zip` |
-| `x86_64-linux` | `Tern-0.9.18-linux-x86_64.tar.gz` |
-| `aarch64-linux` | `Tern-0.9.18-linux-arm64.tar.gz` |
+| `aarch64-darwin` | `Tern-0.9.28-macos-arm64.dmg` |
+| `x86_64-linux` | `Tern-0.9.28-linux-x86_64.tar.gz` |
+| `aarch64-linux` | `Tern-0.9.28-linux-arm64.tar.gz` |
 
 1. Sign in at <https://build.stencil.so/tern> and download the pinned version for
-   the build host. Use the full macOS application ZIP, or the Linux **glibc**
-   tarball, not the musl build.
+   the build host. Use the macOS disk image, or the Linux **glibc** tarball,
+   not the musl build.
 2. Keep the exact filename above (remove any browser-added duplicate suffix).
 3. On the machine that will build it, import the archive. For example on amd64:
 
    ```sh
-   archive="$HOME/Downloads/Tern-0.9.18-linux-x86_64.tar.gz"
+   archive="$HOME/Downloads/Tern-0.9.28-linux-x86_64.tar.gz"
    nix hash file --type sha256 --sri "$archive"
    nix-store --add-fixed sha256 "$archive"
    nix build .#tern
@@ -289,8 +289,8 @@ are moved or deleted by the package.
 
 The macOS package preserves the signed/notarized `Tern.app` under
 `$out/Applications`, with an external CLI wrapper; it does not strip, patch or
-re-sign the application. Use the ZIP rather than a DMG so no disk-image extraction
-is needed. Verify an installed package after store registration:
+re-sign the application. The package extracts the disk image without mounting it.
+Verify an installed package after store registration:
 
 ```sh
 package="$(nix build .#tern --no-link --print-out-paths)"
