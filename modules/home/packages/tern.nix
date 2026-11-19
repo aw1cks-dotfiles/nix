@@ -16,6 +16,11 @@ in
       supportedSystems = builtins.attrNames (import ../../integrations/_tern-sources.nix).artifacts;
       desktop = import ../../integrations/_tern-desktop.nix;
       json = pkgs.formats.json { };
+      terminfoBucket = if isDarwin then "78" else "x";
+      terminfo = pkgs.runCommand "xterm-kitty-terminfo" { nativeBuildInputs = [ pkgs.ncurses ]; } ''
+        tic -x -o "$TMPDIR/terminfo" ${pkgs.kitty.src}/terminfo/kitty.terminfo
+        cp "$TMPDIR/terminfo/${terminfoBucket}/xterm-kitty" "$out"
+      '';
       pluginRuntimePackages = lib.unique (
         lib.concatMap (plugin: plugin.runtimePackages) (
           builtins.attrValues (lib.filterAttrs (_: plugin: plugin.enable) cfg.plugins)
@@ -241,8 +246,10 @@ in
                 --managed ${managed} \
                 --state ${lib.escapeShellArg "${cfg.configDirectory}/.nix-settings-state.json"}
             '';
-        home.file = lib.mkIf isDarwin {
-          "Applications/Tern Managed.app".source = "${macLauncher}/Tern Managed.app";
+        # Native curses tools look here without a Nix profile or TERMINFO override.
+        home.file.".terminfo/${terminfoBucket}/xterm-kitty".source = terminfo;
+        home.file."Applications/Tern Managed.app" = lib.mkIf isDarwin {
+          source = "${macLauncher}/Tern Managed.app";
         };
         xdg.desktopEntries = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           "${desktop.applicationId}" = {

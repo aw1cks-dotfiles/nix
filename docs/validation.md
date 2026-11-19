@@ -381,6 +381,8 @@ It rejects relay enablement without an explicit URL, overlong socket paths,
 unsafe theme/plugin names, reserved wrapper names and palettes without eight
 ANSI and eight bright colors. Disabled malformed plugin sources stay unevaluated
 and install no pointer.
+The fixture also checks that `tput` finds the managed `xterm-kitty` entry under
+a disposable `~/.terminfo`, without a `TERMINFO` or `TERMINFO_DIRS` override.
 On Linux it also runs the read-only migration guard against an unreachable user
 manager and requires it to fail closed.
 
