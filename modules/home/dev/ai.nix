@@ -26,6 +26,35 @@
       premium_model = cfg.models.premium;
       standard_model = cfg.models.standard;
       small_model = cfg.models.small;
+      # Use the raw Handlebars template from the same pin as the default package.
+      ompSystemPrompt = builtins.readFile "${inputs.oh-my-pi}/packages/coding-agent/src/prompts/system/system-prompt.md";
+      mkOmpModelTemplate =
+        {
+          id,
+          name,
+          mainStyle ? "",
+        }:
+        toString (
+          pkgs.writeText "omp-${id}.md" ''
+            ${ompSystemPrompt}
+
+            <model-profile id="${id}">
+            These points are specific to you, GPT-6.2 ${name}. They refine omp's instructions in this prompt, the ones above and the ones that follow this section. Where a point conflicts with one of them, the point wins. The user's rules and context files rank above the points.
+
+            {{#if subagent}}
+            - A choice that your assignment leaves open and that no file settles is not yours to make. Put it into your result as an open question, in the field `open_questions` where your result has one. Do the parts that do not depend on it and leave the rest undone. The most likely value is still a guess.
+            - Your result reports every step that you could not do, and why: a file that is missing, a tool that failed, a rule that forbids the step. A result with such a step never carries the status for finished work.
+            {{else}}
+            - The user's rules and context files in this prompt hold for every request, however small or plain. A direct request is carried out within them and never replaces them. Before the first change that you make or delegate, go through them and find each step that they put before this kind of work: a mockup that the user must approve, an approval, a question. When one applies, do that step first and do not start the work itself until the user has answered. Waiting for that answer is then the right action: the instructions in this prompt to keep working, to act without asking and not to stop apply to work that you may do now. When none applies, start the work, and add no step that no rule asks for.
+            - A decision that is the user's to make stays open until the user has made it: what gets built, how far the scope goes, what is spent or published, and every approval. Finish the parts that do not depend on it, then ask one short question in words the user knows, and wait. Never put an assumption in its place. A fact is not a decision: what a file, a tool or one of your subagents can tell you, you look up and do not ask.
+            - When all that is left is to wait for a subagent or a background job that you started, {{#has tools "wait"}}call `wait`{{else}}end your turn: omp delivers the result as a new message, and you continue from there{{/has}}. Do not wait by reasoning. Reasoning does not make the result arrive, and the turn never ends.
+            - Your final answer names everything that still limits the result: a part you did not finish, a file that was missing, a tool that failed, a check you could not run, a choice you made where the request left one open. This holds for the shortest answer too, and a mention in a progress message does not replace it. Where there is nothing of the kind, say nothing about it.
+            - Write the final answer for a reader who saw none of your work, in the format the request sets. The result or the answer comes first, in plain words and full sentences; details follow only as far as the reader needs them. Leave out what exists only inside your work: names of subagents and jobs, internal addresses, step numbers, labels and abbreviations that you coined. Use the words the user used.
+            ${lib.optionalString (mainStyle != "") "- ${mainStyle}\n"}{{/if}}
+            - Before you report work as finished, hold the result against what was asked, part by part and list item by list item. Whatever no part of the result covers, do it now or name it as not done. This is a comparison by reading: it adds no runs and no new checks.
+            </model-profile>
+          ''
+        );
       configRelative =
         if cfg.omp.storage == "xdg" then
           lib.removePrefix "${config.home.homeDirectory}/" "${config.xdg.configHome}/omp"
@@ -412,6 +441,18 @@
                         tiny = small_model;
                         task = standard_model;
                         advisor = frontier_model;
+                      };
+
+                      systemPromptTemplates = {
+                        "openai-codex/gpt-6.2-sol" = lib.mkDefault (mkOmpModelTemplate {
+                          id = "gpt-6.2-sol";
+                          name = "Sol";
+                        });
+                        "openai-codex/gpt-6.2-astra" = lib.mkDefault (mkOmpModelTemplate {
+                          id = "gpt-6.2-astra";
+                          name = "Astra";
+                          mainStyle = "You write tersely by default, and that is short enough: do not compress your answers further. Give one idea per sentence and drop no words. Explain a cause in simpler terms than the code, never in more complex ones.";
+                        });
                       };
 
                       # Per-subkey defaults so a downstream `task.isolation.*`
