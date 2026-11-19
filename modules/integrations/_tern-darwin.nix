@@ -9,7 +9,7 @@ pkgs.stdenvNoCC.mkDerivation {
   inherit src version meta;
 
   nativeBuildInputs = [
-    pkgs.unzip
+    pkgs.undmg
     pkgs.makeWrapper
   ];
 
@@ -20,12 +20,6 @@ pkgs.stdenvNoCC.mkDerivation {
   # The upstream app is signed: never strip, rewrite, or re-sign its contents.
   dontStrip = true;
   dontFixup = true;
-
-  unpackPhase = ''
-    runHook preUnpack
-    unzip -q "$src"
-    runHook postUnpack
-  '';
 
   installPhase = ''
     runHook preInstall
