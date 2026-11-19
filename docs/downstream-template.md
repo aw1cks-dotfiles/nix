@@ -222,6 +222,12 @@ This is repository CI policy, not a runtime restriction on consumer forks or loc
 Independent consumers need an equivalent CI gate or must retain manual merge review; this workflow and its GitHub approval history are not inherited through a flake input.
 OMP loading is wired by this module; loading in other harnesses and consumer-specific precedence remain the consumer's responsibility.
 
+OMP uses the nixpkgs revision from its upstream lockfile, independent of the
+consumer's `nixpkgs-unstable`. When updating an existing downstream, run
+`nix run .#update -- dendritic-lib oh-my-pi`, then `nix flake lock` to record
+the regenerated input graph. Remove any local
+`oh-my-pi.inputs.nixpkgs.follows` override before regenerating.
+
 OMP declarations remain under `modules.ai.omp.settings` (or additive
 `programs.omp.settings`), but are loaded through an immutable overlay rather than
 copied over the writable main config on every activation. Consumers must launch

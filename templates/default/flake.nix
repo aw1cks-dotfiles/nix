@@ -110,10 +110,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    oh-my-pi = {
-      url = "github:can1357/oh-my-pi";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    oh-my-pi.url = "github:can1357/oh-my-pi";
     rewrite-rs-skills = {
       url = "github:rewrite-rs/skills/ae0fd62485d071437ae5e6c4036c986b0dd122a0";
       flake = false;
