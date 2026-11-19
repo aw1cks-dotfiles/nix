@@ -22,6 +22,19 @@ config root. Activation does not create, rewrite, prune, or back up that file.
 shadowed by the overlay. Removing a declaration exposes any global value still
 present, including values left by the old activation. Change managed keys in Nix.
 
+### Model-specific system prompts
+
+The AI module packages system templates for the Codex Sol and Astra routes.
+Both start from the raw Handlebars template in the pinned `oh-my-pi` input, so
+updating the input refreshes the base without copying it into the checkout.
+Astra's extra prose guidance applies to main sessions, not to the advisor.
+
+The managed overlay points directly at the packaged templates; nothing needs
+to be copied into the user prompt directory. Override an individual selector
+under `modules.ai.omp.settings.systemPromptTemplates` to use a different
+template, including when swapping in an OMP package from a different source
+revision. An explicit or discovered system prompt still takes precedence.
+
 ### One-time cleanup of the old generated settings
 
 Capture wanted UI edits in Nix first. With OMP stopped, back up the old generated
